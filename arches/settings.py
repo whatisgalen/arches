@@ -321,6 +321,31 @@ PACKAGE_VALIDATOR = 'arches.app.utils.mock_package_validator'
 # NOTE: This is not used by the front end of the application.
 DATA_VALIDATION_BBOX = [(-180,-90), (-180,90), (180,90), (180,-90), (-180,-90)]
 
+SEP = r'(\s+|,\s+|-|/|\.)'
+DAY = r'(?P<day>0?[0-9]|1[0-9]|2[0-8]|3[0-1])'
+MONTH = r'(?P<month>0?[0-9]|1[0-2])'
+YEAR = r'(?P<year>\d+)'
+FOUR_DIGIT_YEAR = r'(?P<year>\d{4})'
+ERA = r'(?P<era>(BC(E)?|AD|ACE))'
+
+DATE_FILTERS = [
+    # [DAY,MONTH,FOUR_DIGIT_YEAR,ERA],    # Day first
+    # [DAY,MONTH,FOUR_DIGIT_YEAR+ERA],    # Day first
+    # [DAY,MONTH,FOUR_DIGIT_YEAR],        # Day first
+    
+    # [MONTH,DAY,FOUR_DIGIT_YEAR,ERA],    # Month first
+    # [MONTH,DAY,FOUR_DIGIT_YEAR+ERA],    # Month first
+    # [MONTH,DAY,FOUR_DIGIT_YEAR],        # Month first
+    
+    [FOUR_DIGIT_YEAR,MONTH,DAY,ERA],    # Year first
+    [FOUR_DIGIT_YEAR,MONTH,DAY+ERA],    # Year first
+    [FOUR_DIGIT_YEAR,MONTH,DAY],        # Year first
+    
+    [r'(\s|^)'+YEAR,ERA],
+    [r'(\s|^)'+YEAR+ERA],
+    [r'(\s|\s-|^)'+YEAR+r'(\s|$)'],
+]
+
 try:
     from settings_local import *
 except ImportError:

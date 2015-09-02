@@ -75,7 +75,38 @@ def resource_manager(request, resourcetypeid='', form_id='default', resourceid='
 
             return redirect('resource_manager', resourcetypeid=resourcetypeid, form_id=form_id, resourceid=resourceid)
 
-    min_max_dates = models.Dates.objects.aggregate(Min('val'), Max('val'))
+    se = SearchEngineFactory().create()
+    dsl = {
+        "aggs":{
+            "dates":{
+                "nested":{
+                    "path":"dates"
+                },
+                "aggs":{
+                    "min_year":{
+                        "min":{
+                            "field":"dates.year"
+                        }
+                    },
+                    "max_year":{
+                        "max":{
+                            "field":"dates.year"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    res = se.es.search(body=dsl, index='entity', search_type='count')
+    try:
+        min_year = res['aggregations']['dates']['min_year']['value']
+    except:
+        min_year = 0
+
+    try:
+        max_year = res['aggregations']['dates']['max_year']['value']
+    except:
+        max_year = 1
     
     if request.method == 'GET':
         if form != None:
@@ -94,8 +125,8 @@ def resource_manager(request, resourcetypeid='', form_id='default', resourceid='
                     'resource_name': resource.get_primary_name(),
                     'resource_type_name': resource.get_type_name(),
                     'form_groups': resource.form_groups,
-                    'min_date': min_max_dates['val__min'].year if min_max_dates['val__min'] != None else 0,
-                    'max_date': min_max_dates['val__max'].year if min_max_dates['val__min'] != None else 1,
+                    'min_date': min_year,
+                    'max_date': max_year,
                     'timefilterdata': JSONSerializer().serialize(Concept.get_time_filter_data()),
                 },
                 context_instance=RequestContext(request))

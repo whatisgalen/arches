@@ -1276,7 +1276,7 @@ SET search_path = data, pg_catalog;
 
 CREATE TABLE dates (
     entityid uuid NOT NULL,
-    val timestamp without time zone
+    val text
 );
 
 

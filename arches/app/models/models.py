@@ -416,12 +416,9 @@ class Strings(models.Model):
 
 class Dates(models.Model):
     entityid = models.ForeignKey('Entities', primary_key=True, db_column='entityid')
-    val = models.DateTimeField()
+    val = models.TextField()
     class Meta:
         db_table = u'dates'
-
-    def __unicode__(self):
-        return ('%s') % (self.val)
 
 class Numbers(models.Model):
     entityid = models.ForeignKey('Entities', primary_key=True, db_column='entityid')

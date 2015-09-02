@@ -62,6 +62,7 @@ def delete_index(index=None):
 def create_indexes():
     pass
     # Resource().prepare_resource_relations_index(create=True)
+    # Resource().prepare_report_index(create=True)
     # Resource().prepare_search_index('HERITAGE_RESOURCE_GROUP.E27', create=True)
     # Resource().prepare_search_index('HERITAGE_RESOURCE.E18', create=True)
     # Resource().prepare_search_index('INFORMATION_RESOURCE.E73', create=True)

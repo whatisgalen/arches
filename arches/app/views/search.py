@@ -45,13 +45,44 @@ geocoder = import_module(settings.GEOCODING_PROVIDER)
 
 def home_page(request):
     lang = request.GET.get('lang', settings.LANGUAGE_CODE)
-    min_max_dates = models.Dates.objects.aggregate(Min('val'), Max('val'))
+    se = SearchEngineFactory().create()
+    dsl = {
+        "aggs":{
+            "dates":{
+                "nested":{
+                    "path":"dates"
+                },
+                "aggs":{
+                    "min_year":{
+                        "min":{
+                            "field":"dates.year"
+                        }
+                    },
+                    "max_year":{
+                        "max":{
+                            "field":"dates.year"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    res = se.es.search(body=dsl, index='entity', search_type='count')
+    try:
+        min_year = res['aggregations']['dates']['min_year']['value']
+    except:
+        min_year = 0
 
-    return render_to_response('search.htm', {
+    try:
+        max_year = res['aggregations']['dates']['max_year']['value']
+    except:
+        max_year = 1
+
+    return render_to_response('search_v2.htm', {
             'main_script': 'search',
             'active_page': 'Search',
-            'min_date': min_max_dates['val__min'].year if min_max_dates['val__min'] != None else 0,
-            'max_date': min_max_dates['val__max'].year if min_max_dates['val__min'] != None else 1,
+            'min_date': min_year,
+            'max_date': max_year,
             'timefilterdata': JSONSerializer().serialize(Concept.get_time_filter_data()),
         }, 
         context_instance=RequestContext(request))
@@ -163,13 +194,7 @@ def build_search_results_dsl(request):
             boolfilter.must(nested)
 
     if 'year_min_max' in temporal_filter and len(temporal_filter['year_min_max']) == 2:
-        start_date = date(temporal_filter['year_min_max'][0], 1, 1)
-        end_date = date(temporal_filter['year_min_max'][1], 12, 31)
-        if start_date:
-            start_date = start_date.isoformat()
-        if end_date:
-            end_date = end_date.isoformat()
-        range = Range(field='dates.value', gte=start_date, lte=end_date)
+        range = Range(field='dates.year', gte=temporal_filter['year_min_max'][0], lte=temporal_filter['year_min_max'][1])
         nested = Nested(path='dates', query=range)
         
         if 'inverted' not in temporal_filter:

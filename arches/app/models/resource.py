@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import uuid
+import re
 from datetime import datetime
 from django.conf import settings
 from django.contrib.gis.geos import fromstr
@@ -345,7 +346,13 @@ class Resource(Entity):
                     entity_copy.conceptid = value.conceptid_id
                     document.domains.append(entity_copy)
                 elif entity.businesstablename == 'dates':
-                    document.dates.append(entity)
+                    date_parts = self.parse_date_for_search(entity.value)
+                    entityobj = JSONSerializer().serializeToPython(entity)
+                    entityobj['day'] = date_parts['day']
+                    entityobj['month'] = date_parts['month']
+                    entityobj['year'] = date_parts['year'] if date_parts['era'] == 1 else date_parts['year']*-1
+                    entityobj['era'] = date_parts['era']
+                    document.dates.append(entityobj)
                 elif entity.businesstablename == 'numbers':
                     document.numbers.append(entity)
                 elif entity.businesstablename == 'geometries':
@@ -355,6 +362,57 @@ class Resource(Entity):
                     document.child_entities.append(entity)
 
         return [JSONSerializer().serializeToPython(document)]
+
+    def parse_date_for_search(self, date_string, filters=settings.DATE_FILTERS, sep=settings.SEP):
+        """
+        Attempts to parse a date string into it's constituent components of year, month, day, and era
+
+        """
+
+        number_of_matches = 0
+        result = {'year': None, 'month': None, 'day': None, 'era': None}
+
+        for filter in filters:
+            if sep:
+                filter = sep.join(filter)
+            m = re.search(filter, date_string, re.I)
+            current_matches = 0
+            if m:
+                current_result = m.groupdict()
+                if 'day' in current_result and m.group('day'):
+                    if m.start('day') > 0 and date_string[m.start('day')-1].isdigit():
+                        current_result = {}
+                    else:
+                        current_matches = current_matches + 1
+                if 'month' in current_result and m.group('month'):
+                    if m.start('month') > 0 and date_string[m.start('month')-1].isdigit():
+                        current_result = {}
+                    else:
+                        current_matches = current_matches + 1
+                if 'year' in current_result and m.group('year'):
+                    if m.start('year') > 0 and date_string[m.start('year')-1].isdigit():
+                        current_result = {}
+                    else:
+                        current_matches = current_matches + 1
+                if 'era' in current_result and m.group('era'):
+                    current_matches = current_matches + 1
+
+            if(current_matches > number_of_matches):
+                number_of_matches = current_matches
+                result['day'] = int(current_result['day']) if 'day' in current_result else None
+                result['month'] = int(current_result['month']) if 'month' in current_result else None
+                result['year'] = int(current_result['year']) if 'year' in current_result else None
+                result['era'] = current_result['era'] if 'era' in current_result else None
+
+        if result['era']:
+            if result['era'].lower().strip() == 'bc' or result['era'].lower().strip() == 'bce':
+                result['era'] = 0
+            else:
+                result['era'] = 1
+        elif result['day'] or result['month'] or result['year']:
+            result['era'] = 1;
+
+        return result
 
     def prepare_documents_for_map_index(self, geom_entities=[]):
         """
@@ -548,8 +606,18 @@ class Resource(Entity):
                                 'entitytypeid' : {'type' : 'string', 'index' : 'not_analyzed'},
                                 'businesstablename' : {'type' : 'string', 'index' : 'not_analyzed'},
                                 'label' : {'type' : 'string', 'index' : 'not_analyzed'},
-                                'value' : {
-                                    "type" : "date"
+                                'value' : {'type' : 'string', 'index' : 'not_analyzed'},
+                                'year' : {
+                                    "type" : "integer"
+                                },
+                                'month' : {
+                                    "type" : "integer"
+                                },
+                                'day' : {
+                                    "type" : "integer"
+                                },
+                                'era' : {
+                                    "type" : "integer"
                                 }
                             }
                         }
@@ -565,6 +633,26 @@ class Resource(Entity):
             except:
                 index_settings = index_settings['mappings']
                 se.create_mapping(index='entity', doc_type=resource_type_id, body=index_settings)
+
+        return index_settings
+
+    def prepare_report_index(self, create=False):
+        """
+        Creates the settings and mappings in Elasticsearch to support resource reports
+
+        """
+
+        index_settings = {
+            "mappings": {
+                "_default_": {
+                    "date_detection": False
+                }
+            }
+        }
+
+        if create:
+            se = SearchEngineFactory().create()
+            se.create_index(index='resource', body=index_settings)
 
         return index_settings
 
