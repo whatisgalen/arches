@@ -78,6 +78,14 @@
                     </li>
                     <!-- End Search-->
 
+                    <!-- New Search-->
+                    <li class="{% if active_page = 'Searchv2' %}active{% endif %}">
+                        <a href="{% url 'search_v2_home' %}">
+                            {% trans "Search v2" %}
+                        </a>
+                    </li>
+                    <!-- End Search-->
+
                     <!-- Map-->
                     <li class="{% if active_page = 'Map' %}active{% endif %}">
                         <a href="{% url 'map' %}">
