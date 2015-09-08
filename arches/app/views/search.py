@@ -78,12 +78,66 @@ def home_page(request):
     except:
         max_year = 1
 
-    return render_to_response('search_v2.htm', {
+    return render_to_response('search.htm', {
             'main_script': 'search',
             'active_page': 'Search',
             'min_date': min_year,
             'max_date': max_year,
             'timefilterdata': JSONSerializer().serialize(Concept.get_time_filter_data()),
+        }, 
+        context_instance=RequestContext(request))
+
+def home_page_v2(request):
+    lang = request.GET.get('lang', settings.LANGUAGE_CODE)
+    se = SearchEngineFactory().create()
+    dsl = {
+        "aggs":{
+            "dates":{
+                "nested":{
+                    "path":"dates"
+                },
+                "aggs":{
+                    "years": {
+                        "terms": {
+                            "field": "dates.year"
+                        }
+                    },
+                    "min_year":{
+                        "min":{
+                            "field":"dates.year"
+                        }
+                    },
+                    "max_year":{
+                        "max":{
+                            "field":"dates.year"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    res = se.es.search(body=dsl, index='entity', search_type='count')
+    try:
+        min_year = res['aggregations']['dates']['min_year']['value']
+    except:
+        min_year = 0
+
+    try:
+        max_year = res['aggregations']['dates']['max_year']['value']
+    except:
+        max_year = 1
+
+    try:
+        year_counts = res['aggregations']['dates']['years']['buckets']
+    except:
+        year_counts = []
+
+    return render_to_response('search_v2.htm', {
+            'main_script': 'search_v2',
+            'active_page': 'Search',
+            'min_date': min_year,
+            'max_date': max_year,
+            'timefilterdata': JSONSerializer().serialize(year_counts),
         }, 
         context_instance=RequestContext(request))
 
@@ -194,8 +248,10 @@ def build_search_results_dsl(request):
             boolfilter.must(nested)
 
     if 'year_min_max' in temporal_filter and len(temporal_filter['year_min_max']) == 2:
-        range = Range(field='dates.year', gte=temporal_filter['year_min_max'][0], lte=temporal_filter['year_min_max'][1])
+        range = Range(field='dates.year', gte=int(temporal_filter['year_min_max'][0]), lte=int(temporal_filter['year_min_max'][1]))
         nested = Nested(path='dates', query=range)
+
+        print range
         
         if 'inverted' not in temporal_filter:
             temporal_filter['inverted'] = False

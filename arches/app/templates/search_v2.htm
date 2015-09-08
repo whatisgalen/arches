@@ -1,4 +1,6 @@
+{% extends "base.htm" %}
 {% load i18n %}
+{% load staticfiles %}
 <!DOCTYPE html>
 <!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->  
 <!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->  
@@ -72,55 +74,17 @@
 
     </head> 
 
-    <body class="scroll-y">    
 
-        <div class="wrapper" style="overflow-x: hidden;">
-            <!--=== Header v1 ===-->    
-            <div class="header-v1">
-                <!-- Topbar -->
-                <div class="topbar-v1" style="background: #123;">
-
-                    <!-- Note: replace 'class=fgi-app-margin' with 'class=container' to get bootstrap to add padding to the nav bar -->
-                    <div class="container" style="overflow-x: hidden;">
-                        <div class="row">
-                            <div class="col-md-6 hidden-xs hidden-sm">
-                                <ul class="list-inline top-v1-contacts arches-topbar-text">
-
-                                    <li>
-                                        <a class="arches-topbar-text" href="#"><img id="logo-header" class="" style="height: 20px;" src="assets/img/logos/he_logo_light.png" alt="Logo"></a>
-                                    </li>
-
-                                </ul>
-                            </div>
-
-                            <div class="col-md-6">
-                                <ul class="list-inline top-v1-data">
-                                    <li class="" style="border-left: solid 1px #777; border-right: solid 1px #777;">
-                                        <a class="arches-topbar-text" href="#"><i class="fa fa-home"></i></a>
-                                    </li>
-
-                                    <li class="hidden-xs" style="border-right: solid 1px #777;">
-                                        <a class="arches-topbar-text" href="#"><i class="fa fa-link"></i> Quicklinks</a>
-                                    </li>
-
-                                    <li class="" style="border-right: solid 1px #777;">
-                                        <a class="arches-topbar-text" href="#"><i class="fa fa-globe"></i> English</a>
-                                    </li>
-
-                                    <li class="" style="border-right: solid 1px #777;">
-                                        <a class="arches-topbar-text" href="#"><i class="fa fa-user"></i> alodge@fargeo.com</a>
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </div>        
-                    </div>
-                </div>
-                <!-- End Topbar -->
             
-            </div>
-            <!--=== End Header v1 ===-->
-
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'plugins/cube-portfolio/cubeportfolio.min.css' %}"> 
+    <link rel="stylesheet" href="{% static 'plugins/cube-portfolio/custom-cubeportfolio.css' %}">      
+{% endblock css%}
+{% block header %}
+    {% include 'header-small.htm' %}
+{% endblock header %} 
+{% block content %}
 
             <!-- Search Bar -->
             <div class="search-block" style="padding-bottom: 0px;">
@@ -139,7 +103,7 @@
                             
                             <div class="form-group" style="">  
 
-                                <input id="" class="select2 arches-select2 search-widget" name="" style="width:100%;" placeholder="Search for a resource..." value="">
+                                <input class="select2 resource_search_widget arches-select2" name="" style="width:100%" placeholder="{% trans "Search for a resource..." %}" value="">
 
                             </div>
                         </div>
@@ -169,245 +133,16 @@
                 </div>
             </div>
 
+            <!-- Saved Searches -->
+            {% include 'views/saved-searches.htm' %}
 
             <!-- Time Filter Scale-->
-            <div class="row hidden">
-                <div class="col-xs-1">
-                    Yo
-                </div>
-                <div class="col-xs-11">
-                    <div id="time-scale hidden"  class="time-scale time-scale-hidden" style=""></div>
-                </div>
+            <div class="row" id="time-filter-container" data-filtertext="{% trans "Time Filter Enabled" %}"> 
+                {% include 'views/search/time-filter-v2.htm' %}
             </div>
-
-            <div id="time-scale"  class="time-scale time-scale-hidden" style=""></div>
-
 
             <!-- Main Content (search bars, map, map footer) -->
             <div>
-
-                <!--=== Saved Searches ===-->
-                <div id="saved-search" class="saved-search-panel saved-search-panel-full saved-search-panel-shim" style="">
-
-                    <!--=== Cube-Portfdlio ===-->
-                    <div class="cube-portfolio" style="background: #fafafa;">
-                        
-                        <!-- Saved Search Grid  -->
-                        <div id="grid-container" class="cbp-l-grid-agency" style="z-index: 0;">
-                            <div class="cbp-item ss3" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q1.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Protected Landscapes
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Protected Landscapes</div>
-                                                <div class="cbp-l-grid-agency-desc">Areas and Districts with legal protection</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss2 ss4" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q2.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Canal District Buildings
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Canal District</div>
-                                                <div class="cbp-l-grid-agency-desc">Designated buildings and structures in Venice</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss3 ss4" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q3.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Another clever caption
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Query 3 Title</div>
-                                                <div class="cbp-l-grid-agency-desc">Query explanation/summary</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss2 ss3" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q4.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Here's my Caption
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Query 4 Title</div>
-                                                <div class="cbp-l-grid-agency-desc">Query explanation/summary</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss1 ss2" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q5.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Here's my Caption
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Query 5 Title</div>
-                                                <div class="cbp-l-grid-agency-desc">Query explanation/summary</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss1 ss2" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q6.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Here's my Caption
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Query 6 Title</div>
-                                                <div class="cbp-l-grid-agency-desc">Query explanation/summary</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss2 ss1" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q7.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Here's my Caption
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Query 7 Title</div>
-                                                <div class="cbp-l-grid-agency-desc">Query explanation/summary</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss1 logo" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q8.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Here's my Caption
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Query 8 Title</div>
-                                                <div class="cbp-l-grid-agency-desc">Query explanation/summary</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cbp-item ss3" style="padding: 2px;">
-                                <div class="cbp-caption">
-                                    <div class="cbp-caption-defaultWrap">
-                                        <img src="assets/img/arches_saved_query/q9.jpg" alt="">
-                                        <div class="arches-saved-query-caption" style="">
-                                            Here's my Caption
-                                        </div>
-                                    </div>
-                                    <div class="cbp-caption-activeWrap">
-                                        <div class="cbp-l-caption-alignCenter">
-                                            <div class="cbp-l-caption-body">
-                                                <ul class="link-captions">
-                                                    <li><a href="search.html"><i class="rounded-x fa fa-search"></i></a></li>
-                                                </ul>
-                                                <div class="cbp-l-grid-agency-title">Query 9 Title</div>
-                                                <div class="cbp-l-grid-agency-desc">Query explanation/summary</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!--/end Grid Container-->
-                    </div>    
-                    <!--=== End Cube-Portfdlio ===-->
-
-
-                    <!-- Controls -->
-                    <div id="filters-container" class="saved-query-control-container" style="">
-                        <div class="cbp-l-filters-text content-xs" style="height: 50px; text-align: left; margin-left: 10px;">
-                            <div class="" style="display: inline-block;"> 
-                                <h1 style="font-size: 21px; color: #fff;">
-                                    Featured Searches
-                                </h1>
-                            </div>
-                            <div data-filter="*" class="cbp-filter-item-active cbp-filter-item"> All </div> |
-                            <div data-filter=".ss1" class="cbp-filter-item"> Monuments </div> |
-                            <div data-filter=".ss2" class="cbp-filter-item"> Landscapes </div> |
-                            <div data-filter=".ss3" class="cbp-filter-item"> Archaeology </div> |
-                            <div data-filter=".ss4" class="cbp-filter-item"> Designated </div>
-                        </div>
-                    </div>
-                    <!-- End Controls -->
-
-                </div>
-                <!--=== Saved Searches ===-->
-
 
                 <!-- Search Results Sliding Panel -->
                 <div id="sliding-panel" class="sliding-panel" style="">
@@ -415,20 +150,11 @@
                         <div class="">
 
                             <div class="search-header" style="">
-                                <h1 id="results-counter" class="results-counter" style="">
-                                    <span>147 Results</span>
-
+                                <h1 class="row results-counter" id="search-results-count" data-count="">        
+                                    <div class="col-xs-12 col-lg-2" data-bind="if: total() >= 0">
+                                        <span class="" data-bind="text: total() + ' {% trans "Results" %}'"></span>                               
+                                    </div>
                                 </h1>
-
-                                <div id="date-filter-control" class="date-filter-header truncate hidden" style="">
-                                    
-                                    <a id="time-filter-toggle" class="time-filter-control" style="text-decoration: none;"><i class="icon-custom icon-bg-u icon-line icon-calendar section-icon" style="color: #123; background: transparent; margin-right: -10px;"></i>
-                                        <span class="">
-                                            1945-05-18 to 2015-07-15
-                                        </span>
-                                    </a>
-                                    
-                                </div>
 
                                 <div id="sliding-panel-tools" class="sliding-panel-tools pull-right" style="">
                                     <a class="arches-small-text clear-search" style="padding-right: 5px; text-decoration: none;" href="#"> Clear</a>
@@ -441,28 +167,6 @@
                                     </div>
                                 </div>
 
-
-
-                                <!-- Menu -->
-                                <div class="row hidden" style="">
-                                    <div class="col-xs-12 col-sm-3">
-                                        <a class="headline" style="margin-bottom: 0px; text-decoration: none;">
-                                            <h6 class="" style="font-weight: 500; margin-top: 0px; margin-bottom: 0px; border-bottom-color: #555; border-bottom-width: 2px; border-bottom-style: solid;">Segments</h6>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-xs-12 col-sm-3">
-                                        <a class="headline" style="margin-bottom: 0px; text-decoration: none;">
-                                            <h6 class="" style="font-weight: 500; margin-top: 0px; margin-bottom: 0px;">Surveys</h6>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-xs-12 col-sm-6 col-md-4">
-                                        <a class="headline" style="margin-bottom: 0px; text-decoration: none;">
-                                            <h6 class="" style="font-weight: 500; margin-top: 0px; margin-bottom: 0px;">Search Results</h6>
-                                        </a>
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Sliding Panel Control -->
@@ -471,304 +175,14 @@
                             </div>
 
                             <!-- Search Results Container -->
-                            <div class="search-results-container" style="width: 100%;">
-                                
-                                <!-- Begin Search Item -->
-                                <div  class="arches-search-item">
-                                    
-                                    <!-- Spacer -->
-                                    <hr class="search-list-spacer">
-
-                                    <div class="inner-results arches-list-item">
-
-                                        <!-- Item Header -->
-                                        <h4>
-                                            <a class="arches-search-title" style="" href="#">Harvey Castle</a> 
-                                            &nbsp;
-                                            <span class="">
-                                                <small class="arches-search-subtitle"><i class="fa fa-share-alt"></i>Section</small>
-                                            </span>
-                                        </h4>
-
-                                        <!-- Sub-header -->
-                                        <ul class="list-inline up-ul arches-tool-subheader">
-                                            
-                                            <li style="padding-right: 0px;">
-                                                <i class="arches-search-link fa fa-pencil"></i>
-                                                <a href="#"><span class="arches-search-link">Edit</span></a>
-                                            </li>
-
-                                            <li style="padding-right: 0px;">
-                                                <button class="btn-u info-link map-toggle arches-search-results-button" style="" type="button" title="Map Resource"><i class="fa fa-map-marker" style=""></i><span style="magin-bottom: 2px;"> Zoom</span></button>
-                                            </li>
-
-                                            <li style="padding-right: 0px;">
-                                                <button id="rr-1" class="btn-u info-link related-resources-graph arches-search-results-button" style="" type="button" title="Show Resource Graph"><i class="fa fa-sitemap" style=""></i><span style="magin-bottom: 2px;"> Related Resources</span></button>
-                                            </li>
-
-                                        </ul>
-                                        <!-- End Item Sub-Header -->
-                                      
-                                        <!-- Item Description -->
-                                        <p class="arches-search-item-description" style="">Lorem ipsum dolor sit amet, Lorem ipsum dolor amet consectetur... </p>
-                                        <!-- End Item Description -->
-
-                                    </div>
-                                </div>
-                                <!-- End Search Item -->
-
-                                <!-- Begin Search Item -->
-                                <div  class="arches-search-item">
-                                    
-                                    <!-- Spacer -->
-                                    <hr class="search-list-spacer">
-
-                                    <div class="inner-results arches-list-item" style="height: 100px; overflow-y: hidden;">
-
-                                        <!-- Item Header -->
-                                        <h4 class="" style="margin-top: -5px;">
-                                            <a class="arches-search-title" style="" href="#">Section 2</a> 
-                                            &nbsp;
-                                            <span class="">
-                                                <small class="arches-search-subtitle"><i class="fa fa-share-alt"></i>Section</small>
-                                            </span>
-                                        </h4>
-
-                                        <!-- Sub-header -->
-                                        <ul class="list-inline up-ul arches-tool-subheader">
-                                            
-                                            <li>
-                                                <i class="arches-search-link fa fa-pencil"></i>
-                                                <a href="./hip_resource_editor_locations.html"><span class="arches-search-link">Edit</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-map-marker"></i>
-                                                <a href="./hip_resource_report.html"><span class="arches-search-link map-toggle">Zoom</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-sitemap"></i>
-                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link">Related Resources</span></a>
-                                            </li>
-
-                                        </ul>
-                                        <!-- End Item Sub-Header -->
-                                      
-                                        <!-- Item Description -->
-                                        <p class="arches-search-item-description" style="margin-bottom: 10px;">Lorem ipsum dolor sit amet, consectetur. Lorem ipsum dolor sit amet, Yyiuo ood jll eelld jjlkd lkj;lkj ddoood ldll kk ssllod jjlllss. Lorem ipsum dolor amet consectetur. Lorem ipsum dolor sit amet, tteh llskk ss aoow lkjsdo aai aallkks al oakk qqoosn kkxla kaa.  jjs kkslldi. Lorem ipsum dolor amet consectetur. Lorem ipsum dolor sit amet, Lorem ipsum dolor amet consectetur.</p>
-                                        <!-- End Item Description -->
-
-                                    </div>
-                                </div>
-                                <!-- End Search Item -->
-
-                                <!-- Begin Search Item -->
-                                <div  class="arches-search-item">
-                                    
-                                    <!-- Spacer -->
-                                    <hr class="search-list-spacer">
-
-                                    <div class="inner-results arches-list-item">
-
-                                        <!-- Item Header -->
-                                        <h4>
-                                            <a class="arches-search-title" style="" href="#">Section 3</a> 
-                                            &nbsp;
-                                            <span class="">
-                                                <small class="arches-search-subtitle"><i class="fa fa-share-alt"></i>Section</small>
-                                            </span>
-                                        </h4>
-
-                                        <!-- Sub-header -->
-                                        <ul class="list-inline up-ul arches-tool-subheader">
-                                            
-                                            <li>
-                                                <i class="arches-search-link fa fa-pencil"></i>
-                                                <a href="./hip_resource_editor_locations.html"><span class="arches-search-link">Edit</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-map-marker"></i>
-                                                <a href="./hip_resource_report.html"><span class="arches-search-link map-toggle">Zoom</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-sitemap"></i>
-                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link">Related Resources</span></a>
-                                            </li>
-
-                                        </ul>
-                                        <!-- End Item Sub-Header -->
-                                      
-                                        <!-- Item Description -->
-                                        <p class="arches-search-item-description">Lorem ipsum dolor sit amet, Lorem ipsum dolor amet consectetur... </p>
-                                        <!-- End Item Description -->
-
-                                    </div>
-                                </div>
-                                <!-- End Search Item -->
-
-                                <!-- Begin Search Item -->
-                                <div  class="arches-search-item">
-                                    
-                                    <!-- Spacer -->
-                                    <hr class="search-list-spacer">
-
-                                    <div class="inner-results arches-list-item">
-
-                                        <!-- Item Header -->
-                                        <h4>
-                                            <a class="arches-search-title" style="" href="#">Section 4</a> 
-                                            &nbsp;
-                                            <span class="">
-                                                <small class="arches-search-subtitle"><i class="fa fa-share-alt"></i>Section</small>
-                                            </span>
-                                        </h4>
-
-                                        <!-- Sub-header -->
-                                        <ul class="list-inline up-ul arches-tool-subheader">
-                                            
-                                            <li>
-                                                <i class="arches-search-link fa fa-pencil"></i>
-                                                <a href="./hip_resource_editor_locations.html"><span class="arches-search-link">Edit</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-map-marker"></i>
-                                                <a href="./hip_resource_report.html"><span class="arches-search-link map-toggle">Zoom</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-sitemap"></i>
-                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link">Related Resources</span></a>
-                                            </li>
-
-                                        </ul>
-                                        <!-- End Item Sub-Header -->
-                                      
-                                        <!-- Item Description -->
-                                        <p class="arches-search-item-description">Lorem ipsum dolor sit amet, Lorem ipsum dolor amet consectetur... </p>
-                                        <!-- End Item Description -->
-
-                                    </div>
-                                </div>
-                                <!-- End Search Item -->
-
-                                <!-- Begin Search Item -->
-                                <div  class="arches-search-item">
-                                    
-                                    <!-- Spacer -->
-                                    <hr class="search-list-spacer">
-
-                                    <div class="inner-results arches-list-item">
-
-                                        <!-- Item Header -->
-                                        <h4>
-                                            <a class="arches-search-title" style="" href="#">Section 5</a> 
-                                            &nbsp;
-                                            <span class="">
-                                                <small class="arches-search-subtitle"><i class="fa fa-share-alt"></i>Section</small>
-                                            </span>
-                                        </h4>
-
-                                        <!-- Sub-header -->
-                                        <ul class="list-inline up-ul arches-tool-subheader">
-                                            
-                                            <li>
-                                                <i class="arches-search-link fa fa-pencil"></i>
-                                                <a href="./hip_resource_editor_locations.html"><span class="arches-search-link">Edit</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-map-marker"></i>
-                                                <a href="./hip_resource_report.html"><span class="arches-search-link map-toggle">Zoom</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-sitemap"></i>
-                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link">Related Resources</span></a>
-                                            </li>
-
-                                        </ul>
-                                        <!-- End Item Sub-Header -->
-                                      
-                                        <!-- Item Description -->
-                                        <p class="arches-search-item-description">Lorem ipsum dolor sit amet, consectetur... </p>
-                                        <!-- End Item Description -->
-
-                                    </div>
-                                </div>
-                                <!-- End Search Item -->
-
-                                <!-- Begin Search Item -->
-                                <div  class="arches-search-item">
-                                    
-                                    <!-- Spacer -->
-                                    <hr class="search-list-spacer">
-
-                                    <div class="inner-results arches-list-item">
-
-                                        <!-- Item Header -->
-                                        <h4>
-                                            <a class="arches-search-title" style="" href="#">Section 6</a> 
-                                            &nbsp;
-                                            <span class="">
-                                                <small class="arches-search-subtitle"><i class="fa fa-share-alt"></i>Section</small>
-                                            </span>
-                                        </h4>
-
-                                        <!-- Sub-header -->
-                                        <ul class="list-inline up-ul arches-tool-subheader">
-                                            
-                                            <li>
-                                                <i class="arches-search-link fa fa-pencil"></i>
-                                                <a href="./hip_resource_editor_locations.html"><span class="arches-search-link">Edit</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-map-marker"></i>
-                                                <a href="./hip_resource_report.html"><span class="arches-search-link map-toggle">Zoom</span></a>
-                                            </li>
-
-                                            <li>
-                                                <i class="arches-search-link fa fa-sitemap"></i>
-                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link">Related Resources</span></a>
-                                            </li>
-
-                                        </ul>
-                                        <!-- End Item Sub-Header -->
-                                      
-                                        <!-- Item Description -->
-                                        <p class="arches-search-item-description">Lorem ipsum dolor sit amet, consectetur... </p>
-                                        <!-- End Item Description -->
-
-                                    </div>
-                                </div>
-                                <!-- End Search Item -->
-                                
+                            <div class="row" id="search-results-container"> 
+                                {% include 'views/search/search-results.htm' %}
                             </div>
                             <!-- End search results container -->
 
                         </div>
                     </div>
                     <!-- End Search Results Sliding Panel -->
-
-                    <!-- Paginator -->
-                    <div id="paginator" class="pagination-container" style="">
-
-                        <div class="text-center">
-                            <ul class="pagination arches-page-counter" style="">
-                                <li><a class="disabled" href="#">«</a></li>
-                                <li class="current page active"><a href="#" data-page="1">1</a></li>
-                                <li class="page"><a href="#" data-page="2" class="page-button">2</a></li>
-                                <li class="page"><a href="#" data-page="3" class="page-button">3</a></li>
-                                <li class="page"><a href="#" data-page="216" class="page-button">4</a></li>
-                                <li><a class="page-button" data-page="2" href="#">»</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- End Paginator -->
 
                 </div>
 
@@ -783,33 +197,8 @@
                    
 
                     <!-- Map Filters -->
-                    <div class="container">
-
-                        <div class="map-filter-button" style="margin-top: 20px;">
-
-                            <div class="row">
-                                <div class="col-xs-12">
-
-                                    <div class="btn-group" style="margin-top: -10px;">
-                                        <button type="button" class="btn btn-primary dropdown-toggle" style="height: 36px;" data-toggle="dropdown">
-                                            <i class="fa fa-map-marker"></i> <span class="hidden-xs">Map Filters</span>
-                                            <span class="sr-only">{% trans "Toggle Dropdown" %}</span>                            
-                                        </button>
-                                        <ul class="dropdown-menu" role="menu">
-                                            <li><a href="javascript:void(0);" id="view-saved-searches">{% trans "Limit Search Results to Map Extent" %}</a></li>
-                                            <li class="divider"></li>
-                                            <li><a class="dataexport" id="shp" href="" target="_blank">Draw Polygon to Filter Map</a></li>
-                                            <li><a class="dataexport" id="csv" href="" target="_blank">Draw Line to Filter Map</a></li>
-                                            <li><a class="dataexport" id="kml" href="" target="_blank">Draw Point to Filter Map</a></li>
-                                            <li class="divider"></li>
-                                            <li><a id="spatial-buffer" href="#" style="padding-left: 15px;">Buffer (ft)<input id="map-buffer" type="text" class="" style="width: 30%; margin-left: 5px;" data-bind="textInput: buffer.width"></a></li>
-                                        </ul>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
+                    <div class="row" id="map-filter-container" data-filtertext="{% trans "Map Filter Enabled" %}" style="margin-right: 20px;"> 
+                        {% include 'views/search/map-filter.htm' %}
                     </div>
                     <!-- End Map -->
 
@@ -928,454 +317,6 @@
                     </div>
 
                 </div>
-
-
-
-                <!-- Basemaps and Overlays Panel -->
-                <div class="container">
-                    <div class="row">
-                        <div class="col-xs-4" style="">
-
-                            <!-- Basemaps -->
-                            <div id="basemaps-panel" class="tools-panel hidden" style="overflow-y: scroll; border-top-left-radius: 5px; border-top-right-radius: 5px; margin-top: -590px;">
-                                <div class="modal-header arches-modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                        ×
-                                    </button>
-                                    <h4 class="modal-title">
-                                        Basemaps
-                                    </h4>
-                                </div>
-
-                                <!-- Body Content -->
-                                <div class="modal-body padding-top-10 padding-bottom-0" style="">
-                                    
-                                    <!-- 2 Images per row -->
-                                    <div class="row">
-                                        <div class="col-xs-6">
-                                            <div class="thumbnails thumbnail-style arches-thumbnail" style="">
-                                                <a id="Road" class="fancybox-button zoomer basemap info-click" data-rel="fancybox-button" title="Google Streets" href="#">
-                                                    <span class="">  
-                                                        <img class="img-responsive arches-basemap-thumbnail" src="assets/img/arches_basemap/google_streets.jpg" alt="" />
-                                                        <span class="zoom-icon"></span>                   
-                                                    </span>                                              
-                                                </a>                    
-                                                <div class="caption">
-                                                    <a id="Road" class="hover-effect txt-color-blue font-120 basemap info-click" href="#">Streets</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-xs-6">
-                                            <div class="thumbnails thumbnail-style arches-thumbnail">
-                                                <a id="AerialWithLabels" class="fancybox-button zoomer basemap info-click" data-rel="fancybox-button" title="Google Satellite" href="#">
-                                                    <span class="">  
-                                                        <img class="img-responsive arches-basemap-thumbnail" src="assets/img/arches_basemap/google_satellite.jpg" alt="" />
-                                                        <span class="zoom-icon"></span>                   
-                                                    </span>                                              
-                                                </a>                    
-                                                <div class="caption">
-                                                    <a id="AerialWithLabels" class="hover-effect txt-color-blue font-120 basemap info-click" href="#">Satellite</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-xs-6">
-                                            <div class="thumbnails thumbnail-style arches-thumbnail">
-                                                <a id="ordnanceSurvey" class="fancybox-button zoomer basemap info-click" data-rel="fancybox-button" title="Google Terrain" href="#">
-                                                    <span class="">  
-                                                        <img class="img-responsive arches-basemap-thumbnail" src="assets/img/arches_basemap/google_terrain.jpg" alt="" />
-                                                        <span class="zoom-icon"></span>                   
-                                                    </span>                                              
-                                                </a>                    
-                                                <div class="caption">
-                                                    <a id="ordnanceSurvey" class="hover-effect txt-color-blue font-120 basemap info-link" href="#">Terrain</a>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>   
-                                </div>
-                                <!-- End Body Content -->
-
-                            </div>
-                            <!-- End Basemaps -->
-
-
-                            <!-- Overlays -->
-                            <div id="overlays-panel" class="tools-panel hidden" style="margin-top: -590px; border-top-left-radius: 5px; border-top-right-radius: 5px;">
-                                <div class="modal-header arches-modal-header">
-
-                                    <button type="button" class="close pull-right" data-dismiss="modal" aria-hidden="true">
-                                        ×
-                                    </button>
-
-                                    <div class="btn-group pull-right" style="margin-top:-10px; margin-right: 10px;">
-                                        <button type="button" id="add-layer" class="btn btn-primary arches-RDM-button-xs">
-                                            <i class="fa fa-plus"></i> Add Layer                         
-                                        </button>
-                                        
-                                    </div>
-
-                                    <h4 class="modal-title">
-                                        Overlays
-                                    </h4>
-                                </div>
-                    
-                                <!-- Body Content -->
-                                <div class="modal-body padding-top-0 padding-bottom-0" style="overflow-y: scroll; height: 395px;">
-                                    
-                                    <!-- List overlays -->
-                                    <div class="row">
-                                        <div class="col-xs-12">
-
-                                            <!-- Layer Entry -->
-                                            <div class="row arches-overlay-item arches-ll-selected" id="map-layer-10" style="padding-top: 10px; padding-bottom: 10px;">
-
-                                                <!-- Layer Thumbnail -->
-                                                <div class="col-xs-2" style="padding-right: 0px;">
-                                                    <img id="map-layer-10-img" style="width: 52px; height: 52px; border: 1px solid #cdcdcd;" src="assets/img/layer_library/heritage_grey.png" alt="" title="" class="">
-                                                </div>
-
-                                                <!-- Layer Title and Controls -->
-                                                <div class="col-xs-10">
-                                                    
-                                                    <!-- Layer Title -->
-                                                    <div class="row">
-                                                        <div class="col-xs-12">
-                                                            <a href="#" class="overlay-entry layer-selector" style="margin-left: 5px;" id="map-layer-10-button"><i id="map-layer-10-icon" class="fa fa-dot-circle-o"></i> Heritage Resources</a>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Layer Controls -->
-                                                    <div class="row">
-                                                        <div class="col-xs-12">
-                                                            <div class="knobs-demo" id="map-layer-10-knobs" style="margin-left: 5px; display: block;">
-                                                                
-                                                                <input class="knob" style="font-weight: normal;" data-width="32" data-height="60" data-fgColor="#428BCA" data-angleOffset=-145 data-angleArc=290 value="100" data-thickness=.3>
-
-                                                                <div style="margin-top: -63px; margin-left: 47px;">
-                                                                    <a href="" class="zoom" title="zoom to overlay"><i class="fa fa fa-search" style="font-size: 23px;"></i></a> &nbsp;
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- End Layer Entry -->
-
-
-                                            <!-- Spacer -->
-                                             <hr class="arches-layer-divider" style="margin-left: 0px; margin-right: 0px;">
-
-                                            
-                                            <!-- Layer Entry -->
-                                            <div class="row arches-overlay-item" id="map-layer-11" style="padding-top: 10px; padding-bottom: 10px;">
-
-                                                <!-- Layer Thumbnail -->
-                                                <div class="col-xs-2" style="padding-right: 0px;">
-                                                    <img id="map-layer-11-img" style="width: 52px; height: 52px; border: 1px solid #cdcdcd; opacity: 0.5" src="assets/img/layer_library/marker_blue.png" alt="" title="" class="">
-                                                </div>
-
-                                                <!-- Layer Title and Controls -->
-                                                <div class="col-xs-10">
-                                                    
-                                                    <!-- Layer Title -->
-                                                    <div class="row">
-                                                        <div class="col-xs-12">
-                                                            <a href="#" class="overlay-entry layer-selector" style="margin-left: 5px;" id="map-layer-11-button"><i id="map-layer-11-icon" class="fa fa-ban"></i> Heritage Districts</a>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Layer Controls -->
-                                                    <div class="row">
-                                                        <div class="col-xs-12">
-                                                            <div class="knobs-demo" id="map-layer-11-knobs" style="margin-left: 5px; display: none;">
-                                                                
-                                                                <input class="knob" style="font-weight: normal;" data-width="32" data-height="60" data-fgColor="#428BCA" data-angleOffset=-145 data-angleArc=290 value="100" data-thickness=.3>
-
-                                                                <div style="margin-top: -63px; margin-left: 47px;">
-                                                                    <a href="" class="zoom" title="zoom to overlay"><i class="fa fa fa-search" style="font-size: 23px;"></i></a> &nbsp;
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- End Layer Entry -->
-
-
-                                            <!-- Spacer -->
-                                            <hr class="arches-layer-divider" style="margin-left: 0px; margin-right: 0px;">
-
-
-                                            <!-- Layer Entry -->
-                                            <div class="row arches-overlay-item" id="map-layer-13" style="padding-top: 10px; padding-bottom: 10px;">
-
-                                                <!-- Layer Thumbnail -->
-                                                <div class="col-xs-2" style="padding-right: 0px;">
-                                                    <img id="map-layer-13-img" style="width: 52px; height: 52px; border: 1px solid #cdcdcd; opacity: 0.5" src="assets/img/layer_library/marker_grey.png" alt="" title="" class="">
-                                                </div>
-
-                                                <!-- Layer Title and Controls -->
-                                                <div class="col-xs-10">
-                                                    
-                                                    <!-- Layer Title -->
-                                                    <div class="row">
-                                                        <div class="col-xs-12">
-                                                            <a href="#" class="overlay-entry layer-selector" style="margin-left: 5px;" id="map-layer-13-button"><i id="map-layer-13-icon" class="fa fa-ban"></i> Land Use Planning Areas</a>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Layer Controls -->
-                                                    <div class="row">
-                                                        <div class="col-xs-12">
-                                                            <div class="knobs-demo" id="map-layer-13-knobs" style="margin-left: 5px; display: none;">
-                                                                
-                                                                <input class="knob" style="font-weight: normal;" data-width="32" data-height="60" data-fgColor="#428BCA" data-angleOffset=-145 data-angleArc=290 value="100" data-thickness=.3>
-
-                                                                <div style="margin-top: -63px; margin-left: 47px;">
-                                                                    <a href="" class="zoom" title="zoom to overlay"><i class="fa fa fa-search" style="font-size: 23px;"></i></a> &nbsp;
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- End Layer Entry -->
-
-
-                                            <!-- Spacer -->
-                                            <hr class="arches-layer-divider" style="margin-left: 0px; margin-right: 0px;">
-
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- End Body Content -->
-
-                            </div>
-                            <!-- End Overlays -->
-
-                            <div class="">
-                                <i id="pointer" class="fa fa fa-sort-asc hidden" style=""></i>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-                <!-- End Basemaps and Overlays Panel -->
-
-
-                <!-- Layer Library  -->
-                <div class="hidden" id="layer-library" style="display: block; margin-bottom: 35px; height: 650px;">
-
-                    <!-- Layer Library Header -->
-                    <div class="row" style="background: #f6f6f6; height: 60px;">
-                        <div class="container">
-
-                            <div class="col-xs-12" style="padding-left: 0px; padding-right: 0px; margin-top: 5px;">
-                                <button type="button" id="back-to-map" class="btn btn-primary arches-RDM-button-xs">
-                                    <i class="fa fa-arrow-circle-down"></i> Back to map                         
-                                </button>&nbsp;
-
-                                <span style="color: #585f69; font-size: 18px; font-weight: 200; vertical-align: middle;">
-                                    Manage Map Layers
-                                </span>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    
-                    <!-- Form -->
-                    <div class="container" style="margin-top: 30px;">
-
-                        <!-- Layer Filter Widget -->
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-9 col-md-8">
-                                <div class="form-group">       
-                                    <input class="layerfilter" id="" name="" style="width:100%"  value="">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Layer Filter Widget -->
-
-                        <div class="row">
-                            <div class="col-xs-12">
-
-                                <!-- Form for screens > XS -->
-                                <dl class="hidden-xs">   
-
-                                    <dd class="heritage">
-                                        <div class="row arches-layer-library" id="map-layer-1">
-
-                                            <!-- Layer Thumbnail -->
-                                            <div class="col-sm-2 col-md-1" style="padding-right: 0px; padding-left: 0px;">
-                                                <img id="map-layer-1-img" style="width: 64px; height: 64px; border: 1px solid #cdcdcd; opacity: 0.5" src="assets/img/layer_library/heritage_grey.png" alt="" title="" class="pull-right">
-                                            </div>
-
-                                            <!-- Layer Name/Categories -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <a href="#" class="arches-ll-title layer-selector" id="map-layer-1-button"><i id="map-layer-1-icon" class="fa fa-ban"></i> Heritage Resources</a>
-
-                                                <span class="arches-ll-category pull-right" style="margin-top: 5px;">
-                                                    <i class="fa-fw fa fa-info-circle"></i>Categories: Heritage
-                                                </span>  
-                                            </div>
-
-                                            <!-- Layer description -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <span class="arches-subtitle">
-                                                    Heritage Resources include houses, signs, storefronts, and many other architectural features or other objects of significance that we observed during the SurveyLA effort
-                                                </span>  
-                                            </div>    
-       
-                                        </div>
-
-                                        <!-- Spacer -->
-                                        <hr class="arches-layer-divider">
-
-                                    </dd>
-
-                                    <dd class="heritage">
-                                        <div class="row arches-layer-library arches-ll-selected" id="map-layer-2">
-
-                                            <!-- Layer Thumbnail -->
-                                            <div class="col-sm-2 col-md-1" style="padding-right: 0px; padding-left: 0px;">
-                                                <img id="map-layer-2-img" style="width: 64px; height: 64px; border: 1px solid #cdcdcd;" src="assets/img/layer_library/marker_blue.png" alt="" title="" class="pull-right">
-                                            </div>
-
-                                            <!-- Layer Name/Categories -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <a href="#" class="arches-ll-title layer-selector layer-selected-title" id="map-layer-2-button"><i id="map-layer-2-icon" class="fa fa-dot-circle-o"></i> Heritage District</a>
-                                                
-                                                <span class="arches-ll-category pull-right" style="margin-top: 5px;">
-                                                    <i class="fa-fw fa fa-info-circle"></i>Categories: Heritage
-                                                </span>
-                                                
-                                            </div>
-
-                                            <!-- Layer description -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <span class="arches-subtitle">
-                                                    Vestibulum ut orci urna. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi.
-                                                </span>  
-                                            </div>    
-       
-                                        </div>
-
-                                        <!-- Spacer -->
-                                        <hr class="arches-layer-divider">
-
-                                    </dd>
-
-                                    <dd class="planning historical">
-                                        <div class="row arches-layer-library" id="map-layer-3">
-
-                                            <!-- Layer Thumbnail -->
-                                            <div class="col-sm-2 col-md-1" style="padding-right: 0px; padding-left: 0px;">
-                                                <img id="map-layer-3-img" style="width: 64px; height: 64px; border: 1px solid #cdcdcd; opacity: 0.5" src="img/superbox/superbox-thumb-3.jpg" alt="" title="" class="pull-right">
-                                            </div>
-
-                                            <!-- Layer Name/Categories -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <a href="#" class="arches-ll-title layer-selector" id="map-layer-3-button"><i id="map-layer-3-icon" class="fa fa-ban"></i> Land Use Planning Areas</a>
-                                                
-                                                <span class="arches-ll-category pull-right" style="margin-top: 5px;">
-                                                    <i class="fa-fw fa fa-info-circle"></i>Categories: Planning, Historical
-                                                </span>  
-                                            </div>
-
-                                            <!-- Layer description -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <span class="arches-subtitle">
-                                                    Vestibulum ut orci urna. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi.
-                                                </span>  
-                                            </div>    
-       
-                                        </div>
-
-                                        <!-- Spacer -->
-                                        <hr class="arches-layer-divider">
-
-                                    </dd>
-
-                                    <dd class="environmental historical">
-                                        <div class="row arches-layer-library" id="map-layer-4">
-
-                                            <!-- Layer Thumbnail -->
-                                            <div class="col-sm-2 col-md-1" style="padding-right: 0px; padding-left: 0px;">
-                                                <img id="map-layer-4-img" style="width: 64px; height: 64px; border: 1px solid #cdcdcd; opacity: 0.5" src="img/superbox/superbox-thumb-3.jpg" alt="" title="" class="pull-right">
-                                            </div>
-
-                                            <!-- Layer Name/Categories -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <a href="#" class="arches-ll-title layer-selector" id="map-layer-4-button"><i id="map-layer-4-icon" class="fa fa-ban"></i> Seismic Hazard Zones</a>
-                                                
-                                                <span class="arches-ll-category pull-right" style="margin-top: 5px;">
-                                                    <i class="fa-fw fa fa-info-circle"></i>Categories: Environmental, Historical
-                                                </span>  
-                                            </div>
-
-                                            <!-- Layer description -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <span class="arches-subtitle">
-                                                    Vestibulum ut orci urna. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi.
-                                                </span>  
-                                            </div>    
-       
-                                        </div>
-
-                                        <!-- Spacer -->
-                                        <hr class="arches-layer-divider">
-
-                                    </dd>
-
-                                    <dd class="administrative">
-                                        <div class="row arches-layer-library" id="map-layer-5">
-
-                                            <!-- Layer Thumbnail -->
-                                            <div class="col-sm-2 col-md-1" style="padding-right: 0px; padding-left: 0px;">
-                                                <img id="map-layer-5-img" style="width: 64px; height: 64px; border: 1px solid #cdcdcd; opacity: 0.5" src="img/superbox/superbox-thumb-3.jpg" alt="" title="" class="pull-right">
-                                            </div>
-
-                                            <!-- Layer Name/Categories -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <a href="#" class="arches-ll-title layer-selector" id="map-layer-5-button"><i id="map-layer-5-icon" class="fa fa-ban"></i> Census Tracts</a>
-
-                                                <span class="arches-ll-category pull-right" style="margin-top: 5px;">
-                                                    <i class="fa-fw fa fa-info-circle"></i>Categories: Administrative
-                                                </span>  
-                                            </div>
-
-                                            <!-- Layer description -->
-                                            <div class="col-sm-9 col-md-11">
-                                                <span class="arches-subtitle">
-                                                    Vestibulum ut orci urna. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi. Morbi blandit enim eget risus posuere dapibus. Vestibulum velit nisi.
-                                                </span>  
-                                            </div>    
-       
-                                        </div>
-
-                                        <!-- Spacer -->
-                                        <hr class="arches-layer-divider">
-
-                                    </dd>
-
-                                </dl>
-                                
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <!-- End Layer Library (Back side) -->
 
 
 
@@ -1575,130 +516,16 @@
                       
             </div>
             <!-- End Main Content (search bars, map, map footer) -->
+            
+            {% endblock content %}
 
 
-            <!--=== Footer Version 1 ===-->
-            <div class="footer-v1">
-                <div class="footer">
-                    <div class="container">
-                        <div class="row">
-                            <!-- About -->
-                            <div class="col-md-3 md-margin-bottom-40">
-                                <a href="http://archesproject.org"><img id="logo-footer" class="footer-logo" style="width: 200px;" src="assets/img/arches_logo.png" alt=""></a>
-                                <p style="padding-bottom: 10px;">Arches is used around the world to preserve and protect our cultural heritage</p> 
-                                
-                                <p>Arches is open source software that incorporates international standards and is built to inventory and help manage all types of immovable cultural heritage</p>
-                                   
-                            </div><!--/col-md-3-->
-                            <!-- End About -->
+{% block javascript %}
+    {{ block.super }}
+    <!--<script src="{% static 'plugins/cube-portfolio/jquery.cubeportfolio.min.js' %}"></script>
+    <script src="{% static 'plugins/cube-portfolio/cube-portfolio-3-ns.js' %}"></script>-->
+{% endblock javascript %}
 
-                            <!-- Latest -->
-                            <div class="col-md-3 md-margin-bottom-40">
-                                <div class="posts">
-                                    <div class="headline"><h2>Latest Posts</h2></div>
-                                    <ul class="list-unstyled latest-list">
-                                        <li>
-                                            <a href="#">Incredible content</a>
-                                            <small>May 8, 2014</small>
-                                        </li>
-                                        <li>
-                                            <a href="#">Best shoots</a>
-                                            <small>June 23, 2014</small>
-                                        </li>
-                                        <li>
-                                            <a href="#">New Terms and Conditions</a>
-                                            <small>September 15, 2014</small>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div><!--/col-md-3-->  
-                            <!-- End Latest --> 
-                            
-                            <!-- Link List -->
-                            <div class="col-md-3 md-margin-bottom-40">
-                                <div class="headline"><h2>Useful Links</h2></div>
-                                <ul class="list-unstyled link-list">
-                                    <li><a href="#">About us</a><i class="fa fa-angle-right"></i></li>
-                                    <li><a href="#">Portfolio</a><i class="fa fa-angle-right"></i></li>
-                                    <li><a href="#">Latest jobs</a><i class="fa fa-angle-right"></i></li>
-                                    <li><a href="#">Community</a><i class="fa fa-angle-right"></i></li>
-                                    <li><a href="#">Contact us</a><i class="fa fa-angle-right"></i></li>
-                                </ul>
-                            </div><!--/col-md-3-->
-                            <!-- End Link List -->                    
-
-                            <!-- Address -->
-                            <div class="col-md-3 map-img md-margin-bottom-40">
-                                <div class="headline"><h2>Contact Us</h2></div>                         
-                                <address class="md-margin-bottom-40">
-                                    Farallon Geographics <br />
-                                    601 Montgomery St, Ste 1095 <br />
-                                    San Francisco, California, 94111 <br />
-                                    Phone: 800 123 3456 <br />
-                                    Email: <a href="mailto:info@fargeo.com" class="">info@fargeo.com</a>
-                                </address>
-                            </div><!--/col-md-3-->
-                            <!-- End Address -->
-                        </div>
-                    </div> 
-                </div><!--/footer-->
-
-                <div class="copyright">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md-6">                     
-                                <p>
-                                    Arches v3.03 with Arches-HER v1.0
-                                   <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
-                                </p>
-                            </div>
-
-                            <!-- Social Links -->
-                            <div class="col-md-6">
-                                <ul class="footer-socials list-inline">
-                                    <li>
-                                        <a href="#" class="tooltips" data-toggle="tooltip" data-placement="top" title="" data-original-title="Facebook">
-                                            <i class="fa fa-facebook"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="tooltips" data-toggle="tooltip" data-placement="top" title="" data-original-title="Skype">
-                                            <i class="fa fa-skype"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="tooltips" data-toggle="tooltip" data-placement="top" title="" data-original-title="Google Plus">
-                                            <i class="fa fa-google-plus"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="tooltips" data-toggle="tooltip" data-placement="top" title="" data-original-title="Linkedin">
-                                            <i class="fa fa-linkedin"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="tooltips" data-toggle="tooltip" data-placement="top" title="" data-original-title="Pinterest">
-                                            <i class="fa fa-pinterest"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="tooltips" data-toggle="tooltip" data-placement="top" title="" data-original-title="Twitter">
-                                            <i class="fa fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="tooltips" data-toggle="tooltip" data-placement="top" title="" data-original-title="Dribbble">
-                                            <i class="fa fa-dribbble"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <!-- End Social Links -->
-                        </div>
-                    </div> 
-                </div><!--/copyright-->
-            </div>     
-            <!--=== End Footer Version 1 ===-->
         </div><!--/wrapper-->
 
         <!-- JS Global Compulsory -->           
@@ -1755,7 +582,6 @@
                 
                 var map_panel = $("#map-panel");
                 var map_detail_panel = $("#map-detail-panel");
-                var paginator = $("#paginator");
                 
                 var graph_panel = $("#graph-panel");
                 var graph_detail_panel = $("#graph-detail-panel");
@@ -1764,626 +590,456 @@
 
 
 
-                function getSlidingPanelWidth() {
+                // function getSlidingPanelWidth() {
 
-                    var panel_width;
+                //     var panel_width;
 
-                    panel_width = $("#sliding-panel").width();
-                    return panel_width;
+                //     panel_width = $("#sliding-panel").width();
+                //     return panel_width;
 
-                }
+                // }
 
 
 
-                $(".search-widget").on("select2-selecting", function(e) {
+                // $(".search-widget").on("select2-selecting", function(e) {
                   
-                    //alert("selecting val=" + e.val + " choice=" + e.object.text);
-                    //toggle off layers that don't match the users' selection
-                    var selected = e.val;
+                //     //alert("selecting val=" + e.val + " choice=" + e.object.text);
+                //     //toggle off layers that don't match the users' selection
+                //     var selected = e.val;
 
-                    //check if saved search panel is open.  If so, close and replace with search results
-                    if (saved_search.hasClass("saved-search-panel-full")) {
+                //     //check if saved search panel is open.  If so, close and replace with search results
+                //     if (saved_search.hasClass("saved-search-panel-full")) {
 
-                        saved_search.removeClass("saved-search-panel-full");
-                        search_panel.removeClass("sliding-panel-hidden");
-                        search_panel.addClass("sliding-panel-full");
+                //         saved_search.removeClass("saved-search-panel-full");
+                //         search_panel.removeClass("sliding-panel-hidden");
+                //         search_panel.addClass("sliding-panel-full");
 
-                        //center search items
-                        search_panel_container.addClass("container");
+                //         //center search items
+                //         search_panel_container.addClass("container");
 
-                        //hide saved search menu, show time filter
-                        saved_search_menu.addClass("hidden");
-                        time_filter.removeClass("time-scale-hidden");
-                        saved_search.removeClass("saved-search-panel-shim")
-
-
-                    }
-
-                    //if map panel is open, slide it over and show search results
-                    if (map_panel.hasClass("map-panel-full")) {
-
-                        map_panel.addClass("map-panel-partial");
-                        map_panel.removeClass("map-panel-full");
+                //         //hide saved search menu, show time filter
+                //         saved_search_menu.addClass("hidden");
+                //         time_filter.removeClass("time-scale-hidden");
+                //         saved_search.removeClass("saved-search-panel-shim")
 
 
-                        //update marker panel position
-                        map_detail_panel.removeClass("pull-right");
+                //     }
 
-                        //show partial search results panel
-                        search_panel.removeClass("sliding-panel-hidden");
-                        search_panel.addClass("sliding-panel-partial");
+                //     //if map panel is open, slide it over and show search results
+                //     if (map_panel.hasClass("map-panel-full")) {
 
-                        //show sliding panel control
-                        search_panel_control.removeClass("sliding-panel-control-hidden");
-
-                        //Update position of sliding panel tools
-                        results_counter.addClass("results-counter-shim");
-                        time_filter_toggle.addClass("date-filter-header-shim");
-                        search_panel_tools.addClass("sliding-panel-tools-shim");
+                //         map_panel.addClass("map-panel-partial");
+                //         map_panel.removeClass("map-panel-full");
 
 
-                    }
+                //         //update marker panel position
+                //         map_detail_panel.removeClass("pull-right");
+
+                //         //show partial search results panel
+                //         search_panel.removeClass("sliding-panel-hidden");
+                //         search_panel.addClass("sliding-panel-partial");
+
+                //         //show sliding panel control
+                //         search_panel_control.removeClass("sliding-panel-control-hidden");
+
+                //         //Update position of sliding panel tools
+                //         results_counter.addClass("results-counter-shim");
+                //         time_filter_toggle.addClass("date-filter-header-shim");
+                //         search_panel_tools.addClass("sliding-panel-tools-shim");
+
+
+                //     }
 
  
-                })
+                // })
 
 
-                //Sliding Panel Control
-                $("#sliding-panel-control").click(function(){ slideSearchPanel(); return false; });
+                // //Sliding Panel Control
+                // $("#sliding-panel-control").click(function(){ slideSearchPanel(); return false; });
 
-                function slideSearchPanel() { 
-
-                    //Size Time Filter control
-                    var current_panel_size = getSlidingPanelWidth();
-
-                    if (current_panel_size < 270 ) {
-
-                            $(".truncate").css("width", "30%");
-
-                        } else {
-
-                            $(".truncate").css("width", "90%");
-
-                    }
-
-                    //Slide Search Results Container out of view
-                    if (search_panel.hasClass("sliding-panel-partial")) {
-
-                        //Search panel needs to be slid out of view
-                        search_panel.removeClass("sliding-panel-partial");
-                        search_panel_container.removeClass("container");
-                        
-                        panel_control_icon.removeClass("fa-step-backward");
-                        panel_control_icon.addClass("fa-step-forward");
-
-                        //Update position of sliding panel tools
-                        results_counter.removeClass("results-counter-shim");
-                        time_filter_toggle.removeClass("date-filter-header-shim");
-                        search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-
-                        //if map panel is already displayed, extend it to full screeen
-                        if (map_panel.hasClass("map-panel-partial")) {
-
-                            map_panel.removeClass("map-panel-partial");
-                            map_panel.addClass("map-panel-full");
-
-                            //position marker panel
-                            map_detail_panel.addClass("pull-right");
-
-                            //position sliding panel tools
-                            results_counter.removeClass("results-counter-shim");
-                            time_filter_toggle.removeClass("date-filter-header-shim");
-                            search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                            return_to = 'map';
-
-                        }
-                        
-                        //if graph panel is already displayed, extend it to full screen
-                        if (graph_panel.hasClass("graph-panel-partial")) {
-
-                            graph_panel.removeClass("graph-panel-partial");
-                            graph_panel.addClass("graph-panel-full");
-
-                            //position sliding panel tools
-                            results_counter.removeClass("results-counter-shim");
-                            time_filter_toggle.removeClass("date-filter-header-shim");
-                            search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                            return_to = 'graph';
-
-                        }
-
-
-                    } else {
-
-                        //Search panel needs to be shown again
-                        search_panel.addClass("sliding-panel-partial");
-                        panel_control_icon.addClass("fa-step-backward");
-                        panel_control_icon.removeClass("fa-step-forward");
-
-                        //position marker panel
-                        map_detail_panel.removeClass("pull-right");
-
-                        //position sliding panel tools
-                        results_counter.addClass("results-counter-shim");
-                        time_filter_toggle.addClass("date-filter-header-shim");
-                        search_panel_tools.addClass("sliding-panel-tools-shim");
-
-
-                        if (return_to = 'map') {
-
-                            map_panel.addClass("map-panel-partial");
-                            map_panel.removeClass("map-panel-full");
-
-                        } 
-
-                        if (return_to = 'graph') {
-
-                            graph_panel.addClass("graph-panel-partial");
-                            graph_panel.removeClass("graph-panel-full");
-
-
-                        } 
-                    }
-                }
-
-
-
-                //Show Map Funtion; meant to:
-                //      display map panel when user presses "map" button
-                //      Update state of list and map buttons
-                //      Determine whether to show partial search results (based on whether user did a search)
-                $(".show-map").click(function(){ handleShowMap(); return false; });
-                
-                function handleShowMap() {  
-
-                    //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
-                    //determine if user has done a term search and has the search results panel open.  
-
-                    if (saved_search.hasClass("saved-search-panel-full")) {
-
-                            saved_search.addClass("saved-search-panel-hidden");
-                            saved_search.removeClass("saved-search-panel-full");
-
-                            map_panel.removeClass("map-panel-hidden");
-                            map_panel.addClass("map-panel-full");
-
-                            //hide results panel
-                            search_panel.removeClass("sliding-panel-full");
-
-                            //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
-                            //Force icon to "show panel" position
-                            search_panel_control.removeClass("sliding-panel-control-hidden");
-                            panel_control_icon.addClass("fa-step-forward");
-                            panel_control_icon.removeClass("fa-step-backward");
-
-
-                            return_to = 'saved-search';
-                        
-                        } else if (search_panel.hasClass("sliding-panel-full")) {
-
-                            //Show Partial Map Panel
-                            map_panel.removeClass("map-panel-hidden");
-                            map_panel.addClass("map-panel-partial");
-
-
-                            //Show partial search results panel
-                            search_panel.removeClass("sliding-panel-full");
-                            search_panel.addClass("sliding-panel-partial");
-                            search_panel_container.removeClass("container");
-
-                            //make sliding panel control visible
-                            search_panel_control.removeClass("sliding-panel-control-hidden");
-
-                            //Update position of sliding panel tools
-                            results_counter.addClass("results-counter-shim");
-                            time_filter_toggle.addClass("date-filter-header-shim");
-                            search_panel_tools.addClass("sliding-panel-tools-shim");
-
-                            return_to = 'search-results';
-
-                    }
-
-
-                    //Update Button Group Display
-                    $("#show-map").removeClass("btn-default");
-                    $("#show-map").addClass("btn-u-light-green");
-
-                    $("#show-list").addClass("btn-default");
-                    $("#show-list").removeClass("btn-u-light-green");
-
-
-                }
-
-
-
-
-                //Show List Funtion; meant to:
-                //      display search results panel when user presses "list" button
-                //      Update state of list and map buttons
-                //      Determine whether to return search results or saved searches (based on whether user did a search)
-                $(".show-list").click(function(){ handleShowList(); return false; });
-                
-                function handleShowList() {  
-
-                    //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
-                    //determine if user has done a term search and has the search results panel open.  
-
-                    if (return_to == 'saved-search') {
-
-                            saved_search.removeClass("saved-search-panel-hidden");
-                            saved_search.addClass("saved-search-panel-full");
-
-                            map_panel.addClass("map-panel-hidden");
-                            map_panel.removeClass("map-panel-full");
-
-                            //hide results panel
-                            search_panel.removeClass("sliding-panel-full");
-
-                            //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
-                            //Force icon to "show panel" position
-                            search_panel_control.addClass("sliding-panel-control-hidden");
-
-                        
-                        } else if (search_panel.hasClass("sliding-panel-partial")) {
-
-                            //Show Partial Map Panel
-                            map_panel.addClass("map-panel-hidden");
-                            map_panel.removeClass("map-panel-partial");
-                            map_panel.removeClass("map-panel-full");
-
-
-                            //Show search results panel
-                            search_panel.addClass("sliding-panel-full");
-                            search_panel.removeClass("sliding-panel-partial");
-                            search_panel_container.addClass("container");
-
-                            //hide sliding panel control
-                            search_panel_control.addClass("sliding-panel-control-hidden");
-
-                            //Update position of sliding panel tools
-                            results_counter.removeClass("results-counter-shim");
-                            time_filter_toggle.removeClass("date-filter-header-shim");
-                            search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                    }
-
-
-                    //Update Button Group Display
-                    $("#show-map").addClass("btn-default");
-                    $("#show-map").removeClass("btn-u-light-green");
-
-                    $("#show-list").removeClass("btn-default");
-                    $("#show-list").addClass("btn-u-light-green");
-
-
-                }
-
-
-
-                //Show Graph Panel Funtion; meant to:
-                //      Toggle graph panel body
-                //      Update state of toggle button
-                
-                $("#show-graph-panel").click(function(){ handleShowGraphPanel(); return false; });
-                
-                function handleShowGraphPanel() { 
-
-                    var graph_panel_button = $("#show-graph-panel");
-                    var graph_panel_body = $("#graph-detail-panel-body");
-                    var graph_panel_footer = $("#graph-detail-panel-footer");
-                
-                    //check button icon to determine whether to hide/show graph panel body and footer
-                    if (graph_panel_button.hasClass("icon-size-actual")) {
-
-                            //Graph panel body/footer are visible.  Toggle display off
-                            graph_panel_body.addClass("hidden");
-                            graph_panel_footer.addClass("hidden");
-
-                            //update button icon
-                            graph_panel_button.removeClass("icon-size-actual");
-                            graph_panel_button.addClass("icon-size-fullscreen");
-
-
-                        }   else {
-
-                            //Graph panel body/footer are not visible.  Toggle display on
-                            graph_panel_body.removeClass("hidden");
-                            graph_panel_footer.removeClass("hidden");
-
-                            //update button icon
-                            graph_panel_button.addClass("icon-size-actual");
-                            graph_panel_button.removeClass("icon-size-fullscreen");
-
-                    
-                    }
-
-                }
-
-
-                //Handle Display of Map Panel
-                // $(".map-toggle").click(function(){ handleMapToggle(); return false; });
-
-                // function handleMapToggle() {  
+                // function slideSearchPanel() { 
 
                 //     //Size Time Filter control
                 //     var current_panel_size = getSlidingPanelWidth();
 
-                    
-                //     //if saved search is displayed, slide it out of the way and show map
-                //     if (saved_search.hasClass("saved-search-panel-full")) {
+                //     if (current_panel_size < 270 ) {
 
-                //         saved_search.addClass("saved-search-panel-hidden");
-                //         saved_search.removeClass("saved-search-panel-full");
-
-                //         map_panel.removeClass("map-panel-hidden");
-                //         map_panel.addClass("map-panel-full");
-
-                //         //position marker panel
-                //         map_detail_panel.addClass("pull-right");
-
-                //         //hide results panel
-                //         search_panel.removeClass("sliding-panel-full");
-
-                //         //Update Href Button
-                //         $("#map-toggle-state").text("hide");
-                //         $("#map-toggle-state").addClass("arches-small-text-shim");
-
-                //         return_to = 'saved-search';
+                //             $(".truncate").css("width", "30%");
 
                 //         } else {
 
-                //             //check state of map panel
-                //             if (map_panel.hasClass("map-panel-hidden")) {
+                //             $(".truncate").css("width", "90%");
 
-                //                 //Map Panel is hidden, user wants to display.  Check to see if Search Results are open.  If so, display partial map
-                //                 if (search_panel.hasClass("sliding-panel-full")) {
-                                
-                //                     map_panel.removeClass("map-panel-hidden");
-                //                     map_panel.addClass("map-panel-partial");
+                //     }
 
-                //                     //position marker panel
-                //                     map_detail_panel.removeClass("pull-right");
+                //     //Slide Search Results Container out of view
+                //     if (search_panel.hasClass("sliding-panel-partial")) {
 
+                //         //Search panel needs to be slid out of view
+                //         search_panel.removeClass("sliding-panel-partial");
+                //         search_panel_container.removeClass("container");
+                        
+                //         panel_control_icon.removeClass("fa-step-backward");
+                //         panel_control_icon.addClass("fa-step-forward");
 
-                //                     search_panel.removeClass("sliding-panel-full");
-                //                     search_panel.addClass("sliding-panel-partial");
-                //                     search_panel_container.removeClass("container");
-
-                //                     //make sliding panel control visible
-                //                     search_panel_control.removeClass("sliding-panel-control-hidden");
-
-                //                     //Update position of sliding panel tools
-                //                     results_counter.addClass("results-counter-shim");
-                //                     time_filter_toggle.addClass("date-filter-header-shim");
-                //                     search_panel_tools.addClass("sliding-panel-tools-shim");
-
-                //                     //Update size of time filter toggle
-                //                     // if (current_panel_size > 270 ) {
-                //                     //     $(".truncate").css("width", "40%");
-                //                     // }  
+                //         //Update position of sliding panel tools
+                //         results_counter.removeClass("results-counter-shim");
+                //         time_filter_toggle.removeClass("date-filter-header-shim");
+                //         search_panel_tools.removeClass("sliding-panel-tools-shim");
 
 
-                //                 }
+                //         //if map panel is already displayed, extend it to full screeen
+                //         if (map_panel.hasClass("map-panel-partial")) {
 
-                //                 //If search results panel is open, slide it back and slide in map panel
-                //                 if (search_panel.hasClass("sliding-panel-partial")) {
-                                
-                //                     map_panel.removeClass("map-panel-hidden");
-                //                     map_panel.addClass("map-panel-partial");
-                
-                //                     search_panel_container.removeClass("container");
+                //             map_panel.removeClass("map-panel-partial");
+                //             map_panel.addClass("map-panel-full");
 
-                //                     //update marker detail panel position
-                //                     map_detail_panel.removeClass("pull-right");
+                //             //position marker panel
+                //             map_detail_panel.addClass("pull-right");
 
-                //                     //need to slide in paginator too
-                //                     paginator.removeClass("paginator-hidden");
+                //             //position sliding panel tools
+                //             results_counter.removeClass("results-counter-shim");
+                //             time_filter_toggle.removeClass("date-filter-header-shim");
+                //             search_panel_tools.removeClass("sliding-panel-tools-shim");
 
-                //                 }
-
-                //                 //If Graph panel is partly open, slide it out of the way
-                //                 if (graph_panel.hasClass("graph-panel-partial")) {
-
-                //                     graph_panel.removeClass("graph-panel-partial");
-                //                     graph_panel.addClass("graph-panel-hidden");
-
-                //                     map_panel.addClass("map-panel-partial");
-
-                //                 }
-
-                //                 //If Graph panel is fully open, slide it out of the way
-                //                 if (graph_panel.hasClass("graph-panel-full")) {
-
-                //                     graph_panel.removeClass("graph-panel-full");
-                //                     graph_panel.addClass("graph-panel-hidden");
-
-                //                     map_panel.removeClass("map-panel-hidden");
-                //                     map_panel.removeClass("map-panel-partial");
-
-                //                     //position marker panel
-                //                     map_detail_panel.addClass("pull-right");
-
-                //                 }
-
-
-                //                 //Update Href Button
-                //                 $("#map-toggle-state").text("hide");
-                //                 $("#map-toggle-state").addClass("arches-small-text-shim");
-
-
-                //                 } else {
-
-                //                     //Map Panel is already displayed
-                //                     map_panel.removeClass("map-panel-partial");
-                //                     map_panel.removeClass("map-panel-full");
-                //                     map_panel.addClass("map-panel-hidden");
-
-                //                     //Update position of sliding panel tools
-                //                     results_counter.removeClass("results-counter-shim");
-                //                     time_filter_toggle.removeClass("date-filter-header-shim");
-                //                     search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                //                     //Update Href Button
-                //                     $("#map-toggle-state").text("show");
-                //                     $("#map-toggle-state").removeClass("arches-small-text-shim")
-
-                //                     //update sliding panel control icon
-                //                     panel_control_icon.addClass("fa-step-backward");
-                //                     panel_control_icon.removeClass("fa-step-forward");
-
-
-                                    
-                //                     //decide whether to show saved searches or search results
-                //                     if (return_to == 'saved-search') {
-
-                //                         saved_search.removeClass("saved-search-panel-hidden");
-                //                         saved_search.addClass("saved-search-panel-full");
-
-                //                         //To be safe, close search results partial
-                //                         search_panel.removeClass("sliding-panel-partial");
-
-
-                //                         } else {
-
-                //                             //Show search results full screen
-                //                             search_panel.addClass("sliding-panel-full");
-                //                             search_panel.removeClass("sliding-panel-partial");
-                //                             search_panel_container.addClass("container");
-
-                //                             //hide sliding panel control visible
-                //                             search_panel_control.addClass("sliding-panel-control-hidden");
-
-                //                             //Update position of sliding panel tools
-                //                             results_counter.removeClass("results-counter-shim");
-                //                             time_filter_toggle.removeClass("date-filter-header-shim");
-                //                             search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                //                     }
-
-
-                //                     //Update size of time filter toggle
-                //                     if (current_panel_size < 270 ) {
-                //                         $(".truncate").css("width", "40%");
-                //                 }  
-
-                //             return_to = 'search-results';
+                //             return_to = 'map';
 
                 //         }
+                        
+                //         //if graph panel is already displayed, extend it to full screen
+                //         if (graph_panel.hasClass("graph-panel-partial")) {
+
+                //             graph_panel.removeClass("graph-panel-partial");
+                //             graph_panel.addClass("graph-panel-full");
+
+                //             //position sliding panel tools
+                //             results_counter.removeClass("results-counter-shim");
+                //             time_filter_toggle.removeClass("date-filter-header-shim");
+                //             search_panel_tools.removeClass("sliding-panel-tools-shim");
+
+                //             return_to = 'graph';
+
+                //         }
+
+
+                //     } else {
+
+                //         //Search panel needs to be shown again
+                //         search_panel.addClass("sliding-panel-partial");
+                //         panel_control_icon.addClass("fa-step-backward");
+                //         panel_control_icon.removeClass("fa-step-forward");
+
+                //         //position marker panel
+                //         map_detail_panel.removeClass("pull-right");
+
+                //         //position sliding panel tools
+                //         results_counter.addClass("results-counter-shim");
+                //         time_filter_toggle.addClass("date-filter-header-shim");
+                //         search_panel_tools.addClass("sliding-panel-tools-shim");
+
+
+                //         if (return_to = 'map') {
+
+                //             map_panel.addClass("map-panel-partial");
+                //             map_panel.removeClass("map-panel-full");
+
+                //         } 
+
+                //         if (return_to = 'graph') {
+
+                //             graph_panel.addClass("graph-panel-partial");
+                //             graph_panel.removeClass("graph-panel-full");
+
+
+                //         } 
                 //     }
                 // }
 
 
-                //Handle Display of Graph Panel
-                $(".related-resources-graph").click(function(){ handleGraphToggle(); return false; });
 
-                function handleGraphToggle() {   
+                // //Show Map Funtion; meant to:
+                // //      display map panel when user presses "map" button
+                // //      Update state of list and map buttons
+                // //      Determine whether to show partial search results (based on whether user did a search)
+                // $(".show-map").click(function(){ handleShowMap(); return false; });
+                
+                // function handleShowMap() {  
 
-                    //check state of search panel.  Note that user can only access related resources button if 
-                    //sliding panel is visible
-                    if (search_panel.hasClass("sliding-panel-full")) {
+                //     //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
+                //     //determine if user has done a term search and has the search results panel open.  
 
-                        //slide full search panel back to partial
-                        search_panel.removeClass("sliding-panel-full");
-                        search_panel.addClass("sliding-panel-partial");
-                        search_panel_container.removeClass("container");
+                //     if (saved_search.hasClass("saved-search-panel-full")) {
 
-                        //show search panel control
-                        search_panel_control.removeClass("sliding-panel-control-hidden");
+                //             saved_search.addClass("saved-search-panel-hidden");
+                //             saved_search.removeClass("saved-search-panel-full");
 
-                        //Update position of sliding panel tools
-                        results_counter.addClass("results-counter-shim");
-                        time_filter_toggle.addClass("date-filter-header-shim");
-                        search_panel_tools.addClass("sliding-panel-tools-shim");
+                //             map_panel.removeClass("map-panel-hidden");
+                //             map_panel.addClass("map-panel-full");
 
-                        //show graph panel, force graph-detail-panel to default position
-                        graph_panel.removeClass("graph-panel-hidden");
-                        graph_panel.addClass("graph-panel-partial");
+                //             //hide results panel
+                //             search_panel.removeClass("sliding-panel-full");
 
-
-                    }
-
-
-                    //if Search panel is already partially visible, check to see if map panel is being displayed.  If so, slide it out
-                    //of the the and show graph panel
-                    if (search_panel.hasClass("sliding-panel-partial")) {
-
-                        //Check state of map panel
-                        if (map_panel.hasClass("map-panel-partial")) {
-
-                            map_panel.removeClass("map-panel-partial");
-                            map_panel.addClass("map-panel-hidden");
-
-                        }
-
-                        //show graph panel
-                        graph_panel.removeClass("graph-panel-hidden");
-                        graph_panel.addClass("graph-panel-partial");
-
-                        //show graph detail panel
-                        graph_detail_panel.removeClass("hidden");
-
-                    }
-
-                }
+                //             //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
+                //             //Force icon to "show panel" position
+                //             search_panel_control.removeClass("sliding-panel-control-hidden");
+                //             panel_control_icon.addClass("fa-step-forward");
+                //             panel_control_icon.removeClass("fa-step-backward");
 
 
-                //Clear Search Results
-                $(".clear-search").click(function(){ handleClearSearch(); return false; });
+                //             return_to = 'saved-search';
+                        
+                //         } else if (search_panel.hasClass("sliding-panel-full")) {
 
-                function handleClearSearch() {  
-
-                    //If search panel takes up full screen, hide the panel, remove the container (to properly center the search items),
-                    //and hide the panel control
-                    if (search_panel.hasClass("sliding-panel-full")) {
-
-                        search_panel.removeClass("sliding-panel-full");
-                        search_panel_container.removeClass("container");
-                        search_panel_control.addClass("sliding-panel-control-hidden");
-
-                    }
-
-                    if (search_panel.hasClass("sliding-panel-partial")) {
-
-                        search_panel.removeClass("sliding-panel-partial");
-                        search_panel_control.addClass("sliding-panel-control-hidden");
-
-                        //Update position of sliding panel tools
-                        results_counter.removeClass("results-counter-shim");
-                        time_filter_toggle.removeClass("date-filter-header-shim");
-                        search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                        //make sure map panel is hidden and href is toggled back to "show"
-                        map_panel.removeClass("map-panel-partial");
-                        map_panel.addClass("map-panel-hidden");
-
-                        $("#map-toggle-state").text("show");
-                        $("#map-toggle-state").removeClass("arches-small-text-shim");
+                //             //Show Partial Map Panel
+                //             map_panel.removeClass("map-panel-hidden");
+                //             map_panel.addClass("map-panel-partial");
 
 
-                        //make sure graph panel is hidden
-                        graph_panel.removeClass("graph-panel-partial");
-                        graph_panel.addClass("graph-panel-hidden");
+                //             //Show partial search results panel
+                //             search_panel.removeClass("sliding-panel-full");
+                //             search_panel.addClass("sliding-panel-partial");
+                //             search_panel_container.removeClass("container");
 
-                    }
+                //             //make sliding panel control visible
+                //             search_panel_control.removeClass("sliding-panel-control-hidden");
 
-                    saved_search.removeClass("saved-search-panel-hidden");
-                    saved_search.addClass("saved-search-panel-full");
+                //             //Update position of sliding panel tools
+                //             results_counter.addClass("results-counter-shim");
+                //             time_filter_toggle.addClass("date-filter-header-shim");
+                //             search_panel_tools.addClass("sliding-panel-tools-shim");
 
-                    //clear terms in search box
-                    $(".search-widget").select2("val", "");
+                //             return_to = 'search-results';
+
+                //     }
 
 
-                    //Update Button Group Display
-                    $("#show-map").addClass("btn-default");
-                    $("#show-map").removeClass("btn-u-light-green");
+                //     //Update Button Group Display
+                //     $("#show-map").removeClass("btn-default");
+                //     $("#show-map").addClass("btn-u-light-green");
 
-                    $("#show-list").removeClass("btn-default");
-                    $("#show-list").addClass("btn-u-light-green");
+                //     $("#show-list").addClass("btn-default");
+                //     $("#show-list").removeClass("btn-u-light-green");
 
-                }
+
+                // }
+
+
+
+
+                // //Show List Funtion; meant to:
+                // //      display search results panel when user presses "list" button
+                // //      Update state of list and map buttons
+                // //      Determine whether to return search results or saved searches (based on whether user did a search)
+                // $(".show-list").click(function(){ handleShowList(); return false; });
+                
+                // function handleShowList() {  
+
+                //     //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
+                //     //determine if user has done a term search and has the search results panel open.  
+
+                //     if (return_to == 'saved-search') {
+
+                //             saved_search.removeClass("saved-search-panel-hidden");
+                //             saved_search.addClass("saved-search-panel-full");
+
+                //             map_panel.addClass("map-panel-hidden");
+                //             map_panel.removeClass("map-panel-full");
+
+                //             //hide results panel
+                //             search_panel.removeClass("sliding-panel-full");
+
+                //             //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
+                //             //Force icon to "show panel" position
+                //             search_panel_control.addClass("sliding-panel-control-hidden");
+
+                        
+                //         } else if (search_panel.hasClass("sliding-panel-partial")) {
+
+                //             //Show Partial Map Panel
+                //             map_panel.addClass("map-panel-hidden");
+                //             map_panel.removeClass("map-panel-partial");
+                //             map_panel.removeClass("map-panel-full");
+
+
+                //             //Show search results panel
+                //             search_panel.addClass("sliding-panel-full");
+                //             search_panel.removeClass("sliding-panel-partial");
+                //             search_panel_container.addClass("container");
+
+                //             //hide sliding panel control
+                //             search_panel_control.addClass("sliding-panel-control-hidden");
+
+                //             //Update position of sliding panel tools
+                //             results_counter.removeClass("results-counter-shim");
+                //             time_filter_toggle.removeClass("date-filter-header-shim");
+                //             search_panel_tools.removeClass("sliding-panel-tools-shim");
+
+                //     }
+
+
+                //     //Update Button Group Display
+                //     $("#show-map").addClass("btn-default");
+                //     $("#show-map").removeClass("btn-u-light-green");
+
+                //     $("#show-list").removeClass("btn-default");
+                //     $("#show-list").addClass("btn-u-light-green");
+
+
+                // }
+
+
+
+                // //Show Graph Panel Funtion; meant to:
+                // //      Toggle graph panel body
+                // //      Update state of toggle button
+                
+                // $("#show-graph-panel").click(function(){ handleShowGraphPanel(); return false; });
+                
+                // function handleShowGraphPanel() { 
+
+                //     var graph_panel_button = $("#show-graph-panel");
+                //     var graph_panel_body = $("#graph-detail-panel-body");
+                //     var graph_panel_footer = $("#graph-detail-panel-footer");
+                
+                //     //check button icon to determine whether to hide/show graph panel body and footer
+                //     if (graph_panel_button.hasClass("icon-size-actual")) {
+
+                //             //Graph panel body/footer are visible.  Toggle display off
+                //             graph_panel_body.addClass("hidden");
+                //             graph_panel_footer.addClass("hidden");
+
+                //             //update button icon
+                //             graph_panel_button.removeClass("icon-size-actual");
+                //             graph_panel_button.addClass("icon-size-fullscreen");
+
+
+                //         }   else {
+
+                //             //Graph panel body/footer are not visible.  Toggle display on
+                //             graph_panel_body.removeClass("hidden");
+                //             graph_panel_footer.removeClass("hidden");
+
+                //             //update button icon
+                //             graph_panel_button.addClass("icon-size-actual");
+                //             graph_panel_button.removeClass("icon-size-fullscreen");
+
+                    
+                //     }
+
+                // }
+
+
+                
+
+
+                // //Handle Display of Graph Panel
+                // $(".related-resources-graph").click(function(){ handleGraphToggle(); return false; });
+
+                // function handleGraphToggle() {   
+
+                //     //check state of search panel.  Note that user can only access related resources button if 
+                //     //sliding panel is visible
+                //     if (search_panel.hasClass("sliding-panel-full")) {
+
+                //         //slide full search panel back to partial
+                //         search_panel.removeClass("sliding-panel-full");
+                //         search_panel.addClass("sliding-panel-partial");
+                //         search_panel_container.removeClass("container");
+
+                //         //show search panel control
+                //         search_panel_control.removeClass("sliding-panel-control-hidden");
+
+                //         //Update position of sliding panel tools
+                //         results_counter.addClass("results-counter-shim");
+                //         time_filter_toggle.addClass("date-filter-header-shim");
+                //         search_panel_tools.addClass("sliding-panel-tools-shim");
+
+                //         //show graph panel, force graph-detail-panel to default position
+                //         graph_panel.removeClass("graph-panel-hidden");
+                //         graph_panel.addClass("graph-panel-partial");
+
+
+                //     }
+
+
+                //     //if Search panel is already partially visible, check to see if map panel is being displayed.  If so, slide it out
+                //     //of the the and show graph panel
+                //     if (search_panel.hasClass("sliding-panel-partial")) {
+
+                //         //Check state of map panel
+                //         if (map_panel.hasClass("map-panel-partial")) {
+
+                //             map_panel.removeClass("map-panel-partial");
+                //             map_panel.addClass("map-panel-hidden");
+
+                //         }
+
+                //         //show graph panel
+                //         graph_panel.removeClass("graph-panel-hidden");
+                //         graph_panel.addClass("graph-panel-partial");
+
+                //         //show graph detail panel
+                //         graph_detail_panel.removeClass("hidden");
+
+                //     }
+
+                // }
+
+
+                // //Clear Search Results
+                // $(".clear-search").click(function(){ handleClearSearch(); return false; });
+
+                // function handleClearSearch() {  
+
+                //     //If search panel takes up full screen, hide the panel, remove the container (to properly center the search items),
+                //     //and hide the panel control
+                //     if (search_panel.hasClass("sliding-panel-full")) {
+
+                //         search_panel.removeClass("sliding-panel-full");
+                //         search_panel_container.removeClass("container");
+                //         search_panel_control.addClass("sliding-panel-control-hidden");
+
+                //     }
+
+                //     if (search_panel.hasClass("sliding-panel-partial")) {
+
+                //         search_panel.removeClass("sliding-panel-partial");
+                //         search_panel_control.addClass("sliding-panel-control-hidden");
+
+                //         //Update position of sliding panel tools
+                //         results_counter.removeClass("results-counter-shim");
+                //         time_filter_toggle.removeClass("date-filter-header-shim");
+                //         search_panel_tools.removeClass("sliding-panel-tools-shim");
+
+                //         //make sure map panel is hidden and href is toggled back to "show"
+                //         map_panel.removeClass("map-panel-partial");
+                //         map_panel.addClass("map-panel-hidden");
+
+                //         $("#map-toggle-state").text("show");
+                //         $("#map-toggle-state").removeClass("arches-small-text-shim");
+
+
+                //         //make sure graph panel is hidden
+                //         graph_panel.removeClass("graph-panel-partial");
+                //         graph_panel.addClass("graph-panel-hidden");
+
+                //     }
+
+                //     saved_search.removeClass("saved-search-panel-hidden");
+                //     saved_search.addClass("saved-search-panel-full");
+
+                //     //clear terms in search box
+                //     $(".search-widget").select2("val", "");
+
+
+                //     //Update Button Group Display
+                //     $("#show-map").addClass("btn-default");
+                //     $("#show-map").removeClass("btn-u-light-green");
+
+                //     $("#show-list").removeClass("btn-default");
+                //     $("#show-list").addClass("btn-u-light-green");
+
+                // }
 
 
                 //Close Graph Panel, show full searh results
@@ -2568,124 +1224,6 @@
                 });
 
 
-
-
-                //D3 Time Filter
-                // sizing information, including margins so there is space for labels, etc
-                // Adapted from: http://bl.ocks.org/mbostock/3048450
-                var w = 1280;//$("#time-scale").width();
-                var h = 50;
-                var num_bins = 300;
-                var num_ticks = 5;
-                var target = "#time-scale";
-                var bar_width = 1;
-                var label_offset = -2;
-
-                var values =  [-1000, -900, -988, -988, 25, 44, 400, 405, 399, 399, 401, -10, -977, -960, -960, -960, -960, -960, -499, -479, -450, 0, 899, 904, 933, 933, 934, 935, 1288, 1305, 1492, 1515, 1615, 1789, 1888, 1880, 1889, 1890, 1890, 1890, 1900, 1946, 1955, 1979, 1999, 2001, 2010, -250, -240, -230, -235, -235, -235, -240, -230, 1100, 1105, 1099, 1100, 1100, 1104, 680, 675, 689, 1020, 1019, 1021, 1018, 1020, 1019, 1019, 1018, 1020, 676, 677, 2013, 2014, 2015, 80, 77, 81, 82, 62, 61, 60, 60, 70, 71, 71, 70, 70, 71, 490, 489, -488, -490, -487, 1400, 1401];
-
-
-                // A formatter for counts.
-                var formatCount = d3.format(",f");
-
-                var margin = {top: 5, right: 40, bottom: 0, left: 40},
-                    width = w - margin.left - margin.right,
-                    height = h - margin.top - margin.bottom;
-
-                var x = d3.scale.linear()
-                    .domain([d3.min(values), d3.max(values)])
-                    .range([0, width]);
-
-                // Generate a histogram using twenty uniformly-spaced bins.
-                var data = d3.layout.histogram()
-                    .bins(num_bins)
-                    (values);
-
-                var y = d3.scale.linear()
-                    .domain([0, d3.max(data, function(d) { return d.y; })])
-                    .range([height, 0]);
-
-
-                var xAxis = d3.svg.axis()
-                    .scale(x)
-                    .orient("top")
-                    .tickSize(50)
-                    .tickFormat(d3.format("f"))
-                    .ticks(num_ticks);
-
-
-                // brush tool to let us zoom and pan using the overview chart
-                var brush = d3.svg.brush()
-                    .x(x)
-                    .on("brush", brushed);
-
-
-                var svg = d3.select(target).append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
-                    .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-                var bar = svg.selectAll(".bar")
-                    .data(data)
-                    .enter().append("g")
-                    .attr("class", "bar")
-                    .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-
-
-                bar.append("rect")
-                    .attr("x", 1)
-                    .attr("width", bar_width)
-                    .attr("height", function(d) { return height - y(d.y); });
-
-
-                //draw tick lines
-                // svg.selectAll("line.x")
-                //     .data(x.ticks(num_ticks))
-                //     .enter().append("line")
-                //     .attr("class", "x")
-                //     .attr("x1", x)
-                //     .attr("x2", x)
-                //     .attr("y1", 0)
-                //     .attr("y2", 50)
-                //     .style("stroke", "#999")
-
-
-                //Label Tick lines
-                svg.append("g")
-                    .attr("class", "x-axis")
-                    //.attr("transform", "translate(0," + height + ")")
-                    .attr("transform", "translate(0, 60)")
-                    .call(xAxis)
-                    .selectAll("text")
-                    .attr("dx", label_offset)
-                    .style("text-anchor", "start");
-
-
-                // add the brush target area on the chart
-                svg.append("g")
-                    .attr("class", "x brush")
-                    .call(brush)
-                    .selectAll("rect")
-                                
-                    // -6 is magic number to offset positions for styling/interaction to feel right
-                    .attr("y", -6)
-
-                    // need to manually set the height because the brush has
-                    // no y scale, i.e. we should see the extent being marked
-                    // over the full height of the chart
-                    .attr("height", height +7);  // +7 is magic number for styling
-
-
-
-                function brushed() {
-                    
-                    x.domain(brush.empty() ? x.domain() : brush.extent());
-                    
-                    // Add additional functionality here (eg: update svg elements, etc.)
-                    
-
-                }
 
 
 

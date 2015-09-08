@@ -995,6 +995,82 @@ input.arches-select2:-ms-input-placeholder {
 
 
 /* Search */
+
+.search-header {
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    background: #fff;
+    height: 72px;
+    border-bottom-color: #eee;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.sliding-panel-tools {
+    margin-top: -35px;
+}
+
+.sliding-panel-tools-shim {
+    margin-top: -35px;
+}
+
+.results-counter {
+    margin-bottom: 10px; 
+    font-weight: 300;
+}
+
+.results-counter-shim {
+    margin-top: 0px;
+}
+
+.sliding-panel {
+    width: 33%;
+    margin-left: -33%;
+    height: 650px;
+    background: #fff;
+    opacity: .90;
+    border-right-color: #ddd;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-top-color: #ddd;
+    border-top-width: 1px;
+    border-top-style: solid;
+}
+
+.sliding-panel-partial {
+    margin-left: 0%;
+}
+
+.sliding-panel-full {
+    margin-left: 0%;
+    width: 100%;
+}
+
+.sliding-panel-control {
+    width: 35px;
+    height: 45px;
+    background: #fff;
+    margin-left: 100%;
+    margin-top: -560px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border-width: 1px;
+    border-color: #ddd;
+    border-style: solid;
+    border-left-width: 1px;
+}
+
+.sliding-panel-control-hidden {
+    margin-left: -150%;
+}
+
+.search-results-container {
+    height: 517px; 
+    margin-top: -45px;
+    overflow-y: scroll;
+}
+
 .search-block {
     border-bottom: 1px solid #eee;
     background: #fafafa;
@@ -1116,6 +1192,63 @@ input.arches-select2:-ms-input-placeholder {
     border: 1px solid rgb(197, 197, 197);
     background-color: #FFF;
     color: #416CA9;
+}
+
+/* Time Filter v2*/
+
+.time-scale {
+    height: 50px; 
+    background: #fafafa; 
+    border-top-width: 1px; 
+    border-top-style: solid; 
+    border-top-color: #ddd;
+}
+
+.time-scale-hidden {
+    margin-left: 100%
+}
+
+/* D3 styles */
+.brush .extent {
+    stroke: #fff;
+    fill: #123;
+    fill-opacity: .1750;
+    shape-rendering: crispEdges;
+}
+
+.bar {
+    fill: steelblue;
+    stroke: steelblue;
+}
+
+.tick {
+    fill: #999;
+    stroke: #999;
+    stroke-width: 1;
+    font-size: 11px;
+    font-weight: 100;
+}
+
+
+.x-axis {
+    stroke: #777;
+    fill: #f7f7f7;
+    stroke-width: 0;
+    text-anchor: right;
+}
+
+.domain {
+    fill: transparent;
+    opacity: .1;
+}
+
+
+.axis path,
+.axis line {
+  fill: transparent;
+  stroke: #555;
+  stroke-width: 1;
+  shape-rendering: crispEdges;
 }
 
 
