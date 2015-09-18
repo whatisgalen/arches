@@ -435,6 +435,12 @@ define(['jquery',
                     }
                 });
                 this.map.map.addLayer(this.currentPageLayer);
+
+                // $(window).resize(function(){
+                //     setTimeout( function() { 
+                //         self.map.map.updateSize();
+                //     }, 200);
+                // });
             },
 
             zoomToResource: function(resourceid){
@@ -711,6 +717,10 @@ define(['jquery',
 
             slideToggle: function(ele, showOrHide){
                 var self = this;
+                ele[showOrHide]();
+                self.map.map.updateSize();
+                self.zoomToResults();
+                return;
                 if ($(ele).is(":visible") && showOrHide === 'hide'){
                     ele.slideToggle('slow');
                     return;

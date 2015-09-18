@@ -13,7 +13,9 @@ require(['jquery',
     'resource-types',
     'openlayers',
     'bootstrap-datetimepicker',
-    'plugins/knockout-select2'], 
+    'plugins/knockout-select2', 
+    'plugins/cube-portfolio/jquery.cubeportfolio.min',
+    'plugins/cube-portfolio/cube-portfolio-3-ns'], 
     function($, _, Backbone, bootstrap, arches, select2, TermFilter, MapFilter, TimeFilter, SearchResults, ko, BranchList, resourceTypes, ol) {
     $(document).ready(function() {
         var wkt = new ol.format.WKT();
@@ -23,11 +25,11 @@ require(['jquery',
             updateRequest: '',
 
             events: {
-                'click #sliding-panel-control' : 'slideSearchPanel',
-                'click .show-map' : 'handleShowMap',
-                'click .show-list' : 'handleShowList',
+                'click #sliding-panel-control' : 'slideList',
+                'click .show-map' : 'showMap',
+                'click .show-list' : 'showList',
                 // 'click #view-saved-searches': 'showSavedSearches',
-                'click .clear-search': 'handleClearSearch',
+                'click .clear-search': 'showSavedSearches',
                 // 'click #map-filter-button': 'toggleMapFilter',
                 // 'click #time-filter-button': 'toggleTimeFilter',
                 // 'click a.dataexport': 'exportSearch'
@@ -36,72 +38,80 @@ require(['jquery',
             initialize: function(options) { 
                 var mapFilterText, timeFilterText;
                 var self = this;
+                this.PAGE_STATES = {'saved_searches_displayed': 'SAVED_SEARCHES_DISPLAYED', 'saved_searches_hidden': 'SAVED_SEARCHES_HIDDEN'};
+                this.LIST_STATES = {'full': 'FULL', 'partial': 'PARTIAL', 'hidden': 'HIDDEN'};
 
                 this.saved_search = $("#saved-search");
                 this.results_counter = $("#search-results-count");
                 this.time_filter_toggle = $("#date-filter-control");
-                this.search_panel = $("#sliding-panel");
-                this.search_panel_container = $("#sliding-panel-container");
-                this.search_panel_control = $("#sliding-panel-control");
-                this.panel_control_icon = $("#sliding-panel-control-icon");
-                this.search_panel_tools = $("#sliding-panel-tools");
+                this.search_results_and_filters_container = $('#search-results-and-filters-container');
+                this.sliding_panel = $("#sliding-panel");
+                this.sliding_panel_container = $("#sliding-panel-container");
+                this.sliding_panel_control = $("#sliding-panel-control");
+                this.sliding_panel_control_icon = $("#sliding-panel-control-icon");
+                this.sliding_panel_tools = $("#sliding-panel-tools");
                 this.saved_search_menu = $("#filters-container");
                 this.time_filter = $("#time-scale");
+                this.time_filter_container = $("#time-filter-container");
                 this.map_panel = $("#map-panel");
                 this.map_detail_panel = $("#map-detail-panel");
                 this.graph_panel = $("#graph-panel");
                 this.graph_detail_panel = $("#graph-detail-panel");
 
                 this.return_to;
+                this.default_page_state = this.PAGE_STATES.saved_searches_displayed;
+                //this.current_page_state = this.default_page_state;
+                this.default_list_view_state = this.LIST_STATES.full;
+                //this.current_list_view_state = this.default_list_view_state;
 
 
                 this.termFilter = new TermFilter({
                     el: $.find('input.resource_search_widget')[0]
                 });
                 this.termFilter.on('change', function(){
-                    if($('#saved-searches').is(":visible")){
+                    if(this.saved_search.is(":visible")){
                         this.hideSavedSearches();
                     }
 
-                    //check if saved search panel is open.  If so, close and replace with search results
-                    if (this.saved_search.hasClass("saved-search-panel-full")) {
+                    // //check if saved search panel is open.  If so, close and replace with search results
+                    // if (this.saved_search.hasClass("saved-search-panel-full")) {
 
-                        this.saved_search.removeClass("saved-search-panel-full");
-                        this.search_panel.removeClass("sliding-panel-hidden");
-                        this.search_panel.addClass("sliding-panel-full");
+                    //     this.saved_search.removeClass("saved-search-panel-full");
+                    //     this.sliding_panel.removeClass("sliding-panel-hidden");
+                    //     this.sliding_panel.addClass("sliding-panel-full");
 
-                        //center search items
-                        this.search_panel_container.addClass("container");
+                    //     //center search items
+                    //     this.sliding_panel_container.addClass("container");
 
-                        //hide saved search menu, show time filter
-                        this.saved_search_menu.addClass("hidden");
-                        this.time_filter.removeClass("time-scale-hidden");
-                        this.saved_search.removeClass("saved-search-panel-shim")
+                    //     //hide saved search menu, show time filter
+                    //     this.saved_search_menu.addClass("hidden");
+                    //     this.time_filter.removeClass("time-scale-hidden");
+                    //     this.saved_search.removeClass("saved-search-panel-shim")
 
-                    }
+                    // }
 
-                    //if map panel is open, slide it over and show search results
-                    if (this.map_panel.hasClass("map-panel-full")) {
+                    // //if map panel is open, slide it over and show search results
+                    // if (this.map_panel.hasClass("map-panel-full")) {
 
-                        this.map_panel.addClass("map-panel-partial");
-                        this.map_panel.removeClass("map-panel-full");
+                    //     this.map_panel.addClass("map-panel-partial");
+                    //     this.map_panel.removeClass("map-panel-full");
 
 
-                        //update marker panel position
-                        this.map_detail_panel.removeClass("pull-right");
+                    //     //update marker panel position
+                    //     this.map_detail_panel.removeClass("pull-right");
 
-                        //show partial search results panel
-                        this.search_panel.removeClass("sliding-panel-hidden");
-                        this.search_panel.addClass("sliding-panel-partial");
+                    //     //show partial search results panel
+                    //     this.sliding_panel.removeClass("sliding-panel-hidden");
+                    //     this.sliding_panel.addClass("sliding-panel-partial");
 
-                        //show sliding panel control
-                        this.search_panel_control.removeClass("sliding-panel-control-hidden");
+                    //     //show sliding panel control
+                    //     this.sliding_panel_control.removeClass("sliding-panel-control-hidden");
 
-                        //Update position of sliding panel tools
-                        this.results_counter.addClass("results-counter-shim");
-                        this.time_filter_toggle.addClass("date-filter-header-shim");
-                        this.search_panel_tools.addClass("sliding-panel-tools-shim");
-                    }
+                    //     //Update position of sliding panel tools
+                    //     this.results_counter.addClass("results-counter-shim");
+                    //     this.time_filter_toggle.addClass("date-filter-header-shim");
+                    //     this.sliding_panel_tools.addClass("sliding-panel-tools-shim");
+                    // }
 
                 }, this);
                 this.termFilter.on('filter-removed', function(item){
@@ -123,7 +133,8 @@ require(['jquery',
 
 
                 this.mapFilter = new MapFilter({
-                    el: $('#map-filter-container')[0]
+                    el: $('#map-filter-container')[0],
+                    expanded: true
                 });
                 this.mapFilter.on('enabled', function(enabled, inverted){
                     if(enabled){
@@ -209,7 +220,7 @@ require(['jquery',
                     }, this).extend({ rateLimit: 200 })
                 };
 
-                this.getSearchQuery();
+                //this.getSearchQuery();
 
                 this.searchResults.page.subscribe(function(){
                     self.doQuery();
@@ -220,6 +231,12 @@ require(['jquery',
                     self.searchResults.page(1);
                     self.doQuery();
                 });
+
+                // $(window).resize(function(){
+                //     self.handlePageResize();
+                // })
+
+                // this.handlePageResize();
             },
 
             doQuery: function () {
@@ -247,272 +264,169 @@ require(['jquery',
                 });
             },
 
-            slideSearchPanel: function() { 
+            handlePageResize: function(){
+                var offset = this.saved_search.offset() || this.search_results_and_filters_container.offset();
+                var window_height = $(window).height();
 
-                //Size Time Filter control
-                var current_panel_size = $("#sliding-panel").width();
+                this.saved_search.height(window_height - offset.top);
+                this.search_results_and_filters_container.height(window_height - offset.top);
+            },
 
-                if (current_panel_size < 270 ) {
-                    $(".truncate").css("width", "30%");
-                } else {
-                    $(".truncate").css("width", "90%");
+            getPageState: function(){
+                if(this.saved_search.is(":visible")){
+                    return this.PAGE_STATES.saved_searches_displayed;
                 }
+                return this.PAGE_STATES.saved_searches_hidden;
+            },
 
-                //Slide Search Results Container out of view
-                if (this.search_panel.hasClass("sliding-panel-partial")) {
-
-                    //Search panel needs to be slid out of view
-                    this.search_panel.removeClass("sliding-panel-partial");
-                    this.search_panel_container.removeClass("container");
-                    
-                    this.panel_control_icon.removeClass("fa-step-backward");
-                    this.panel_control_icon.addClass("fa-step-forward");
-
-                    //Update position of sliding panel tools
-                    this.results_counter.removeClass("results-counter-shim");
-                    this.time_filter_toggle.removeClass("date-filter-header-shim");
-                    this.search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-
-                    //if map panel is already displayed, extend it to full screeen
-                    if (this.map_panel.hasClass("map-panel-partial")) {
-
-                        this.map_panel.removeClass("map-panel-partial");
-                        this.map_panel.addClass("map-panel-full");
-
-                        //position marker panel
-                        this.map_detail_panel.addClass("pull-right");
-
-                        //position sliding panel tools
-                        this.results_counter.removeClass("results-counter-shim");
-                        this.time_filter_toggle.removeClass("date-filter-header-shim");
-                        this.search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                        this.return_to = 'map';
-
-                    }
-                    
-                    //if graph panel is already displayed, extend it to full screen
-                    if (this.graph_panel.hasClass("graph-panel-partial")) {
-
-                        this.graph_panel.removeClass("graph-panel-partial");
-                        this.graph_panel.addClass("graph-panel-full");
-
-                        //position sliding panel tools
-                        this.results_counter.removeClass("results-counter-shim");
-                        this.time_filter_toggle.removeClass("date-filter-header-shim");
-                        this.search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                        this.return_to = 'graph';
-
-                    }
-
-
-                } else {
-
-                    //Search panel needs to be shown again
-                    this.search_panel.addClass("sliding-panel-partial");
-                    this.panel_control_icon.addClass("fa-step-backward");
-                    this.panel_control_icon.removeClass("fa-step-forward");
-
-                    //position marker panel
-                    this.map_detail_panel.removeClass("pull-right");
-
-                    //position sliding panel tools
-                    this.results_counter.addClass("results-counter-shim");
-                    this.time_filter_toggle.addClass("date-filter-header-shim");
-                    this.search_panel_tools.addClass("sliding-panel-tools-shim");
-
-
-                    if (this.return_to = 'map') {
-
-                        this.map_panel.addClass("map-panel-partial");
-                        this.map_panel.removeClass("map-panel-full");
-
-                    } 
-
-                    if (this.return_to = 'graph') {
-
-                        this.graph_panel.addClass("graph-panel-partial");
-                        this.graph_panel.removeClass("graph-panel-full");
-
-
-                    } 
+            getListViewState: function(){
+                if(!(this.sliding_panel.is(":visible"))){
+                    return this.LIST_STATES.hidden;
+                }
+                if(this.sliding_panel.hasClass("col-xs-12")){
+                    return this.LIST_STATES.full;
+                }
+                if(this.sliding_panel.hasClass("col-xs-4")){
+                    return this.LIST_STATES.partial;
                 }
             },
 
-            handleShowMap: function() {  
-
-                //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
-                //determine if user has done a term search and has the search results panel open.  
-
-                if (this.saved_search.hasClass("saved-search-panel-full")) {
-
-                    this.saved_search.addClass("saved-search-panel-hidden");
-                    this.saved_search.removeClass("saved-search-panel-full");
-
-                    this.map_panel.removeClass("map-panel-hidden");
-                    this.map_panel.addClass("map-panel-full");
-
-                    //hide results panel
-                    this.search_panel.removeClass("sliding-panel-full");
-
-                    //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
-                    //Force icon to "show panel" position
-                    this.search_panel_control.removeClass("sliding-panel-control-hidden");
-                    this.panel_control_icon.addClass("fa-step-forward");
-                    this.panel_control_icon.removeClass("fa-step-backward");
-
-
-                    this.return_to = 'saved-search';
-                
-                } else if (this.search_panel.hasClass("sliding-panel-full")) {
-
-                    //Show Partial Map Panel
-                    this.map_panel.removeClass("map-panel-hidden");
-                    this.map_panel.addClass("map-panel-partial");
-
-
-                    //Show partial search results panel
-                    this.search_panel.removeClass("sliding-panel-full");
-                    this.search_panel.addClass("sliding-panel-partial");
-                    this.search_panel_container.removeClass("container");
-
-                    //make sliding panel control visible
-                    this.search_panel_control.removeClass("sliding-panel-control-hidden");
-
-                    //Update position of sliding panel tools
-                    this.results_counter.addClass("results-counter-shim");
-                    this.time_filter_toggle.addClass("date-filter-header-shim");
-                    this.search_panel_tools.addClass("sliding-panel-tools-shim");
-
-                    this.return_to = 'search-results';
-
-                }
-
-
-                //Update Button Group Display
-                $("#show-map").removeClass("btn-default");
-                $("#show-map").addClass("btn-u-light-green");
-
-                $("#show-list").addClass("btn-default");
-                $("#show-list").removeClass("btn-u-light-green");
+            showSavedSearches: function(){
+                this.clear();
+                // this.saved_search.show();
+                // this.search_results_and_filters_container.css('margin-left', '100%');
+                //this.search_results_and_filters_container.hide();
+                this.saved_search.slideDown();
+                this.search_results_and_filters_container.slideUp();
+                //$('#search-results-and-filters-container').slideToggle()
             },
 
-            handleShowList: function() {  
+            hideSavedSearches: function(){
+                var self = this;
+                // this.saved_search.hide();
+                // this.search_results_and_filters_container.css('margin-left', '');
+                //this.search_results_and_filters_container.show();
+                this.saved_search.slideUp();
+                this.search_results_and_filters_container.slideDown(function(){
+                    self.timeFilter.restoreState();
+                });
+                //$('#search-results-and-filters-container').slideToggle()
+            },
 
-                //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
-                //determine if user has done a term search and has the search results panel open.  
+            showList: function(){
+                if(this.getPageState() === this.PAGE_STATES.saved_searches_displayed){
+                    this.doQuery();
+                    this.showSearchResults(this.default_list_view_state);
+                }else{
+                    this.showSearchResults(this.default_list_view_state);
+                }
+            },
 
-                if (this.return_to == 'saved-search') {
+            slideList:function(){
+                if(this.getListViewState() === this.LIST_STATES.hidden){
+                    this.showSearchResults(this.LIST_STATES.partial);
+                }else if(this.getListViewState() === this.LIST_STATES.partial){
+                    this.showSearchResults(this.LIST_STATES.hidden);
+                }
+            },
 
-                    this.saved_search.removeClass("saved-search-panel-hidden");
-                    this.saved_search.addClass("saved-search-panel-full");
+            showMap: function(){
+                if(this.getPageState() === this.PAGE_STATES.saved_searches_displayed){
+                    this.doQuery();
+                    this.showSearchResults(this.LIST_STATES.hidden);
+                }else if(this.getPageState() === this.PAGE_STATES.saved_searches_hidden){
+                    if(this.getListViewState() === this.LIST_STATES.full){
+                        this.showSearchResults(this.LIST_STATES.partial);
+                    }
+                }
+            },
 
-                    this.map_panel.addClass("map-panel-hidden");
-                    this.map_panel.removeClass("map-panel-full");
+            showSearchResults: function(view_state){
+                this.getSearchQuery();
+                this.hideSavedSearches();
 
-                    //hide results panel
-                    this.search_panel.removeClass("sliding-panel-full");
+                view_state = view_state || this.getListViewState();
 
-                    //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
-                    //Force icon to "show panel" position
-                    this.search_panel_control.addClass("sliding-panel-control-hidden");
-
-                
-                } else if (this.search_panel.hasClass("sliding-panel-partial")) {
-
-                    //Show Partial Map Panel
-                    this.map_panel.addClass("map-panel-hidden");
-                    this.map_panel.removeClass("map-panel-partial");
-                    this.map_panel.removeClass("map-panel-full");
-
+                if(view_state === this.LIST_STATES.full){
+                    //Hide map panel
+                    //this.map_panel.hide();
+                    this.mapFilter.expanded(false);
 
                     //Show search results panel
-                    this.search_panel.addClass("sliding-panel-full");
-                    this.search_panel.removeClass("sliding-panel-partial");
-                    this.search_panel_container.addClass("container");
+                    this.sliding_panel.addClass("col-xs-12");
+                    this.sliding_panel.removeClass("col-xs-4");
+                    this.sliding_panel.addClass("container");
+                    // this.sliding_panel.addClass("sliding-panel-full");
+                    // this.sliding_panel.removeClass("sliding-panel-partial");
+                    // this.sliding_panel_container.addClass("container");
 
                     //hide sliding panel control
-                    this.search_panel_control.addClass("sliding-panel-control-hidden");
+                    this.sliding_panel_control.hide();
 
                     //Update position of sliding panel tools
-                    this.results_counter.removeClass("results-counter-shim");
-                    this.time_filter_toggle.removeClass("date-filter-header-shim");
-                    this.search_panel_tools.removeClass("sliding-panel-tools-shim");
+                    // this.results_counter.removeClass("results-counter-shim");
+                    // this.time_filter_toggle.removeClass("date-filter-header-shim");
+                    // this.sliding_panel_tools.removeClass("sliding-panel-tools-shim");
 
-                }
+                }else if(view_state === this.LIST_STATES.partial){
+                    //Show Partial Map Panel
+                    // this.map_panel.show();
+                    // this.map_panel.css('margin-left', '');
+                    this.mapFilter.expanded(true);
+                    this.map_panel.addClass("col-xs-8");
+                    this.map_panel.removeClass("col-xs-12");
+                    this.mapFilter.map.map.updateSize();
+                    //this.map_panel.removeClass("map-panel-hidden");
+                    // this.map_panel.removeClass("map-panel-full");
+                    // this.map_panel.addClass("map-panel-partial");
 
+                    //Show partial search results panel
+                    this.sliding_panel.show();
+                    this.sliding_panel.addClass("col-xs-4");
+                    this.sliding_panel.removeClass("col-xs-12");
+                    this.sliding_panel.removeClass("container");
+                    // this.sliding_panel.removeClass("sliding-panel-full");
+                    // this.sliding_panel.addClass("sliding-panel-partial");
+                    // this.sliding_panel_container.removeClass("container");
 
-                //Update Button Group Display
-                $("#show-map").addClass("btn-default");
-                $("#show-map").removeClass("btn-u-light-green");
-
-                $("#show-list").removeClass("btn-default");
-                $("#show-list").addClass("btn-u-light-green");
-            },
-
-            handleClearSearch: function() {  
-                //If search panel takes up full screen, hide the panel, remove the container (to properly center the search items),
-                //and hide the panel control
-                if (this.search_panel.hasClass("sliding-panel-full")) {
-
-                    this.search_panel.removeClass("sliding-panel-full");
-                    this.search_panel_container.removeClass("container");
-                    this.search_panel_control.addClass("sliding-panel-control-hidden");
-
-                }
-
-                if (this.search_panel.hasClass("sliding-panel-partial")) {
-
-                    this.search_panel.removeClass("sliding-panel-partial");
-                    this.search_panel_control.addClass("sliding-panel-control-hidden");
+                    //make sliding panel control visible
+                    this.sliding_panel_control.show();
+                    this.sliding_panel_control.addClass("col-xs-offset-4");
+                    this.sliding_panel_control_icon.removeClass("fa-step-forward");
+                    this.sliding_panel_control_icon.addClass("fa-step-backward");
 
                     //Update position of sliding panel tools
-                    this.results_counter.removeClass("results-counter-shim");
-                    this.time_filter_toggle.removeClass("date-filter-header-shim");
-                    this.search_panel_tools.removeClass("sliding-panel-tools-shim");
+                    // this.results_counter.addClass("results-counter-shim");
+                    // this.time_filter_toggle.addClass("date-filter-header-shim");
+                    // this.sliding_panel_tools.addClass("sliding-panel-tools-shim");
 
-                    //make sure map panel is hidden and href is toggled back to "show"
-                    this.map_panel.removeClass("map-panel-partial");
-                    this.map_panel.addClass("map-panel-hidden");
+                }else if(view_state === this.LIST_STATES.hidden){
+                    //Show map panel
+                    // this.map_panel.show();
+                    // this.map_panel.css('margin-left', '');
+                    this.mapFilter.expanded(true);
+                    this.map_panel.addClass("col-xs-12");
+                    this.map_panel.removeClass("col-xs-8");
+                    this.mapFilter.map.map.updateSize();
+                    // this.map_panel.removeClass("map-panel-partial");
+                    // this.map_panel.addClass("map-panel-full");
 
-                    $("#map-toggle-state").text("show");
-                    $("#map-toggle-state").removeClass("arches-small-text-shim");
+                    //Hide search results panel
+                    this.sliding_panel.hide()
 
+                    //hide sliding panel control
+                    this.sliding_panel_control.show();
+                    this.sliding_panel_control.removeClass("col-xs-offset-4");
+                    this.sliding_panel_control_icon.removeClass("fa-step-backward");
+                    this.sliding_panel_control_icon.addClass("fa-step-forward");
 
-                    //make sure graph panel is hidden
-                    this.graph_panel.removeClass("graph-panel-partial");
-                    this.graph_panel.addClass("graph-panel-hidden");
-
+                    //Update position of sliding panel tools
+                    // this.results_counter.removeClass("results-counter-shim");
+                    // this.time_filter_toggle.removeClass("date-filter-header-shim");
+                    // this.sliding_panel_tools.removeClass("sliding-panel-tools-shim");
                 }
-
-                this.saved_search.removeClass("saved-search-panel-hidden");
-                this.saved_search.addClass("saved-search-panel-full");
-
-                //clear terms in search box
-                $(".search-widget").select2("val", "");
-
-                //Update Button Group Display
-                $("#show-map").addClass("btn-default");
-                $("#show-map").removeClass("btn-u-light-green");
-
-                $("#show-list").removeClass("btn-default");
-                $("#show-list").addClass("btn-u-light-green");
+                
             },
-
-            // showSavedSearches: function(){
-            //     this.clear();
-            //     $('#saved-searches').slideDown('slow');
-            //     $('#search-results').slideUp('slow');
-            //     this.mapFilter.expanded(false);
-            //     this.timeFilter.expanded(false);
-            // },
-
-            // hideSavedSearches: function(){
-            //     $('#saved-searches').slideUp('slow');
-            //     $('#search-results').slideDown('slow');
-            // },
 
             // toggleMapFilter: function(){
             //     if($('#saved-searches').is(":visible")){
@@ -578,13 +492,14 @@ require(['jquery',
                     query.mapExpanded = JSON.parse(query.mapExpanded);
                     doQuery = true;
                 }
+                //query.mapExpanded = true;
                 this.mapFilter.restoreState(query.spatialFilter, query.mapExpanded);
                 
 
                 if(doQuery){
                     this.doQuery();
                     //this.hideSavedSearches();
-                    this.slideSearchPanel();
+                    //this.slideSearchPanel();
                 }
                 
             },

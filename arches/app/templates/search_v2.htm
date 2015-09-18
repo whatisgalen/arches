@@ -1,1405 +1,405 @@
 {% extends "base.htm" %}
 {% load i18n %}
 {% load staticfiles %}
-<!DOCTYPE html>
-<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->  
-<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->  
-<!--[if !IE]><!--> 
-<html lang="en"> <!--<![endif]-->  
-    <head>
-        <title>Polaris | Oil Spill Response v1.0</title>
-
-        <!-- Meta -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="">
-        <meta name="author" content="">
-
-        <!-- Favicon -->
-        <link rel="shortcut icon" href="favicon.ico">
-
-        <!-- Web Fonts -->
-        <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400,300,600&amp;subset=cyrillic,latin">
-
-        <!-- CSS Global Compulsory -->
-        <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">
-        <link rel="stylesheet" href="assets/css/style.css">
-
-
-         <!-- Arches CSS Global Compulsory -->
-        <link rel="stylesheet" href="assets/css/arches.css">
-        <link rel="stylesheet" href="assets/css/main.css">
-
-
-        <!-- SmartAdmin Styles : Please note (smartadmin-production.css) was created using LESS variables -->
-        <link rel="stylesheet" type="text/css" media="screen" href="assets/css/smartadmin-production.css">
-        <link rel="stylesheet" href="assets/plugins/sky-forms/version-2.0.1/css/custom-sky-forms.css">
-
-
-        <!-- CSS Header and Footer -->
-        <link rel="stylesheet" href="assets/css/headers/header-v1.css">
-        <link rel="stylesheet" href="assets/css/footers/footer-v1.css">
-
-        <!-- CSS Implementing Plugins -->
-        <link rel="stylesheet" href="assets/plugins/animate.css">
-        <link rel="stylesheet" href="assets/plugins/line-icons/line-icons.css">
-        <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.min.css">
-
-
-        <!-- CSS Page Style -->    
-        <link rel="stylesheet" href="assets/css/pages/page_search_inner.css">
-
-
-        <!-- CSS Theme --> 
-        <link rel="stylesheet" href="assets/css/theme-colors/dark-blue.css" id="style_color">
-
-
-        <!-- CSS Customization -->
-        <link rel="stylesheet" href="assets/css/custom.css">
-        <link rel="stylesheet" href="assets/css/package.css">
-
-
-        <link rel="stylesheet" href="assets/css/cubeportfolio.min.css">    
-        <link rel="stylesheet" href="unify17/assets/plugins/cube-portfolio/cubeportfolio/custom/custom-cubeportfolio.css">
-
-        <!-- CSS Customization -->
-        <link rel="stylesheet" href="unify17/assets/css/custom.css">
-
-
-        <!-- OpenLayers 3.0 
-        <link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
-        <script src="http://openlayers.org/en/v3.0.0/build/ol.js" type="text/javascript"></script>
-        -->
-
-
-    </head> 
-
-
             
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'plugins/cube-portfolio/cubeportfolio.min.css' %}"> 
     <link rel="stylesheet" href="{% static 'plugins/cube-portfolio/custom-cubeportfolio.css' %}">      
 {% endblock css%}
+
 {% block header %}
     {% include 'header-small.htm' %}
 {% endblock header %} 
+
 {% block content %}
 
-            <!-- Search Bar -->
-            <div class="search-block" style="padding-bottom: 0px;">
-                <div id="search-block-container" class="container" style="margin-bottom: 10px;">
+<!-- Search Bar -->
+<div class="search-block" style="padding-bottom: 0px;">
+    <div id="search-block-container" class="container" style="margin-bottom: 10px;">
 
-                    <div class="row">
-            
-                        <!-- Search Widget -->
-                        <div class="col-xs-2 col-sm-1">
-                            <h1 style="margin-top: -3px;">
-                                Search 
-                            </h1> 
-                        </div>
+        <div class="row">
 
-                        <div class="col-xs-10 col-md-7 col-lg-8">
-                            
-                            <div class="form-group" style="">  
+            <!-- Search Widget -->
+            <div class="col-xs-2 col-sm-1">
+                <h1 style="margin-top: -3px;">
+                    Search 
+                </h1> 
+            </div>
 
-                                <input class="select2 resource_search_widget arches-select2" name="" style="width:100%" placeholder="{% trans "Search for a resource..." %}" value="">
+            <div class="col-xs-10 col-md-7 col-lg-8">
+                
+                <div class="form-group" style="">  
 
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 col-lg-3">
-                            <!-- Display Select Buttons -->
-                            <span class="btn-group pull-right" role="group" style="padding-left: 10px;">
-                                
-                                <button id="show-list" type="button" class="btn btn-u-light-green show-list arches-button-text" style="" data-toggle="">
-                                    <i class="fa fa-align-justify"></i> <span class="hidden-xs"> List</span>
-                                                            
-                                </button>
-
-                                <button id="show-map" type="button" class="btn btn-default show-map arches-button-text" style="" data-toggle="">
-                                    <i class="fa fa-globe"></i> <span class="hidden-xs"> Map</span>
-                                                               
-                                </button>
-
-                            </span>
-                            <!-- End Display Select Buttons -->
-
-                        </div>
-                        <!-- End Search Widget -->
-
-                    </div>
+                    <input class="select2 resource_search_widget arches-select2" name="" style="width:100%" placeholder="{% trans "Search for a resource..." %}" value="">
 
                 </div>
             </div>
 
-            <!-- Saved Searches -->
-            {% include 'views/saved-searches.htm' %}
+            <div class="col-md-4 col-lg-3">
+                <!-- Display Select Buttons -->
+                <span class="btn-group pull-right" role="group" style="padding-left: 10px;">
+                    
+                    <button id="show-list" type="button" class="btn btn-u-light-green show-list arches-button-text" style="" data-toggle="">
+                        <i class="fa fa-align-justify"></i> <span class="hidden-xs"> List</span>
+                                                
+                    </button>
 
-            <!-- Time Filter Scale-->
-            <div class="row" id="time-filter-container" data-filtertext="{% trans "Time Filter Enabled" %}"> 
-                {% include 'views/search/time-filter-v2.htm' %}
+                    <button id="show-map" type="button" class="btn btn-default show-map arches-button-text" style="" data-toggle="">
+                        <i class="fa fa-globe"></i> <span class="hidden-xs"> Map</span>
+                                                   
+                    </button>
+
+                </span>
+                <!-- End Display Select Buttons -->
+
             </div>
+            <!-- End Search Widget -->
 
-            <!-- Main Content (search bars, map, map footer) -->
-            <div>
+        </div>
 
-                <!-- Search Results Sliding Panel -->
-                <div id="sliding-panel" class="sliding-panel" style="">
-                    <div id="sliding-panel-container" class="" style="margin-bottom: 1px;">
-                        <div class="">
+    </div>
+</div>
 
-                            <div class="search-header" style="">
-                                <h1 class="row results-counter" id="search-results-count" data-count="">        
-                                    <div class="col-xs-12 col-lg-2" data-bind="if: total() >= 0">
-                                        <span class="" data-bind="text: total() + ' {% trans "Results" %}'"></span>                               
+<!-- Saved Searches -->
+{% include 'views/saved-searches_v2.htm' %}
+
+<!-- Main Content (search bars, map, map footer) -->
+<div id="search-results-and-filters-container" style="display:none;">
+    <!-- Time Filter Scale-->
+    <div class="row margin-hack" id="time-filter-container" data-filtertext="{% trans "Time Filter Enabled" %}" style="width: 100%;"> 
+        {% include 'views/search/time-filter-v2.htm' %}
+    </div>
+
+    <div class="row margin-hack">
+
+        <!-- Search Results Sliding Panel -->
+        <div id="sliding-panel" class="col-xs-12 margin-hack sliding-panel" style="">
+            <div id="sliding-panel-container" class="" style="margin-bottom: 1px;">
+                <div class="">
+
+                    <div class="search-header" style="">
+                        <h1 class="results-counter" id="search-results-count" data-count="">        
+                            <div data-bind="if: total() >= 0">
+                                <span class="" data-bind="text: total() + ' {% trans "Results" %}'"></span>                               
+                            </div>
+                        </h1>
+
+                        <div id="sliding-panel-tools" class="sliding-panel-tools pull-right" style="">
+                            <a class="arches-small-text clear-search" style="padding-right: 5px; text-decoration: none;" href="#"> Clear</a>
+
+                            <div class="btn-group hidden-xs" style="margin-top: -5px; padding-right: 5px;">
+                                <button type="button" class="btn btn-primary btn-xs" style="" data-toggle="">
+                                    <i class="fa fa-download"></i> <span class="hidden-xs"> Save</span>
+                                    <span class="sr-only">{% trans "Toggle Dropdown" %}</span>                            
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Sliding Panel Control -->
+                    <!-- <div id="sliding-panel-control" class="sliding-panel-control" style="margin-top: 0px; width: 25px; display:none;">
+                        <i id="sliding-panel-control-icon" class="fa fa-step-backward" style="margin-left: 5px; margin-top: 13px; font-size: 17px; font-weight: 500; color: #777;"></i>
+                    </div> -->
+
+
+                </div>
+            </div>
+            <!-- End Search Results Sliding Panel -->
+
+            <!-- Search Results Container -->
+            <div class="search-results-container" id="search-results-container"> 
+                {% include 'views/search/search-results.htm' %}
+            </div>
+            <!-- End search results container -->
+        </div>
+
+
+        <!-- Map/Footer Container -->
+        <div class="map-panel margin-hack" id="map-panel">
+           
+            <!-- Map Filters -->
+            <div class="row" id="map-filter-container" data-filtertext="{% trans "Map Filter Enabled" %}" style="margin-right: 20px;"> 
+                {% include 'views/search/map-filter.htm' %}
+            </div>
+            <!-- End Map -->
+
+            <!-- Map Footer -->
+            <div class="fgi-map-footer arches-map-footer hidden" style="margin-top: 530px;">
+                <div class="container map-border">
+
+                    <!-- Tool Buttons -->
+                    <div class="margin-left: -11px;">
+                        <!-- Map tools button -->
+                        <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
+                            <button class="btn-u btn-u-green arches-button" style="width: 32px; height: 32px;" type="button" title="Map Tools"><i class="fa fa-2x fa-info-circle" style="  font-size: 21px; margin-top: -1px; margin-left: -7px;"></i></button>
+                        </div>
+
+                        <!-- Time Control button -->
+                        <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
+                            <button class="btn-u btn-u-default" style="width: 32px; height: 32px;" type="button" title="Time Controls"><i class="fa fa-2x fa-clock-o" style="  font-size: 21px; margin-top: -1px; margin-left: -6px;"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-left: 25px;">
+
+                        <div class="col-xs-12">
+
+                            <div class="" style="margin-top: 25px; margin-left: -5px; margin-top: -67px;">
+                                <!-- Basemap -->
+                                <div class="" style="">
+
+                                    <button id="show-basemaps" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Select Basemap"><i class="fa fa-globe fa-2x" style="margin-top: 0px; margin-left: -5px;"></i></button>
+
+                                </div>
+                                <!-- End Basemap -->
+
+                                <!-- Overlay -->
+                                <div class="" style="margin-left: 70px; margin-top: -67px;">
+
+                                    <button id="show-overlays" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Add Overlays"><i class="fa fa-align-justify fa-2x" style="margin-top: 0px; margin-left: 0px;"></i></button>
+
+                                </div>
+                                <!-- End Overlay -->
+
+                                <!-- Zoom Readout -->
+                                <div class="info-blocks" style="margin-left: 150px; margin-top: -55px;">
+                                    <div class="info-blocks-in margin-bottom-0">
+                                        <p class="margin-top-5">
+                                            <span class="arches-map-inventory-footer-text">
+                                                Map Zoom: <span data-bind="text:zoom">10</span> &nbsp; &nbsp;
+                                            </span>
+                                        </p>
                                     </div>
-                                </h1>
+                                </div>
 
-                                <div id="sliding-panel-tools" class="sliding-panel-tools pull-right" style="">
-                                    <a class="arches-small-text clear-search" style="padding-right: 5px; text-decoration: none;" href="#"> Clear</a>
-
-                                    <div class="btn-group hidden-xs" style="margin-top: -5px; padding-right: 5px;">
-                                        <button type="button" class="btn btn-primary btn-xs" style="" data-toggle="">
-                                            <i class="fa fa-download"></i> <span class="hidden-xs"> Save</span>
-                                            <span class="sr-only">{% trans "Toggle Dropdown" %}</span>                            
-                                        </button>
+                                <!-- Coordinate Readout -->
+                                <div class="info-blocks" style="margin-left: 150px; margin-top: -38px;">
+                                    <div class="info-blocks-in margin-bottom-0">
+                                        <p class="margin-top-5">
+                                            <span class="arches-map-inventory-footer-text">
+                                                Cursor: <span data-bind="text:mousePosition"></span> <span class="hidden-xs">(long,lat)</span>
+                                            </span>
+                                        </p>
                                     </div>
                                 </div>
 
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Sliding Panel Control -->
-                            <div id="sliding-panel-control" class="sliding-panel-control sliding-panel-control-hidden" style="margin-top: 0px; width: 25px;">
-                                <i id="sliding-panel-control-icon" class="fa fa-step-backward" style="margin-left: 5px; margin-top: 13px; font-size: 17px; font-weight: 500; color: #777;"></i>
-                            </div>
+                </div>
+            </div>
+            <!-- End Map Footer -->
 
+        </div>
+        <!-- End Map/Footer Container -->
+
+    </div>
+
+    <div class="row margin-hack" style="height: 0px;">
+        <!-- <div class="col-xs-4"></div> -->
+        <div id="sliding-panel-control" class="col-xs-8 col-xs-offset-4 sliding-panel-control" style="margin-top: 0px; display:none;">
+            <i id="sliding-panel-control-icon" class="fa fa-step-backward" style="font-size: 17px; font-weight: 500; color: #777;"></i>
+        </div>
+    </div>
+
+    <!-- Graph Container -->
+    <div class="graph-panel graph-panel-hidden hidden" id="graph-panel" style="">
+
+        <div class="container">
+            <div class="" style="">
+
+                <div>
+                    <p style="font-size: 19px; margin-top: 25%; margin-left: 20%;">
+                        graph goes here
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <!-- End Graph Container -->
+
+
+
+    <!-- Graph Info Panel -->
+    <div class="container hidden">
+        <div class="row">
+            <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-6 col-md-5 col-md-offset-7 col-lg-4 col-lg-offset-8">
+
+                <!-- Using Bootstrap Model CSS classes to get the overall look of the info panel,
+                but the actual info panel is NOT implemented as a model form -->
+                <div id="graph-detail-panel" class="modal-content no-corners arches-map-inventory-panel hidden" style="background: #fff;">
+                    <div class="modal-header" style="background: #f4f4f4;">
+                        <a class="" style="text-decoration: none;" href="#">
+                            <i id="show-graph-panel" class="icon-size-actual pull-right" style="margin-top: 5px; font-weight: 600; color: #337ab7;"></i>
+                        </a>
+
+                        <h4 class="modal-title">
+                            <a href="javascript:void(0);" class="text-primary" target="_blank" data-bind="attr:{ href: selectedResource() ? selectedResource().reportLink : 'javascript:void(0);'}">
+                                <i class="fa fa-trophy text-primary" data-bind="attr: { class: selectedResource() ? selectedResource().typeIcon + ' text-primary': '' }"></i> 
+                                <span data-bind="text:selectedResource() ? selectedResource().primaryname : ''"></span>
+
+                                <!-- Resource Type for larger screens -->
+                                <span class="hidden-xs">
+                                    <small class="text-primary" data-bind="text: selectedResource() ? selectedResource().typeName: ''"></small>
+                                </span>
+
+                                <!-- Resource Type for small screens -->
+                                <span class="hidden-sm hidden-md hidden-lg">
+                                    </br><small class="text-primary margin-left-30 margin-top-minus-10"  data-bind="text: selectedResource() ? selectedResource().typeName: ''"></small>
+                                </span>
+
+                            </a>
+                        </h4>
+
+                    </div>
+
+                    <!-- Body Content -->
+                    <div id="graph-detail-panel-body" class="modal-body" style="height: 400px;">
+                        
+                        <!-- Search Widget  -->
+                        <div class="" style="padding-bottom: 15px; padding-left: 20px; padding-right: 20px; margin-left: -15px; margin-right: -15px; background: #fff; border-bottom-color: #f0f0f0; border-bottom-width: 1px; border-bottom-style: solid;">
+
+                            <input id="" class="select2 arches-select2 graph-search-widget" name="" style="width:100%; " placeholder="Find a resource..." value=""></input>
+
+                        </div>
+
+                        <div class="row" style="padding-top: 0px; height: 285px; background: #fff;">
+                            
                             <!-- Search Results Container -->
-                            <div class="row" id="search-results-container"> 
-                                {% include 'views/search/search-results.htm' %}
-                            </div>
-                            <!-- End search results container -->
-
-                        </div>
-                    </div>
-                    <!-- End Search Results Sliding Panel -->
-
-                </div>
-
-
-
-                <!-- Map/Footer Container -->
-                <div class="map-space-panel map-panel map-panel-hidden" id="map-panel" style="">
-
-                    <!-- Map  -->
-                    <!-- <div id="map" class="map" style="width: 100%; height: 650px; overflow-x: "></div>
-                    <div id="olmap" class="fill"></div> -->
-                   
-
-                    <!-- Map Filters -->
-                    <div class="row" id="map-filter-container" data-filtertext="{% trans "Map Filter Enabled" %}" style="margin-right: 20px;"> 
-                        {% include 'views/search/map-filter.htm' %}
-                    </div>
-                    <!-- End Map -->
-
-
-                    <!-- Map Footer -->
-                    <div class="fgi-map-footer arches-map-footer" style="margin-top: 530px;">
-                        <div class="container map-border">
-
-                            <!-- Tool Buttons -->
-                            <div class="margin-left: -11px;">
-                                <!-- Map tools button -->
-                                <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
-                                    <button class="btn-u btn-u-green arches-button" style="width: 32px; height: 32px;" type="button" title="Map Tools"><i class="fa fa-2x fa-info-circle" style="  font-size: 21px; margin-top: -1px; margin-left: -7px;"></i></button>
-                                </div>
-
-                                <!-- Time Control button -->
-                                <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
-                                    <button class="btn-u btn-u-default" style="width: 32px; height: 32px;" type="button" title="Time Controls"><i class="fa fa-2x fa-clock-o" style="  font-size: 21px; margin-top: -1px; margin-left: -6px;"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="row" style="margin-left: 25px;">
-
-                                <div class="col-xs-12">
-
-                                    <div class="" style="margin-top: 25px; margin-left: -5px; margin-top: -67px;">
-                                        <!-- Basemap -->
-                                        <div class="" style="">
-
-                                            <button id="show-basemaps" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Select Basemap"><i class="fa fa-globe fa-2x" style="margin-top: 0px; margin-left: -5px;"></i></button>
-
-                                        </div>
-                                        <!-- End Basemap -->
-
-                                        <!-- Overlay -->
-                                        <div class="" style="margin-left: 70px; margin-top: -67px;">
-
-                                            <button id="show-overlays" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Add Overlays"><i class="fa fa-align-justify fa-2x" style="margin-top: 0px; margin-left: 0px;"></i></button>
-
-                                        </div>
-                                        <!-- End Overlay -->
-
-                                        <!-- Zoom Readout -->
-                                        <div class="info-blocks" style="margin-left: 150px; margin-top: -55px;">
-                                            <div class="info-blocks-in margin-bottom-0">
-                                                <p class="margin-top-5">
-                                                    <span class="arches-map-inventory-footer-text">
-                                                        Map Zoom: <span data-bind="text:zoom">10</span> &nbsp; &nbsp;
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <!-- Coordinate Readout -->
-                                        <div class="info-blocks" style="margin-left: 150px; margin-top: -38px;">
-                                            <div class="info-blocks-in margin-bottom-0">
-                                                <p class="margin-top-5">
-                                                    <span class="arches-map-inventory-footer-text">
-                                                        Cursor: <span data-bind="text:mousePosition"></span> <span class="hidden-xs">(long,lat)</span>
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <!-- End Map Footer -->
-
-                </div>
-                <!-- End Map/Footer Container -->
-
-
-
-                <!-- Marker Info Panel -->
-                <div class="container hidden">
-
-                    <div id="map-detail-panel" class="modal-content no-corners arches-graph-panel graph-detail-panel-partial" style="margin-top: 0px; z-index: 200;">
-                        <div class="">
-                            <div class="arches-data-panel" style="">
-                                <i class="icon-custom icon-bg-u icon-line icon-trophy section-icon" style="background: rgba(35,24,80,1); margin-right: 0px;"></i>
-                                <span>
-                                    Castle Wolfenstein
-                                </span>
-                            
-                                <span class="pull-right hidden" style="margin-top: 8px;">
-
-                                    <a id="close-data-panel" class="" href="#" style="margin-top: 0px; padding-right: 15px; color: #fff; text-decoration: none; font-size: 14px;"><i class="icon-close"></i></a>
-
-                                </span>
-                            </div>
-
-                        </div>
-
-
-                        <!-- Body Content -->
-                        <div id="graph-detail-node-panel" class="modal-body" style="height: 180px;">
-
-                            <p> Map Panel </p>
-
-                            
-                        </div>
-                        <!-- End Body Content -->
-
-                        <div class="modal-footer" style="padding-top: 10px; padding-bottom: 10px; background: #fcfcfc;">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">
-                                Close
-                            </button>
-                            <button type="button" class="btn btn-primary">
-                                View Report
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-
-
-
-                <!-- Graph Container -->
-                <div class="graph-panel graph-panel-hidden" id="graph-panel" style="">
-
-                    <div class="container">
-                        <div class="" style="">
-
-                            <div>
-                                <p style="font-size: 19px; margin-top: 25%; margin-left: 20%;">
-                                    graph goes here
-                                </p>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-                <!-- End Graph Container -->
-
-
-
-                <!-- Graph Info Panel -->
-                <div class="container">
-                    <div class="row">
-                        <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-6 col-md-5 col-md-offset-7 col-lg-4 col-lg-offset-8">
-
-                            <!-- Using Bootstrap Model CSS classes to get the overall look of the info panel,
-                            but the actual info panel is NOT implemented as a model form -->
-                            <div id="graph-detail-panel" class="modal-content no-corners arches-map-inventory-panel hidden" style="background: #fff;">
-                                <div class="modal-header" style="background: #f4f4f4;">
-                                    <a class="" style="text-decoration: none;" href="#">
-                                        <i id="show-graph-panel" class="icon-size-actual pull-right" style="margin-top: 5px; font-weight: 600; color: #337ab7;"></i>
-                                    </a>
-
-                                    <h4 class="modal-title">
-                                        <a href="javascript:void(0);" class="text-primary" target="_blank" data-bind="attr:{ href: selectedResource() ? selectedResource().reportLink : 'javascript:void(0);'}">
-                                            <i class="fa fa-trophy text-primary" data-bind="attr: { class: selectedResource() ? selectedResource().typeIcon + ' text-primary': '' }"></i> 
-                                            <span data-bind="text:selectedResource() ? selectedResource().primaryname : ''"></span>
-
-                                            <!-- Resource Type for larger screens -->
-                                            <span class="hidden-xs">
-                                                <small class="text-primary" data-bind="text: selectedResource() ? selectedResource().typeName: ''"></small>
-                                            </span>
-
-                                            <!-- Resource Type for small screens -->
-                                            <span class="hidden-sm hidden-md hidden-lg">
-                                                </br><small class="text-primary margin-left-30 margin-top-minus-10"  data-bind="text: selectedResource() ? selectedResource().typeName: ''"></small>
-                                            </span>
-
-                                        </a>
-                                    </h4>
-
-                                </div>
-
-                                <!-- Body Content -->
-                                <div id="graph-detail-panel-body" class="modal-body" style="height: 400px;">
+                            <div class="" style="width: 100%;">
+                                
+                                <!-- Begin Search Item -->
+                                <div  class="arches-search-item">
                                     
-                                    <!-- Search Widget  -->
-                                    <div class="" style="padding-bottom: 15px; padding-left: 20px; padding-right: 20px; margin-left: -15px; margin-right: -15px; background: #fff; border-bottom-color: #f0f0f0; border-bottom-width: 1px; border-bottom-style: solid;">
+                                    <!-- Spacer -->
+                                    <hr class="search-list-spacer">
 
-                                        <input id="" class="select2 arches-select2 graph-search-widget" name="" style="width:100%; " placeholder="Find a resource..." value=""></input>
+                                    <div class="inner-results arches-graph-list-item" style="">
+
+                                        <!-- Item Header -->
+                                        <h4>
+                                            <a class="arches-graph-search-title" style="" href="#">Castle Anthrax</a> 
+                                            &nbsp;
+                                            <span class="">
+                                                <small class="arches-graph-search-subtitle"><i class="fa fa-trophy"></i>Heritage Resource</small>
+                                            </span>
+                                        </h4>
+
+                                        <!-- Sub-header -->
+                                        <ul class="list-inline up-ul arches-tool-subheader">
+
+                                            <li>
+                                                <i class="arches-search-link fa fa fa-sitemap"></i>
+                                                <span class="arches-search-link map-toggle"> 15 of 42 resources loaded</span>
+                                            </li>
+
+                                            <li>
+                                                <i class="arches-search-link fa fa-cloud-download"></i>
+                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
+                                            </li>
+
+                                        </ul>
+                                        <!-- End Item Sub-Header -->
 
                                     </div>
-
-                                    <div class="row" style="padding-top: 0px; height: 285px; background: #fff;">
-                                        
-                                        <!-- Search Results Container -->
-                                        <div class="" style="width: 100%;">
-                                            
-                                            <!-- Begin Search Item -->
-                                            <div  class="arches-search-item">
-                                                
-                                                <!-- Spacer -->
-                                                <hr class="search-list-spacer">
-
-                                                <div class="inner-results arches-graph-list-item" style="">
-
-                                                    <!-- Item Header -->
-                                                    <h4>
-                                                        <a class="arches-graph-search-title" style="" href="#">Castle Anthrax</a> 
-                                                        &nbsp;
-                                                        <span class="">
-                                                            <small class="arches-graph-search-subtitle"><i class="fa fa-trophy"></i>Heritage Resource</small>
-                                                        </span>
-                                                    </h4>
-
-                                                    <!-- Sub-header -->
-                                                    <ul class="list-inline up-ul arches-tool-subheader">
-
-                                                        <li>
-                                                            <i class="arches-search-link fa fa fa-sitemap"></i>
-                                                            <span class="arches-search-link map-toggle"> 15 of 42 resources loaded</span>
-                                                        </li>
-
-                                                        <li>
-                                                            <i class="arches-search-link fa fa-cloud-download"></i>
-                                                            <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
-                                                        </li>
-
-                                                    </ul>
-                                                    <!-- End Item Sub-Header -->
-
-                                                </div>
-                                            </div>
-                                            <!-- End Search Item -->
+                                </div>
+                                <!-- End Search Item -->
 
 
-                                            <!-- Begin Search Item -->
-                                            <div  class="arches-search-item">
-                                                
-                                                <!-- Spacer -->
-                                                <hr class="search-list-spacer">
+                                <!-- Begin Search Item -->
+                                <div  class="arches-search-item">
+                                    
+                                    <!-- Spacer -->
+                                    <hr class="search-list-spacer">
 
-                                                <div class="inner-results arches-graph-list-item" style="">
+                                    <div class="inner-results arches-graph-list-item" style="">
 
-                                                    <!-- Item Header -->
-                                                    <h4>
-                                                        <a class="arches-graph-search-title" style="" href="#">King Arthur</a> 
-                                                        &nbsp;
-                                                        <span class="">
-                                                            <small class="arches-graph-search-subtitle"><i class="fa fa-group"></i>Person/Organization</small>
-                                                        </span>
-                                                    </h4>
+                                        <!-- Item Header -->
+                                        <h4>
+                                            <a class="arches-graph-search-title" style="" href="#">King Arthur</a> 
+                                            &nbsp;
+                                            <span class="">
+                                                <small class="arches-graph-search-subtitle"><i class="fa fa-group"></i>Person/Organization</small>
+                                            </span>
+                                        </h4>
 
-                                                    <!-- Sub-header -->
-                                                    <ul class="list-inline up-ul arches-tool-subheader">
+                                        <!-- Sub-header -->
+                                        <ul class="list-inline up-ul arches-tool-subheader">
 
-                                                        <li>
-                                                            <i class="arches-search-link fa fa fa-sitemap"></i>
-                                                            <span class="arches-search-link map-toggle"> 8 of 8 resources loaded</span>
-                                                        </li>
+                                            <li>
+                                                <i class="arches-search-link fa fa fa-sitemap"></i>
+                                                <span class="arches-search-link map-toggle"> 8 of 8 resources loaded</span>
+                                            </li>
 
-                                                        <li>
-                                                            <i class="arches-search-link fa fa-cloud-download"></i>
-                                                            <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
-                                                        </li>
+                                            <li>
+                                                <i class="arches-search-link fa fa-cloud-download"></i>
+                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
+                                            </li>
 
-                                                    </ul>
-                                                    <!-- End Item Sub-Header -->
+                                        </ul>
+                                        <!-- End Item Sub-Header -->
 
-                                                </div>
-                                            </div>
-                                            <!-- End Search Item -->
-
-
-                                            <!-- Begin Search Item -->
-                                            <div  class="arches-search-item">
-                                                
-                                                <!-- Spacer -->
-                                                <hr class="search-list-spacer">
-
-                                                <div class="inner-results arches-graph-list-item" style="">
-
-                                                    <!-- Item Header -->
-                                                    <h4>
-                                                        <a class="arches-graph-search-title" style="" href="#">Magna Carta</a> 
-                                                        &nbsp;
-                                                        <span class="">
-                                                            <small class="arches-graph-search-subtitle"><i class="fa fa-file-o"></i>Information Object</small>
-                                                        </span>
-                                                    </h4>
-
-                                                    <!-- Sub-header -->
-                                                    <ul class="list-inline up-ul arches-tool-subheader">
-
-                                                        <li>
-                                                            <i class="arches-search-link fa fa fa-sitemap"></i>
-                                                            <span class="arches-search-link map-toggle"> 15 of 21 resources loaded</span>
-                                                        </li>
-
-                                                        <li>
-                                                            <i class="arches-search-link fa fa-cloud-download"></i>
-                                                            <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
-                                                        </li>
-
-                                                    </ul>
-                                                    <!-- End Item Sub-Header -->
-
-                                                </div>
-                                            </div>
-                                            <!-- End Search Item -->
-
-                                        </div>
                                     </div>
                                 </div>
-                                <!-- End Body Content -->
+                                <!-- End Search Item -->
 
-                                <div id="graph-detail-panel-footer" class="modal-footer" style="background: #f4f4f4; height: 50px; padding-top: 8px; padding-bottom: 0px;">
-                                    <button type="button" class="btn-u btn-u-sm btn-u-default close-graph-panel" data-dismiss="modal">Close</button>
+
+                                <!-- Begin Search Item -->
+                                <div  class="arches-search-item">
+                                    
+                                    <!-- Spacer -->
+                                    <hr class="search-list-spacer">
+
+                                    <div class="inner-results arches-graph-list-item" style="">
+
+                                        <!-- Item Header -->
+                                        <h4>
+                                            <a class="arches-graph-search-title" style="" href="#">Magna Carta</a> 
+                                            &nbsp;
+                                            <span class="">
+                                                <small class="arches-graph-search-subtitle"><i class="fa fa-file-o"></i>Information Object</small>
+                                            </span>
+                                        </h4>
+
+                                        <!-- Sub-header -->
+                                        <ul class="list-inline up-ul arches-tool-subheader">
+
+                                            <li>
+                                                <i class="arches-search-link fa fa fa-sitemap"></i>
+                                                <span class="arches-search-link map-toggle"> 15 of 21 resources loaded</span>
+                                            </li>
+
+                                            <li>
+                                                <i class="arches-search-link fa fa-cloud-download"></i>
+                                                <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
+                                            </li>
+
+                                        </ul>
+                                        <!-- End Item Sub-Header -->
+
+                                    </div>
                                 </div>
+                                <!-- End Search Item -->
+
                             </div>
                         </div>
                     </div>
+                    <!-- End Body Content -->
+
+                    <div id="graph-detail-panel-footer" class="modal-footer" style="background: #f4f4f4; height: 50px; padding-top: 8px; padding-bottom: 0px;">
+                        <button type="button" class="btn-u btn-u-sm btn-u-default close-graph-panel" data-dismiss="modal">Close</button>
+                    </div>
                 </div>
-                      
             </div>
-            <!-- End Main Content (search bars, map, map footer) -->
-            
-            {% endblock content %}
-
-
-{% block javascript %}
-    {{ block.super }}
-    <!--<script src="{% static 'plugins/cube-portfolio/jquery.cubeportfolio.min.js' %}"></script>
-    <script src="{% static 'plugins/cube-portfolio/cube-portfolio-3-ns.js' %}"></script>-->
-{% endblock javascript %}
-
-        </div><!--/wrapper-->
-
-        <!-- JS Global Compulsory -->           
-        <script type="text/javascript" src="unify17/assets/plugins/jquery/jquery.min.js"></script>
-        <script type="text/javascript" src="unify17/assets/plugins/jquery/jquery-migrate.min.js"></script>
-        <script type="text/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
-
-
-        <!-- JS Implementing Plugins -->
-        <script type="text/javascript" src="assets/plugins/back-to-top.js"></script>
-        <script type="text/javascript" src="assets/plugins/smoothScroll.js"></script>
-        <script type="text/javascript" src="assets/plugins/jquery.parallax.js"></script>
-
-        
-        <!-- JQUERY SELECT2 INPUT -->
-        <script src="assets/plugins/select2/select2.js"></script>
-        
-
-        <!-- JS Customization -->
-        <script type="text/javascript" src="assets/js/custom.js"></script>
-
-
-        <!-- JS Page Level -->           
-        <script type="text/javascript" src="assets/js/app.js"></script>
-
-
-        <!-- D3 -->
-        <script src="assets/js/d3.js"></script>
-
-
-        <!-- Cube Portfolio -->
-        <script type="text/javascript" src="unify17/assets/plugins/cube-portfolio/cubeportfolio/js/jquery.cubeportfolio.min.js"></script>
-        <script type="text/javascript" src="unify17/assets/js/plugins/cube-portfolio/cube-portfolio-3-ns.js"></script>
-
-
-        <script type="text/javascript">
-            jQuery(document).ready(function() {
-                App.init();
-
-                //Display Panel Variables
-                var saved_search = $("#saved-search");
-
-                var results_counter = $("#results-counter");
-                var time_filter_toggle = $("#date-filter-control");
-
-                var search_panel = $("#sliding-panel");
-                var search_panel_container = $("#sliding-panel-container");
-                var search_panel_control = $("#sliding-panel-control");
-                var panel_control_icon = $("#sliding-panel-control-icon");
-                var search_panel_tools = $("#sliding-panel-tools");
-
-                var saved_search_menu = $("#filters-container");
-                var time_filter = $("#time-scale");
-                
-                var map_panel = $("#map-panel");
-                var map_detail_panel = $("#map-detail-panel");
-                
-                var graph_panel = $("#graph-panel");
-                var graph_detail_panel = $("#graph-detail-panel");
-
-                var return_to;
-
-
-
-                // function getSlidingPanelWidth() {
-
-                //     var panel_width;
-
-                //     panel_width = $("#sliding-panel").width();
-                //     return panel_width;
-
-                // }
-
-
-
-                // $(".search-widget").on("select2-selecting", function(e) {
-                  
-                //     //alert("selecting val=" + e.val + " choice=" + e.object.text);
-                //     //toggle off layers that don't match the users' selection
-                //     var selected = e.val;
-
-                //     //check if saved search panel is open.  If so, close and replace with search results
-                //     if (saved_search.hasClass("saved-search-panel-full")) {
-
-                //         saved_search.removeClass("saved-search-panel-full");
-                //         search_panel.removeClass("sliding-panel-hidden");
-                //         search_panel.addClass("sliding-panel-full");
-
-                //         //center search items
-                //         search_panel_container.addClass("container");
-
-                //         //hide saved search menu, show time filter
-                //         saved_search_menu.addClass("hidden");
-                //         time_filter.removeClass("time-scale-hidden");
-                //         saved_search.removeClass("saved-search-panel-shim")
-
-
-                //     }
-
-                //     //if map panel is open, slide it over and show search results
-                //     if (map_panel.hasClass("map-panel-full")) {
-
-                //         map_panel.addClass("map-panel-partial");
-                //         map_panel.removeClass("map-panel-full");
-
-
-                //         //update marker panel position
-                //         map_detail_panel.removeClass("pull-right");
-
-                //         //show partial search results panel
-                //         search_panel.removeClass("sliding-panel-hidden");
-                //         search_panel.addClass("sliding-panel-partial");
-
-                //         //show sliding panel control
-                //         search_panel_control.removeClass("sliding-panel-control-hidden");
-
-                //         //Update position of sliding panel tools
-                //         results_counter.addClass("results-counter-shim");
-                //         time_filter_toggle.addClass("date-filter-header-shim");
-                //         search_panel_tools.addClass("sliding-panel-tools-shim");
-
-
-                //     }
-
- 
-                // })
-
-
-                // //Sliding Panel Control
-                // $("#sliding-panel-control").click(function(){ slideSearchPanel(); return false; });
-
-                // function slideSearchPanel() { 
-
-                //     //Size Time Filter control
-                //     var current_panel_size = getSlidingPanelWidth();
-
-                //     if (current_panel_size < 270 ) {
-
-                //             $(".truncate").css("width", "30%");
-
-                //         } else {
-
-                //             $(".truncate").css("width", "90%");
-
-                //     }
-
-                //     //Slide Search Results Container out of view
-                //     if (search_panel.hasClass("sliding-panel-partial")) {
-
-                //         //Search panel needs to be slid out of view
-                //         search_panel.removeClass("sliding-panel-partial");
-                //         search_panel_container.removeClass("container");
-                        
-                //         panel_control_icon.removeClass("fa-step-backward");
-                //         panel_control_icon.addClass("fa-step-forward");
-
-                //         //Update position of sliding panel tools
-                //         results_counter.removeClass("results-counter-shim");
-                //         time_filter_toggle.removeClass("date-filter-header-shim");
-                //         search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-
-                //         //if map panel is already displayed, extend it to full screeen
-                //         if (map_panel.hasClass("map-panel-partial")) {
-
-                //             map_panel.removeClass("map-panel-partial");
-                //             map_panel.addClass("map-panel-full");
-
-                //             //position marker panel
-                //             map_detail_panel.addClass("pull-right");
-
-                //             //position sliding panel tools
-                //             results_counter.removeClass("results-counter-shim");
-                //             time_filter_toggle.removeClass("date-filter-header-shim");
-                //             search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                //             return_to = 'map';
-
-                //         }
-                        
-                //         //if graph panel is already displayed, extend it to full screen
-                //         if (graph_panel.hasClass("graph-panel-partial")) {
-
-                //             graph_panel.removeClass("graph-panel-partial");
-                //             graph_panel.addClass("graph-panel-full");
-
-                //             //position sliding panel tools
-                //             results_counter.removeClass("results-counter-shim");
-                //             time_filter_toggle.removeClass("date-filter-header-shim");
-                //             search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                //             return_to = 'graph';
-
-                //         }
-
-
-                //     } else {
-
-                //         //Search panel needs to be shown again
-                //         search_panel.addClass("sliding-panel-partial");
-                //         panel_control_icon.addClass("fa-step-backward");
-                //         panel_control_icon.removeClass("fa-step-forward");
-
-                //         //position marker panel
-                //         map_detail_panel.removeClass("pull-right");
-
-                //         //position sliding panel tools
-                //         results_counter.addClass("results-counter-shim");
-                //         time_filter_toggle.addClass("date-filter-header-shim");
-                //         search_panel_tools.addClass("sliding-panel-tools-shim");
-
-
-                //         if (return_to = 'map') {
-
-                //             map_panel.addClass("map-panel-partial");
-                //             map_panel.removeClass("map-panel-full");
-
-                //         } 
-
-                //         if (return_to = 'graph') {
-
-                //             graph_panel.addClass("graph-panel-partial");
-                //             graph_panel.removeClass("graph-panel-full");
-
-
-                //         } 
-                //     }
-                // }
-
-
-
-                // //Show Map Funtion; meant to:
-                // //      display map panel when user presses "map" button
-                // //      Update state of list and map buttons
-                // //      Determine whether to show partial search results (based on whether user did a search)
-                // $(".show-map").click(function(){ handleShowMap(); return false; });
-                
-                // function handleShowMap() {  
-
-                //     //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
-                //     //determine if user has done a term search and has the search results panel open.  
-
-                //     if (saved_search.hasClass("saved-search-panel-full")) {
-
-                //             saved_search.addClass("saved-search-panel-hidden");
-                //             saved_search.removeClass("saved-search-panel-full");
-
-                //             map_panel.removeClass("map-panel-hidden");
-                //             map_panel.addClass("map-panel-full");
-
-                //             //hide results panel
-                //             search_panel.removeClass("sliding-panel-full");
-
-                //             //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
-                //             //Force icon to "show panel" position
-                //             search_panel_control.removeClass("sliding-panel-control-hidden");
-                //             panel_control_icon.addClass("fa-step-forward");
-                //             panel_control_icon.removeClass("fa-step-backward");
-
-
-                //             return_to = 'saved-search';
-                        
-                //         } else if (search_panel.hasClass("sliding-panel-full")) {
-
-                //             //Show Partial Map Panel
-                //             map_panel.removeClass("map-panel-hidden");
-                //             map_panel.addClass("map-panel-partial");
-
-
-                //             //Show partial search results panel
-                //             search_panel.removeClass("sliding-panel-full");
-                //             search_panel.addClass("sliding-panel-partial");
-                //             search_panel_container.removeClass("container");
-
-                //             //make sliding panel control visible
-                //             search_panel_control.removeClass("sliding-panel-control-hidden");
-
-                //             //Update position of sliding panel tools
-                //             results_counter.addClass("results-counter-shim");
-                //             time_filter_toggle.addClass("date-filter-header-shim");
-                //             search_panel_tools.addClass("sliding-panel-tools-shim");
-
-                //             return_to = 'search-results';
-
-                //     }
-
-
-                //     //Update Button Group Display
-                //     $("#show-map").removeClass("btn-default");
-                //     $("#show-map").addClass("btn-u-light-green");
-
-                //     $("#show-list").addClass("btn-default");
-                //     $("#show-list").removeClass("btn-u-light-green");
-
-
-                // }
-
-
-
-
-                // //Show List Funtion; meant to:
-                // //      display search results panel when user presses "list" button
-                // //      Update state of list and map buttons
-                // //      Determine whether to return search results or saved searches (based on whether user did a search)
-                // $(".show-list").click(function(){ handleShowList(); return false; });
-                
-                // function handleShowList() {  
-
-                //     //Before showing map, determine whether saved search is still visible.  If so, then close and show full map.  Otherwise
-                //     //determine if user has done a term search and has the search results panel open.  
-
-                //     if (return_to == 'saved-search') {
-
-                //             saved_search.removeClass("saved-search-panel-hidden");
-                //             saved_search.addClass("saved-search-panel-full");
-
-                //             map_panel.addClass("map-panel-hidden");
-                //             map_panel.removeClass("map-panel-full");
-
-                //             //hide results panel
-                //             search_panel.removeClass("sliding-panel-full");
-
-                //             //Show sliding panel control so that user can access "default" (e.g.: first page of all results)
-                //             //Force icon to "show panel" position
-                //             search_panel_control.addClass("sliding-panel-control-hidden");
-
-                        
-                //         } else if (search_panel.hasClass("sliding-panel-partial")) {
-
-                //             //Show Partial Map Panel
-                //             map_panel.addClass("map-panel-hidden");
-                //             map_panel.removeClass("map-panel-partial");
-                //             map_panel.removeClass("map-panel-full");
-
-
-                //             //Show search results panel
-                //             search_panel.addClass("sliding-panel-full");
-                //             search_panel.removeClass("sliding-panel-partial");
-                //             search_panel_container.addClass("container");
-
-                //             //hide sliding panel control
-                //             search_panel_control.addClass("sliding-panel-control-hidden");
-
-                //             //Update position of sliding panel tools
-                //             results_counter.removeClass("results-counter-shim");
-                //             time_filter_toggle.removeClass("date-filter-header-shim");
-                //             search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                //     }
-
-
-                //     //Update Button Group Display
-                //     $("#show-map").addClass("btn-default");
-                //     $("#show-map").removeClass("btn-u-light-green");
-
-                //     $("#show-list").removeClass("btn-default");
-                //     $("#show-list").addClass("btn-u-light-green");
-
-
-                // }
-
-
-
-                // //Show Graph Panel Funtion; meant to:
-                // //      Toggle graph panel body
-                // //      Update state of toggle button
-                
-                // $("#show-graph-panel").click(function(){ handleShowGraphPanel(); return false; });
-                
-                // function handleShowGraphPanel() { 
-
-                //     var graph_panel_button = $("#show-graph-panel");
-                //     var graph_panel_body = $("#graph-detail-panel-body");
-                //     var graph_panel_footer = $("#graph-detail-panel-footer");
-                
-                //     //check button icon to determine whether to hide/show graph panel body and footer
-                //     if (graph_panel_button.hasClass("icon-size-actual")) {
-
-                //             //Graph panel body/footer are visible.  Toggle display off
-                //             graph_panel_body.addClass("hidden");
-                //             graph_panel_footer.addClass("hidden");
-
-                //             //update button icon
-                //             graph_panel_button.removeClass("icon-size-actual");
-                //             graph_panel_button.addClass("icon-size-fullscreen");
-
-
-                //         }   else {
-
-                //             //Graph panel body/footer are not visible.  Toggle display on
-                //             graph_panel_body.removeClass("hidden");
-                //             graph_panel_footer.removeClass("hidden");
-
-                //             //update button icon
-                //             graph_panel_button.addClass("icon-size-actual");
-                //             graph_panel_button.removeClass("icon-size-fullscreen");
-
-                    
-                //     }
-
-                // }
-
-
-                
-
-
-                // //Handle Display of Graph Panel
-                // $(".related-resources-graph").click(function(){ handleGraphToggle(); return false; });
-
-                // function handleGraphToggle() {   
-
-                //     //check state of search panel.  Note that user can only access related resources button if 
-                //     //sliding panel is visible
-                //     if (search_panel.hasClass("sliding-panel-full")) {
-
-                //         //slide full search panel back to partial
-                //         search_panel.removeClass("sliding-panel-full");
-                //         search_panel.addClass("sliding-panel-partial");
-                //         search_panel_container.removeClass("container");
-
-                //         //show search panel control
-                //         search_panel_control.removeClass("sliding-panel-control-hidden");
-
-                //         //Update position of sliding panel tools
-                //         results_counter.addClass("results-counter-shim");
-                //         time_filter_toggle.addClass("date-filter-header-shim");
-                //         search_panel_tools.addClass("sliding-panel-tools-shim");
-
-                //         //show graph panel, force graph-detail-panel to default position
-                //         graph_panel.removeClass("graph-panel-hidden");
-                //         graph_panel.addClass("graph-panel-partial");
-
-
-                //     }
-
-
-                //     //if Search panel is already partially visible, check to see if map panel is being displayed.  If so, slide it out
-                //     //of the the and show graph panel
-                //     if (search_panel.hasClass("sliding-panel-partial")) {
-
-                //         //Check state of map panel
-                //         if (map_panel.hasClass("map-panel-partial")) {
-
-                //             map_panel.removeClass("map-panel-partial");
-                //             map_panel.addClass("map-panel-hidden");
-
-                //         }
-
-                //         //show graph panel
-                //         graph_panel.removeClass("graph-panel-hidden");
-                //         graph_panel.addClass("graph-panel-partial");
-
-                //         //show graph detail panel
-                //         graph_detail_panel.removeClass("hidden");
-
-                //     }
-
-                // }
-
-
-                // //Clear Search Results
-                // $(".clear-search").click(function(){ handleClearSearch(); return false; });
-
-                // function handleClearSearch() {  
-
-                //     //If search panel takes up full screen, hide the panel, remove the container (to properly center the search items),
-                //     //and hide the panel control
-                //     if (search_panel.hasClass("sliding-panel-full")) {
-
-                //         search_panel.removeClass("sliding-panel-full");
-                //         search_panel_container.removeClass("container");
-                //         search_panel_control.addClass("sliding-panel-control-hidden");
-
-                //     }
-
-                //     if (search_panel.hasClass("sliding-panel-partial")) {
-
-                //         search_panel.removeClass("sliding-panel-partial");
-                //         search_panel_control.addClass("sliding-panel-control-hidden");
-
-                //         //Update position of sliding panel tools
-                //         results_counter.removeClass("results-counter-shim");
-                //         time_filter_toggle.removeClass("date-filter-header-shim");
-                //         search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                //         //make sure map panel is hidden and href is toggled back to "show"
-                //         map_panel.removeClass("map-panel-partial");
-                //         map_panel.addClass("map-panel-hidden");
-
-                //         $("#map-toggle-state").text("show");
-                //         $("#map-toggle-state").removeClass("arches-small-text-shim");
-
-
-                //         //make sure graph panel is hidden
-                //         graph_panel.removeClass("graph-panel-partial");
-                //         graph_panel.addClass("graph-panel-hidden");
-
-                //     }
-
-                //     saved_search.removeClass("saved-search-panel-hidden");
-                //     saved_search.addClass("saved-search-panel-full");
-
-                //     //clear terms in search box
-                //     $(".search-widget").select2("val", "");
-
-
-                //     //Update Button Group Display
-                //     $("#show-map").addClass("btn-default");
-                //     $("#show-map").removeClass("btn-u-light-green");
-
-                //     $("#show-list").removeClass("btn-default");
-                //     $("#show-list").addClass("btn-u-light-green");
-
-                // }
-
-
-                //Close Graph Panel, show full searh results
-                $(".close-graph-panel").click(function(){ handleCloseGraphPanel(); return false; });
-
-                function handleCloseGraphPanel() { 
-
-                    //force search panel to full view
-                    search_panel.removeClass("sliding-panel-partial");
-                    search_panel.addClass("sliding-panel-full");
-
-                    //Update position of sliding panel tools
-                    results_counter.removeClass("results-counter-shim");
-                    time_filter_toggle.removeClass("date-filter-header-shim");
-                    search_panel_tools.removeClass("sliding-panel-tools-shim");
-
-                    //add container to display results properly
-                    search_panel_container.addClass("container");
-
-                    //hide control, make sure icon is set to default
-                    search_panel_control.addClass("sliding-panel-control-hidden");
-                    panel_control_icon.addClass("fa-step-backward");
-                    panel_control_icon.removeClass("fa-step-forward");
-
-
-                    //hide graph panel
-                    graph_panel.removeClass("graph-panel-partial");
-                    graph_panel.removeClass("graph-panel-full");
-                    graph_panel.addClass("graph-panel-hidden");
-
-                    //hide graph detail panel
-                    graph_detail_panel.addClass("hidden");
-
-                }
-
-
-                //Toggle Basemap Selection Panel
-                $("#show-basemaps").click(function(){ handleToggleBasemapsPanel(); return false; });
-
-                function handleToggleBasemapsPanel() { 
-
-                    var basemaps_panel = $("#basemaps-panel");
-                    var pointer = $("#pointer");
-
-                    if (basemaps_panel.hasClass("hidden")) {
-
-                        //show basemaps panel and its pointer
-                        basemaps_panel.removeClass("hidden");
-                        pointer.removeClass("hidden");
-                        pointer.addClass("pointer-basemaps");
-
-
-                        } else {
-
-                            //hide basemaps panel and its pointer
-                            basemaps_panel.addClass("hidden");
-                            pointer.addClass("hidden");
-                            pointer.removeClass("pointer-basemaps");
-
-                    }
-                }
-
-
-                //Toggle Overlays Selection Panel
-                $("#show-overlays").click(function(){ handleToggleOverlaysPanel(); return false; });
-
-                function handleToggleOverlaysPanel() { 
-
-                    var overlays_panel = $("#overlays-panel");
-                    var pointer = $("#pointer");
-
-                    if (overlays_panel.hasClass("hidden")) {
-
-                        //show basemaps panel and its pointer
-                        overlays_panel.removeClass("hidden");
-                        pointer.removeClass("hidden");
-                        pointer.addClass("pointer-overlays");
-
-
-                        } else {
-
-                            //hide basemaps panel and its pointer
-                            overlays_panel.addClass("hidden");
-                            pointer.addClass("hidden");
-                            pointer.removeClass("pointer-overlays");
-
-                    }
-                }
-
-
-
-
-                //Show Basemap Funtion; meant to:
-                //      Toggle Display of Basemap selection panel
-                $("#basemaps-panel").click(function(){ handleToggleBasemapPanel(); return false; });
-                
-                function handleToggleBasemapPanel() {
-
-                    alert("hi");
-
-
-                }
-
-
-
-
-                
-                //style select2 filters for main search widget
-                //$(".select2-choices").css("padding-right", "30px");
-
-
-                //Select2 Search Widget
-                $('.search-widget').select2({
-                    data: function() {
-                    var data;
-
-                    data = [
-                    {id: "1", text: "Craftsman"},
-                    {id: "2", text: "Protected Monument"},
-                    {id: "3", text: "Archaeological site"},
-                    {id: "4", text: "Nottingham Ale"},
-                    {id: "5", text: "Paulaner"},
-                    {id: "6", text: "Castle Anthrax"},
-                    {id: "7", text: "Access Point"}, 
-                    {id: "8", text: "Nunnery"}, 
-                    ];
-              
-                    return {results:data};
-                  },
-                  placeholder: "Find a resource...",
-                  multiple: true,
-                  maximumSelectionSize: 10
-
-                });
-
-
-
-                //Select2 Graph Search Widget
-                $('.graph-search-widget').select2({
-                    data: function() {
-                    var data;
-
-                    data = [
-                    {id: "1", text: "Castle Wolfenstein"},
-                    {id: "2", text: "Castle Anthrax"},
-                    {id: "3", text: "Monty Python"},
-                    {id: "4", text: "John Cleese"},
-                    {id: "5", text: "King Arthur"},
-                    {id: "6", text: "Nottingham Parish"},
-                    {id: "7", text: "Magna Carta"}, 
-                    {id: "8", text: "Tim"}, 
-                    ];
-              
-                    return {results:data};
-                  },
-                  placeholder: "Find a resource...",
-                  multiple: true,
-                  maximumSelectionSize: 10
-
-                });
-
-
-
-                //Select2 address types
-                $('.address-type').select2({
-                    data: function() {
-                    var data;
-
-                        data = [
-                        {id: "1", text: "Primary"},
-                        {id: "2", text: "Mailing"},
-                        {id: "3", text: "Alternate"},
-                        ];
-                  
-                        return {results:data};
-                    },
-                    placeholder: "Address type",
-                    closeOnSelect: true,
-                    maximumSelectionSize: 1,
-                    multiple: true
-
-                });
-
-
-
-
-
-
-
-                //OpenLayer 3 CRUD
-                //
-                var projection = ol.proj.get('EPSG:3857');
-
-                
-                var styles = [
-                  'Road',
-                  'AerialWithLabels',
-                  'ordnanceSurvey'
-                ];
-
-                var layers = [];
-                var i, ii;
-                for (i = 0, ii = styles.length; i < ii; ++i) {
-                  layers.push(new ol.layer.Tile({
-                    visible: false,
-                    preload: Infinity,
-                    source: new ol.source.BingMaps({
-                      key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
-                      imagerySet: styles[i]
-                    })
-                  }));
-                }
-
-
-                //set default map style to Roads
-                layers[0].setVisible(true);
-
-
-                //set up basemap display selection
-                $(".basemap").click(function (){ 
-                    
-                    var basemap = $(this).attr('id');
-
-                    //iterate through the set of layers.  Set the layer visibilty to "true" for the 
-                    //layer that matches the user's selection
-                    var i, ii;
-                      for (i = 0, ii = layers.length; i < ii; ++i) {
-                        layers[i].setVisible(styles[i] == basemap);
-                    }
-
-                    //close panel
-                    $("#inventory-home").click();
-
-                    //keep page from re-loading
-                    return false;
-
-                }); 
-
-
-                var styleFunction = new ol.style.Style({
-                    fill: new ol.style.Fill({
-                      color: 'rgba(92, 184, 92, 0.5)'
-                    }),
-                    stroke: new ol.style.Stroke({
-                      color: '#0ff',
-                      width: 1
-                    })
-                  });
-
-
-                var dragAndDropInteraction = new ol.interaction.DragAndDrop({
-                  formatConstructors: [
-                    ol.format.GPX,
-                    ol.format.GeoJSON,
-                    ol.format.IGC,
-                    ol.format.KML,
-                    ol.format.TopoJSON
-                  ]
-                });
-
-
-                dragAndDropInteraction.on('addfeatures', function(event) {
-                  var vectorSource = new ol.source.Vector({
-                    features: event.features,
-                    projection: event.projection
-                  });
-                  map.getLayers().push(new ol.layer.Vector({
-                    source: vectorSource,
-                    style: styleFunction
-                  }));
-                  var view = map.getView();
-                  view.fitExtent(
-                      vectorSource.getExtent(), /** @type {ol.Size} */ (map.getSize()));
-                });
-
-
-                //Add "inventory" 
-                // var inventory = new ol.layer.Vector({
-                //       source: new ol.source.KML({
-                //         projection: projection,
-                //         url: 'data/wolfenstein.kml'
-                //       }),
-                //       style: new ol.style.Style({
-                //         stroke: new ol.style.Stroke({
-                //           color: '#555',
-                //           width: 4
-                //         }),
-                //         fill: new ol.style.Fill({
-                //           color: "rgba(40, 170, 68, 0.6)"
-                //         })
-                //       })
-                //     });
-
-
-                
-                var map = new ol.Map({
-                  layers: layers,
-                    interactions: ol.interaction.defaults({
-                    altShiftDragRotate: false,
-                    dragPan: false,
-                    rotate: false
-                    }).extend([new ol.interaction.DragPan({kinetic: null})]).extend([dragAndDropInteraction]),
-                  target: 'map',
-                  view: new ol.View({
-                    center: [-13168799.0, 4012635.2],
-                    zoom: 10
-                  })
-                });
-
-
-
-                // The features are not added to a regular vector layer/source,
-                // but to a feature overlay which holds a collection of features.
-                // This collection is passed to the modify and also the draw
-                // interaction, so that both can add or modify features.
-                var featureOverlay = new ol.FeatureOverlay({
-                  style: new ol.style.Style({
-                    fill: new ol.style.Fill({
-                      color: 'rgba(92, 184, 92, 0.5)'
-                    }),
-                    stroke: new ol.style.Stroke({
-                      color: '#5cb85c',
-                      width: 2
-                    }),
-                    image: new ol.style.Circle({
-                      radius: 7,
-                      fill: new ol.style.Fill({
-                        color: 'rgba(92, 184, 92, 0.5)'
-                      }),
-                      stroke: new ol.style.Stroke({
-                        color: '#5cb85c',
-                        width: 2
-                      })
-                    })
-                  })
-                });
-                featureOverlay.setMap(map);
-
-
-                //Move zoom control so that it isn't under the map search bar
-                $(".ol-control").css("margin-top", "70px");
-                
-
-                //End OPenlayer 3 Map
-
-
-
-
-
-
-
-            });
-
-        </script>
-        
-        <!--[if lt IE 9]>
-            <script src="assets/plugins/respond.js"></script>
-            <script src="assets/plugins/html5shiv.js"></script>
-            <script src="assets/plugins/placeholder-IE-fixes.js"></script>
-        <![endif]-->
-
-    </body>
-</html> 
+        </div>
+    </div>
+          
+</div>
+<!-- End Main Content (search bars, map, map footer) -->
+
+{% endblock content %}

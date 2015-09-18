@@ -996,6 +996,13 @@ input.arches-select2:-ms-input-placeholder {
 
 /* Search */
 
+.margin-hack{
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
 .search-header {
     padding-left: 20px;
     padding-top: 20px;
@@ -1025,50 +1032,70 @@ input.arches-select2:-ms-input-placeholder {
 }
 
 .sliding-panel {
-    width: 33%;
+/*    width: 33%;
     margin-left: -33%;
-    height: 650px;
+    height: 650px;*/
     background: #fff;
     opacity: .90;
-    border-right-color: #ddd;
+/*    border-right-color: #ddd;
     border-right-width: 1px;
     border-right-style: solid;
     border-top-color: #ddd;
     border-top-width: 1px;
-    border-top-style: solid;
+    border-top-style: solid;*/
 }
 
-.sliding-panel-partial {
+/*.sliding-panel-partial {
     margin-left: 0%;
 }
 
 .sliding-panel-full {
     margin-left: 0%;
     width: 100%;
-}
+}*/
 
 .sliding-panel-control {
-    width: 35px;
-    height: 45px;
-    background: #fff;
-    margin-left: 100%;
-    margin-top: -560px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-width: 1px;
-    border-color: #ddd;
-    border-style: solid;
-    border-left-width: 1px;
+    width: 25px;
+    top: -543px;
+   /* left: -15px;*/
+    border: solid 1px #ddd;
+    border-left-color: white;
+    padding-top: 14px;
+    padding-bottom: 10px;
+    padding-right: 10px;
+    padding-left: 7px;
+    background-color: white;
 }
 
-.sliding-panel-control-hidden {
-    margin-left: -150%;
+.sliding-panel-control:hover {
+    box-shadow: 5px 2px 10px rgba(0,0,0,0.2);
 }
 
 .search-results-container {
-    height: 517px; 
-    margin-top: -45px;
+    height: 562px; 
+    /*margin-top: -45px;*/
     overflow-y: scroll;
+}
+
+#search-results-list {
+    height: 472px;
+    overflow-y: scroll;
+    padding: 15px;
+}
+
+.search-results-list-container {
+    padding: 0px;
+}
+
+#paginator {
+    background: #f4f4f4;
+    height: 60px;
+    margin-top: 0px;
+    margin-left: 0px;
+    padding-top: -2px;
+    border-top-width: 1px;
+    border-top-color: #ccc;
+    border-top-style: solid;
 }
 
 .search-block {
@@ -1141,15 +1168,21 @@ input.arches-select2:-ms-input-placeholder {
 
 /* Map Filter*/
 
-/*element.style {
-    position: relative;
-    overflow: hidden;
-    transform: translateZ(0px);
-    background-color: rgb(229, 227, 223);
-}*/
+.map-panel { 
+/*    height: 650px; 
+    margin-top: -650px; 
+    width: 100%; */
+    border-left: solid 1px #ddd;
+    /*margin-left:-15px;*/
+}
 
+/*.map-panel-partial {
+    margin-left: 33%;
+    width: 67%;
+}
+*/
 .arches-search-map {
-    height: 400px;
+    height: 635px;;
     margin-top: 0px;
     border-width: 1px 1px 1px 1px;
     border-color: #cfcfcf;
@@ -1161,7 +1194,7 @@ input.arches-select2:-ms-input-placeholder {
     margin-left: 20px;
     margin-top: -10px;
     margin-right: 25px;
-    margin-bottom: 20px;
+    /*margin-bottom: 20px;*/
 }
 
 #info {
@@ -1194,14 +1227,62 @@ input.arches-select2:-ms-input-placeholder {
     color: #416CA9;
 }
 
+
+/* Saved Searches */
+.saved-search-panel {
+    background: #fff; 
+    margin-left: -100%;
+    width: 100%;
+    height: 650px; 
+    border-top-color: #ddd;
+    border-top-width: 1px;
+    border-top-style: solid;
+    display: block;
+    overflow-y: scroll; 
+}
+
+
+.saved-search-panel-hidden {
+    margin-left: 100%;
+}
+
+.saved-search-panel-full {
+    margin-left: 0%;
+    width: 100%;
+}
+
+.saved-query-control-container {
+    background: #123; 
+    opacity: .5; 
+    position: absolute; 
+    top: 118px; 
+    height: 50px; 
+    width: 100%; 
+    margin-left: 2px; 
+    margin-right: -2px;
+}
+
+
+.arches-saved-query-caption {
+    position: absolute; 
+    top: 85%; 
+    left: 5%; 
+    color: #fff; 
+    font-size: 19px; 
+    font-weight: 100;
+}
+
+/* End Saved Searches */
+
 /* Time Filter v2*/
 
 .time-scale {
-    height: 50px; 
+    height: 52px; 
     background: #fafafa; 
     border-top-width: 1px; 
     border-top-style: solid; 
     border-top-color: #ddd;
+    border-bottom: solid 1px #ddd;
 }
 
 .time-scale-hidden {
