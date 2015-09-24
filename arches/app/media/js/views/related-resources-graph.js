@@ -1,4 +1,4 @@
-define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'plugins/d3-tip'], function($, Backbone, _, arches, resourceTypes, d3, d3Tip) {
+define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'plugins/d3-tip', 'knockout'], function($, Backbone, _, arches, resourceTypes, d3, d3Tip, ko) {
     return Backbone.View.extend({
         resourceId: null,
         resourceName: '',
@@ -9,13 +9,15 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
         },
 
         initialize: function(options) {
-            var self = this,
-                width = this.$el.parent().width(),
-                height = 400;
+            var self = this;
+            this.width = this.$el.width();
+            this.height = this.$el.height();
 
             _.extend(this, _.pick(options, 'resourceId', 'resourceName', 'resourceTypeId'));
             
             this.nodeMap = {};
+            this.nodeList = ko.observableArray();
+            ko.applyBindings(this.nodeList, $('#graph-detail-panel')[0]);
             this.linkMap = {};
             this.data = {
                 nodes: [],
@@ -29,7 +31,7 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                 .friction(0.55)
                 .linkStrength(function(l, i) {return 1; })
                 .theta(0.8)
-                .size([width, height]);
+                .size([this.width, this.height]);
 
             var redraw = function() {
                 self.vis.attr("transform",
@@ -47,8 +49,8 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
             };
 
             self.svg = d3.select(this.el).append("svg:svg")
-                .attr("width", width)
-                .attr("height", height)
+                .attr("width", this.width)
+                .attr("height", this.height)
                 .call(d3.behavior.zoom().on("zoom", redraw));
             self.vis = self.svg.append('svg:g');
 
@@ -78,23 +80,37 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                 .call(self.targetTip)
                 .call(self.nodeTip);
 
-
             if (self.resourceId) {
-                self.$el.addClass('loading');
-                self.getResourceData(self.resourceId, this.resourceName, self.resourceTypeId, function (data) {
-                    self.$el.removeClass('loading');
-                    self.data = data;
-                    self.data.nodes[0].x = width/2;
-                    self.data.nodes[0].y = height/2;
-                    self.update();
-                }, true);
+                self.loadResourceData(self.resourceId, this.resourceName, self.resourceTypeId);
             }
             
             $(window).on("resize", function() {
-                self.svg.attr("width", self.$el.parent().width());
+                self.resize();
             }).trigger("resize");
 
             self.$el.addClass('view-created');
+        },
+
+        resize: function(){
+            this.width = this.$el.width();
+            this.height = this.$el.height();
+            this.svg.attr("width", this.width);
+            this.svg.attr("height", this.height);    
+        },
+
+        loadResourceData: function(resourceId, resourceName, resourceTypeId){
+            var self = this;
+            this.nodeMap = {};
+            this.nodeList.removeAll();
+            this.$el.find('.node_info').hide();
+            this.$el.addClass('loading');
+            this.getResourceData(resourceId, resourceName, resourceTypeId, function (data) {
+                self.$el.removeClass('loading');
+                self.data = data;
+                self.data.nodes[0].x = self.width/2;
+                self.data.nodes[0].y = self.height/2;
+                self.update();
+            }, true);
         },
 
         update: function () {
@@ -263,7 +279,8 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
         },
 
         loadMoreRelations: function () {
-            this.getResourceDataForNode(this.selectedNode);
+            var data = $(arguments[0].currentTarget).data() || this.selectedNode;
+            this.getResourceDataForNode(data);
         },
 
         getResourceDataForNode: function(d) {
@@ -309,6 +326,8 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                                 entityid: resourceId,
                                 name: resourceName,
                                 entitytypeid: resourceTypeId,
+                                typeIcon: resourceTypes[resourceTypeId].icon,
+                                typeName: resourceTypes[resourceTypeId].name,
                                 isRoot: true,
                                 relationType: 'Current',
                                 relationCount: {
@@ -318,6 +337,7 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                             };
                             nodes.push(rootNode);
                             self.nodeMap[resourceId] = rootNode;
+                            self.nodeList.push(rootNode);
                             self.newNodeId += 1;
                         } else if (rootNode.relationCount) {
                             rootNode.relationCount.loaded = rootNode.relationCount.loaded + response.resource_relationships.length;
@@ -335,6 +355,8 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                                     id: self.newNodeId,
                                     entityid: related_resource.entityid,
                                     entitytypeid: related_resource.entitytypeid,
+                                    typeIcon: resourceTypes[related_resource.entitytypeid].icon,
+                                    typeName: resourceTypes[related_resource.entitytypeid].name,
                                     name: related_resource.primaryname,
                                     isRoot: false,
                                     relationType: 'Ancestor',
@@ -342,6 +364,7 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                                 };
                                 nodes.push(node);
                                 self.nodeMap[related_resource.entityid] = node;
+                                self.nodeList.push(node);
                                 self.newNodeId += 1;
                             }
                         });

@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="row">
+<!-- <div class="row">
     <div class="node_info" style="position: absolute;margin-top: 15px;right: 40px;display:none;">
         <dl style="margin-bottom: 0;">
             <dd class="arches-concept-heirarchy">
@@ -18,5 +18,148 @@
                 </div>
             </dd>
         </dl>
+    </div>
+</div> -->
+
+<!-- Graph Info Panel -->
+<div class="node_info" style="position: absolute ;top:10px; left:-9px;display:none;">
+    <div class="row">
+        <div class="col-xs-5 col-xs-offset-7">
+
+            <!-- Using Bootstrap Model CSS classes to get the overall look of the info panel,
+            but the actual info panel is NOT implemented as a model form -->
+            <div id="graph-detail-panel" class="modal-content no-corners" style="background: #fff;">
+                <div class="modal-header" style="background: #f4f4f4;">
+                    <a class="" style="text-decoration: none;" href="#">
+                        <i id="show-graph-panel" class="icon-size-actual pull-right" style="margin-top: 5px; font-weight: 600; color: #337ab7;"></i>
+                    </a>
+                    <!-- ko foreach: $data -->
+                    <h4 class="modal-title" data-bind="if: isRoot">
+                        <a href="javascript:void(0);" class="text-primary">
+                            <i class="fa text-primary" data-bind="css: typeIcon"></i> 
+                            <span data-bind="text:name"></span>
+
+                            <!-- Resource Type for larger screens -->
+                            <span class="hidden-xs">
+                                <small class="text-primary" data-bind="text:typeName"></small>
+                            </span>
+
+                            <!-- Resource Type for small screens -->
+                            <span class="hidden-sm hidden-md hidden-lg">
+                                </br><small class="text-primary margin-left-30 margin-top-minus-10"  data-bind="text:typeName"></small>
+                            </span>
+
+                        </a>
+                    </h4>
+                    <!-- /ko -->
+
+                </div>
+
+                <!-- Body Content -->
+                <div id="graph-detail-panel-body" class="modal-body" style="height: 400px;">
+                    
+                    <!-- Search Widget  -->
+                    <div class="" style="padding-bottom: 15px; padding-left: 20px; padding-right: 20px; margin-left: -15px; margin-right: -15px; background: #fff; border-bottom-color: #f0f0f0; border-bottom-width: 1px; border-bottom-style: solid;">
+
+                        <input id="" class="select2 arches-select2 graph-search-widget" name="" style="width:100%; " placeholder="Find a resource..." value=""></input>
+
+                    </div>
+
+                    <div class="row" style="padding-top: 0px; height: 285px; background: #fff; overflow:scroll;">
+                        
+                        <!-- Search Results Container -->
+                        <!-- ko foreach: $data -->
+                        <div class="" style="width: 100%;"  data-bind="if: !isRoot">
+                            <!-- Spacer -->
+                            <hr class="margin-10">
+
+                            <div class="inner-results padding-left-5" style="width:400px;">
+
+                                <!-- Item Header -->
+                                <h4>
+                                    <a class="arches-graph-search-title" style="" data-bind="text: name, attr: { href: 'reports/' + entityid }" target="_blank"></a> 
+                                    &nbsp;
+                                    <span class="">
+                                        <small class="arches-graph-search-subtitle"><i data-bind="css:typeIcon"></i><span data-bind="text: typeName"></span></small>
+                                    </span>
+                                </h4>
+
+                                <!-- Sub-header -->
+                                <ul class="list-inline up-ul">
+                                    {% if user_can_edit == True %}
+                                    <li>
+                                        <i class="arches-search-link fa fa-pencil"></i>&nbsp;
+                                        <a href="" data-bind="attr: {'href': 'resources/' +  entitytypeid + '/default/' + entityid}"><span class="arches-search-link">{% trans "Edit" %}</span></a>
+                                    </li>
+                                    {% endif %}
+
+                                    <li>
+                                        <i class="arches-search-link fa fa fa-sitemap"></i>
+                                        <span class="arches-search-link map-toggle" data-bind="with: relationCount"><!--ko text: loaded--><!--/ko--> of <!--ko text: total--><!--/ko--> resources loaded</span>
+                                    </li>
+
+                                    <li>
+                                        <i class="arches-search-link fa fa-cloud-download"></i>
+                                        <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
+                                        <a href="javascript:void(0);" class="info-link load-more-relations-link" data-bind="attr:{'data-name': name, 'data-entityid': entityid, 'data-entitytypeid': entitytypeid, }">{% trans 'load more' %}</a>
+                                    </li>
+
+                                </ul>
+                                <!-- End Item Sub-Header -->
+
+
+                                <!-- Item Creator/Editor -->
+                                <!-- This list is hidden for guests, but shown if user is logged in with editor privileges -->
+                                <!-- End Item Creator/Editor -->
+
+                            </div>
+                            
+                            <!-- Begin Search Item -->
+                            <div  class="arches-search-item hidden">
+                                
+                                <!-- Spacer -->
+                                <hr class="margin-10">
+
+                                <div class="inner-results arches-graph-list-item" style="">
+
+                                    <!-- Item Header -->
+                                    <h4>
+                                        <a class="arches-graph-search-title" style="" href="#" data-bind="text:name">Castle Anthrax</a> 
+                                        &nbsp;
+                                        <span class="">
+                                            <small class="arches-graph-search-subtitle"><i class="fa fa-trophy"></i>Heritage Resource</small>
+                                        </span>
+                                    </h4>
+
+                                    <!-- Sub-header -->
+                                    <ul class="list-inline up-ul arches-tool-subheader">
+
+                                        <li>
+                                            <i class="arches-search-link fa fa fa-sitemap"></i>
+                                            <span class="arches-search-link map-toggle"> 15 of 42 resources loaded</span>
+                                        </li>
+
+                                        <li>
+                                            <i class="arches-search-link fa fa-cloud-download"></i>
+                                            <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
+                                        </li>
+
+                                    </ul>
+                                    <!-- End Item Sub-Header -->
+
+                                </div>
+                            </div>
+                            <!-- End Search Item -->
+                        </div>
+                        <!-- /ko -->
+                    </div>
+                </div>
+                <!-- End Body Content -->
+
+                <div id="graph-detail-panel-footer" class="modal-footer" style="background: #f4f4f4; height: 50px; padding-top: 8px; padding-bottom: 0px;">
+                    <button type="button" class="btn-u btn-u-sm btn-u-default close-graph-panel" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
