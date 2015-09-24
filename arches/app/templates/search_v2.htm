@@ -110,91 +110,99 @@
 
             <!-- Search Results Container -->
             <div class="search-results-container" id="search-results-container"> 
-                {% include 'views/search/search-results.htm' %}
+                {% include 'views/search/search-results_v2.htm' %}
             </div>
             <!-- End search results container -->
         </div>
 
 
-        <!-- Map/Footer Container -->
-        <div class="map-panel margin-hack" id="map-panel">
+        <!-- Map Container -->
+        <div class="right-panel margin-hack" id="right-panel">
            
             <!-- Map Filters -->
             <div class="row" id="map-filter-container" data-filtertext="{% trans "Map Filter Enabled" %}" style="margin-right: 20px;"> 
                 {% include 'views/search/map-filter.htm' %}
-            </div>
-            <!-- End Map -->
+            
+                <!-- Map Footer -->
+                <div class="fgi-map-footer arches-map-footer hidden">
+                    <div class="container map-border">
 
-            <!-- Map Footer -->
-            <div class="fgi-map-footer arches-map-footer hidden" style="margin-top: 530px;">
-                <div class="container map-border">
+                        <!-- Tool Buttons -->
+                        <div class="margin-left: -11px;">
+                            <!-- Map tools button -->
+                            <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
+                                <button class="btn-u btn-u-green arches-button" style="width: 32px; height: 32px;" type="button" title="Map Tools"><i class="fa fa-2x fa-info-circle" style="  font-size: 21px; margin-top: -1px; margin-left: -7px;"></i></button>
+                            </div>
 
-                    <!-- Tool Buttons -->
-                    <div class="margin-left: -11px;">
-                        <!-- Map tools button -->
-                        <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
-                            <button class="btn-u btn-u-green arches-button" style="width: 32px; height: 32px;" type="button" title="Map Tools"><i class="fa fa-2x fa-info-circle" style="  font-size: 21px; margin-top: -1px; margin-left: -7px;"></i></button>
-                        </div>
-
-                        <!-- Time Control button -->
-                        <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
-                            <button class="btn-u btn-u-default" style="width: 32px; height: 32px;" type="button" title="Time Controls"><i class="fa fa-2x fa-clock-o" style="  font-size: 21px; margin-top: -1px; margin-left: -6px;"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="row" style="margin-left: 25px;">
-
-                        <div class="col-xs-12">
-
-                            <div class="" style="margin-top: 25px; margin-left: -5px; margin-top: -67px;">
-                                <!-- Basemap -->
-                                <div class="" style="">
-
-                                    <button id="show-basemaps" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Select Basemap"><i class="fa fa-globe fa-2x" style="margin-top: 0px; margin-left: -5px;"></i></button>
-
-                                </div>
-                                <!-- End Basemap -->
-
-                                <!-- Overlay -->
-                                <div class="" style="margin-left: 70px; margin-top: -67px;">
-
-                                    <button id="show-overlays" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Add Overlays"><i class="fa fa-align-justify fa-2x" style="margin-top: 0px; margin-left: 0px;"></i></button>
-
-                                </div>
-                                <!-- End Overlay -->
-
-                                <!-- Zoom Readout -->
-                                <div class="info-blocks" style="margin-left: 150px; margin-top: -55px;">
-                                    <div class="info-blocks-in margin-bottom-0">
-                                        <p class="margin-top-5">
-                                            <span class="arches-map-inventory-footer-text">
-                                                Map Zoom: <span data-bind="text:zoom">10</span> &nbsp; &nbsp;
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Coordinate Readout -->
-                                <div class="info-blocks" style="margin-left: 150px; margin-top: -38px;">
-                                    <div class="info-blocks-in margin-bottom-0">
-                                        <p class="margin-top-5">
-                                            <span class="arches-map-inventory-footer-text">
-                                                Cursor: <span data-bind="text:mousePosition"></span> <span class="hidden-xs">(long,lat)</span>
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-
+                            <!-- Time Control button -->
+                            <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
+                                <button class="btn-u btn-u-default" style="width: 32px; height: 32px;" type="button" title="Time Controls"><i class="fa fa-2x fa-clock-o" style="  font-size: 21px; margin-top: -1px; margin-left: -6px;"></i></button>
                             </div>
                         </div>
+
+                        <div class="row" style="margin-left: 25px;">
+
+                            <div class="col-xs-12">
+
+                                <div class="" style="margin-top: 25px; margin-left: -5px; margin-top: -67px;">
+                                    <!-- Basemap -->
+                                    <div class="" style="">
+
+                                        <button id="show-basemaps" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Select Basemap"><i class="fa fa-globe fa-2x" style="margin-top: 0px; margin-left: -5px;"></i></button>
+
+                                    </div>
+                                    <!-- End Basemap -->
+
+                                    <!-- Overlay -->
+                                    <div class="" style="margin-left: 70px; margin-top: -67px;">
+
+                                        <button id="show-overlays" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Add Overlays"><i class="fa fa-align-justify fa-2x" style="margin-top: 0px; margin-left: 0px;"></i></button>
+
+                                    </div>
+                                    <!-- End Overlay -->
+
+                                    <!-- Zoom Readout -->
+                                    <div class="info-blocks" style="margin-left: 150px; margin-top: -55px;">
+                                        <div class="info-blocks-in margin-bottom-0">
+                                            <p class="margin-top-5">
+                                                <span class="arches-map-inventory-footer-text">
+                                                    Map Zoom: <span data-bind="text:zoom">10</span> &nbsp; &nbsp;
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Coordinate Readout -->
+                                    <div class="info-blocks" style="margin-left: 150px; margin-top: -38px;">
+                                        <div class="info-blocks-in margin-bottom-0">
+                                            <p class="margin-top-5">
+                                                <span class="arches-map-inventory-footer-text">
+                                                    Cursor: <span data-bind="text:mousePosition"></span> <span class="hidden-xs">(long,lat)</span>
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-
                 </div>
+                <!-- End Map Footer -->
             </div>
-            <!-- End Map Footer -->
+            <!-- End Map -->
+            
+            <!-- Graph Container -->
+            <div class="svg related-resource-graph margin-hack" id="related-resource-graph" style="display:none;">
 
+                {% include 'views/related-resources-graph.htm' %}
+
+            </div>
+            <!-- End Graph Container -->
         </div>
-        <!-- End Map/Footer Container -->
+        <!-- End Map Container -->
+
 
     </div>
 
@@ -205,23 +213,6 @@
         </div>
     </div>
 
-    <!-- Graph Container -->
-    <div class="graph-panel graph-panel-hidden hidden" id="graph-panel" style="">
-
-        <div class="container">
-            <div class="" style="">
-
-                <div>
-                    <p style="font-size: 19px; margin-top: 25%; margin-left: 20%;">
-                        graph goes here
-                    </p>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-    <!-- End Graph Container -->
 
 
 

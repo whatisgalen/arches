@@ -7,16 +7,17 @@ require(['jquery',
     'views/search/term-filter', 
     'views/search/map-filter',
     'views/search/time-filter-v2',
-    'views/search/search-results',
+    'views/search/search-results_v2',
     'knockout',
     'views/forms/sections/branch-list',
     'resource-types',
     'openlayers',
+    'views/related-resources-graph',
     'bootstrap-datetimepicker',
     'plugins/knockout-select2', 
     'plugins/cube-portfolio/jquery.cubeportfolio.min',
     'plugins/cube-portfolio/cube-portfolio-3-ns'], 
-    function($, _, Backbone, bootstrap, arches, select2, TermFilter, MapFilter, TimeFilter, SearchResults, ko, BranchList, resourceTypes, ol) {
+    function($, _, Backbone, bootstrap, arches, select2, TermFilter, MapFilter, TimeFilter, SearchResults, ko, BranchList, resourceTypes, ol, RelatedResourcesGraph) {
     $(document).ready(function() {
         var wkt = new ol.format.WKT();
 
@@ -40,6 +41,7 @@ require(['jquery',
                 var self = this;
                 this.PAGE_STATES = {'saved_searches_displayed': 'SAVED_SEARCHES_DISPLAYED', 'saved_searches_hidden': 'SAVED_SEARCHES_HIDDEN'};
                 this.LIST_STATES = {'full': 'FULL', 'partial': 'PARTIAL', 'hidden': 'HIDDEN'};
+                this.RIGHT_PANEL_STATES = {'map': 'MAP', 'graph': 'GRAPH'};
 
                 this.saved_search = $("#saved-search");
                 this.results_counter = $("#search-results-count");
@@ -53,15 +55,15 @@ require(['jquery',
                 this.saved_search_menu = $("#filters-container");
                 this.time_filter = $("#time-scale");
                 this.time_filter_container = $("#time-filter-container");
-                this.map_panel = $("#map-panel");
-                this.map_detail_panel = $("#map-detail-panel");
-                this.graph_panel = $("#graph-panel");
+                this.right_panel = $("#right-panel");
+                this.related_resource_graph_container = $("#related-resource-graph");
                 this.graph_detail_panel = $("#graph-detail-panel");
 
                 this.return_to;
                 this.default_page_state = this.PAGE_STATES.saved_searches_displayed;
                 //this.current_page_state = this.default_page_state;
                 this.default_list_view_state = this.LIST_STATES.full;
+                this.current_right_panel_state = this.RIGHT_PANEL_STATES.map;
                 //this.current_list_view_state = this.default_list_view_state;
 
 
@@ -91,10 +93,10 @@ require(['jquery',
                     // }
 
                     // //if map panel is open, slide it over and show search results
-                    // if (this.map_panel.hasClass("map-panel-full")) {
+                    // if (this.right_panel.hasClass("map-panel-full")) {
 
-                    //     this.map_panel.addClass("map-panel-partial");
-                    //     this.map_panel.removeClass("map-panel-full");
+                    //     this.right_panel.addClass("map-panel-partial");
+                    //     this.right_panel.removeClass("map-panel-full");
 
 
                     //     //update marker panel position
@@ -166,12 +168,25 @@ require(['jquery',
                 this.searchResults.on('mouseout', function(){
                     this.mapFilter.unselectAllFeatures();
                 }, this);
-                this.searchResults.on('find_on_map', function(resourceid, data){
-                    var extent,
-                        expand = !this.mapFilter.expanded();
-                    if (expand) {
-                        this.mapFilter.expanded(true);
+                this.searchResults.on('showrelatedresourcegraph', function(options){
+                    this.showGraph();
+                    if (!this.related_resource_graph) {
+                        this.related_resource_graph = new RelatedResourcesGraph({
+                            el: this.related_resource_graph_container[0],
+                            resourceId: options.resourceId,
+                            resourceName: options.resourceName,
+                            resourceTypeId: options.resourceTypeId
+                        });
+                    }else{
+                        this.related_resource_graph.loadResourceData(options.resourceId, options.resourceName, options.resourceTypeId);
                     }
+                }, this);
+                this.searchResults.on('find_on_map', function(resourceid, data){
+                    var extent;
+                    var expand = !this.mapFilter.expanded();
+
+                    this.current_right_panel_state = this.RIGHT_PANEL_STATES.map
+                    this.updateViewState();
                     
                     _.each(data.geometries, function (geometryData) {
                         var geomExtent = wkt.readGeometry(geometryData.label).getExtent();
@@ -179,12 +194,14 @@ require(['jquery',
                         extent = extent ? ol.extent.extend(extent, geomExtent) : geomExtent;
                     });
                     if (extent) {
-                        _.delay(function() {
-                            self.mapFilter.zoomToExtent(extent);
-                        }, expand ? 700 : 0);
+                        self.mapFilter.zoomToExtent(extent);
+                        // _.delay(function() {
+                        //     self.mapFilter.zoomToExtent(extent);
+                        // }, expand ? 700 : 0);
                     }
                 }, this);
 
+               
 
                 mapFilterText = this.mapFilter.$el.data().filtertext;
                 timeFilterText = this.timeFilter.$el.data().filtertext;
@@ -316,32 +333,38 @@ require(['jquery',
             showList: function(){
                 if(this.getPageState() === this.PAGE_STATES.saved_searches_displayed){
                     this.doQuery();
-                    this.showSearchResults(this.default_list_view_state);
+                    this.updateViewState(this.default_list_view_state);
                 }else{
-                    this.showSearchResults(this.default_list_view_state);
+                    this.updateViewState(this.default_list_view_state);
                 }
             },
 
             slideList:function(){
                 if(this.getListViewState() === this.LIST_STATES.hidden){
-                    this.showSearchResults(this.LIST_STATES.partial);
+                    this.updateViewState(this.LIST_STATES.partial);
                 }else if(this.getListViewState() === this.LIST_STATES.partial){
-                    this.showSearchResults(this.LIST_STATES.hidden);
+                    this.updateViewState(this.LIST_STATES.hidden);
                 }
             },
 
             showMap: function(){
+                this.current_right_panel_state = this.RIGHT_PANEL_STATES.map;
                 if(this.getPageState() === this.PAGE_STATES.saved_searches_displayed){
                     this.doQuery();
-                    this.showSearchResults(this.LIST_STATES.hidden);
+                    this.updateViewState(this.LIST_STATES.hidden);
                 }else if(this.getPageState() === this.PAGE_STATES.saved_searches_hidden){
                     if(this.getListViewState() === this.LIST_STATES.full){
-                        this.showSearchResults(this.LIST_STATES.partial);
+                        this.updateViewState(this.LIST_STATES.partial);
                     }
                 }
             },
 
-            showSearchResults: function(view_state){
+            showGraph: function(){
+                this.current_right_panel_state = this.RIGHT_PANEL_STATES.graph;
+                this.updateViewState(this.LIST_STATES.partial);
+            },
+
+            updateViewState: function(view_state){
                 this.getSearchQuery();
                 this.hideSavedSearches();
 
@@ -349,8 +372,10 @@ require(['jquery',
 
                 if(view_state === this.LIST_STATES.full){
                     //Hide map panel
-                    //this.map_panel.hide();
+                    //this.right_panel.hide();
+                    this.right_panel.hide();
                     this.mapFilter.expanded(false);
+                    //this.map_footer.hide();
 
                     //Show search results panel
                     this.sliding_panel.addClass("col-xs-12");
@@ -370,15 +395,26 @@ require(['jquery',
 
                 }else if(view_state === this.LIST_STATES.partial){
                     //Show Partial Map Panel
-                    // this.map_panel.show();
-                    // this.map_panel.css('margin-left', '');
-                    this.mapFilter.expanded(true);
-                    this.map_panel.addClass("col-xs-8");
-                    this.map_panel.removeClass("col-xs-12");
-                    this.mapFilter.map.map.updateSize();
-                    //this.map_panel.removeClass("map-panel-hidden");
-                    // this.map_panel.removeClass("map-panel-full");
-                    // this.map_panel.addClass("map-panel-partial");
+                    this.right_panel.show();
+                    // this.right_panel.css('margin-left', '');
+                    //this.mapFilter.expanded(true);
+                    this.right_panel.addClass("col-xs-8");
+                    this.right_panel.removeClass("col-xs-12");
+                    //this.map_footer.show();
+                    if(this.current_right_panel_state === this.RIGHT_PANEL_STATES.map){
+                        try{
+                            this.related_resource_graph_container.hide();
+                        }catch(e){}
+                        this.mapFilter.expanded(true);
+                        this.mapFilter.map.map.updateSize();
+                    }else{
+                        this.mapFilter.expanded(false);
+                        this.related_resource_graph_container.show();
+                        this.related_resource_graph_container.resize();
+                    }
+                    //this.right_panel.removeClass("map-panel-hidden");
+                    // this.right_panel.removeClass("map-panel-full");
+                    // this.right_panel.addClass("map-panel-partial");
 
                     //Show partial search results panel
                     this.sliding_panel.show();
@@ -402,14 +438,25 @@ require(['jquery',
 
                 }else if(view_state === this.LIST_STATES.hidden){
                     //Show map panel
-                    // this.map_panel.show();
-                    // this.map_panel.css('margin-left', '');
-                    this.mapFilter.expanded(true);
-                    this.map_panel.addClass("col-xs-12");
-                    this.map_panel.removeClass("col-xs-8");
-                    this.mapFilter.map.map.updateSize();
-                    // this.map_panel.removeClass("map-panel-partial");
-                    // this.map_panel.addClass("map-panel-full");
+                    this.right_panel.show();
+                    // this.right_panel.css('margin-left', '');
+                    //this.mapFilter.expanded(true);
+                    this.right_panel.addClass("col-xs-12");
+                    this.right_panel.removeClass("col-xs-8");
+                    //this.map_footer.show();
+                    if(this.current_right_panel_state === this.RIGHT_PANEL_STATES.map){
+                        try{
+                            this.related_resource_graph_container.hide();
+                        }catch(e){}
+                        this.mapFilter.expanded(true);
+                        this.mapFilter.map.map.updateSize();
+                    }else{
+                        this.mapFilter.expanded(false);
+                        this.related_resource_graph_container.show();
+                        this.related_resource_graph_container.resize();
+                    }
+                    // this.right_panel.removeClass("map-panel-partial");
+                    // this.right_panel.addClass("map-panel-full");
 
                     //Hide search results panel
                     this.sliding_panel.hide()

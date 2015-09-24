@@ -196,9 +196,18 @@ define(['jquery',
                     }
                 };
 
-                self.map.on('mousePositionChanged', function (mousePosition, pixels, feature) {
+                this.mapStats = {
+                    mousePosition: ko.observable(''),
+                    mapZoom: ko.observable('')
+                }
+
+                ko.applyBindings(this.mapStats, $('.arches-map-footer')[0]);
+
+                this.map.on('mousePositionChanged', function (mousePosition, pixels, feature) {
                     var cursorStyle = "";
                     currentMousePx = pixels;
+
+                    self.mapStats.mousePosition(mousePosition);
 
                     if (feature && (feature.get('arches_marker') || feature.get('arches_cluster'))) {
                         cursorStyle = "pointer";
@@ -332,6 +341,7 @@ define(['jquery',
                 var currentZoom;
                 this.map.on('viewChanged', function (zoom, extent) {
                     currentZoom = zoom;
+                    self.mapStats.mapZoom(zoom);
                 });
 
                 this.map.on('mapClicked', function(e, clickFeature) {
