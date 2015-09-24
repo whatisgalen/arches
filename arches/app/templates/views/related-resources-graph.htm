@@ -1,30 +1,8 @@
 {% load i18n %}
-<!-- <div class="row">
-    <div class="node_info" style="position: absolute;margin-top: 15px;right: 40px;display:none;">
-        <dl style="margin-bottom: 0;">
-            <dd class="arches-concept-heirarchy">
-                <div>
-                    <a href="#" target="_blank" class="arches-CRUD-child selected-resource-name"></a>
-                </div>
-                <div>
-                    <small class="arches-search-subtitle"><i class="resource-type-icon" style="padding-right:5px;"></i><span class="resource-type-name"></span></small>
-                </div>
-                <div>
-                    <small class="arches-search-subtitle relation-count" style="display:none;"><span class="relation-load-count"></span> {% trans 'out of' %} <span class="relation-total-count"></span> {% trans 'relations loaded' %}</small>
-                    <small class="arches-search-subtitle relation-unloaded">{% trans 'relations not loaded' %}</small>
-                </div>
-                <div>
-                    <small class="arches-search-subtitle"><a href="javascript:void(0);" class="load-more-relations-link">{% trans 'load more relations' %}</a></small>
-                </div>
-            </dd>
-        </dl>
-    </div>
-</div> -->
-
 <!-- Graph Info Panel -->
-<div class="node_info" style="position: absolute ;top:10px; left:-9px;display:none;">
+<div class="col-xs-5 node_info">
     <div class="row">
-        <div class="col-xs-5 col-xs-offset-7">
+        <div>
 
             <!-- Using Bootstrap Model CSS classes to get the overall look of the info panel,
             but the actual info panel is NOT implemented as a model form -->
@@ -61,19 +39,19 @@
                     <!-- Search Widget  -->
                     <div class="" style="padding-bottom: 15px; padding-left: 20px; padding-right: 20px; margin-left: -15px; margin-right: -15px; background: #fff; border-bottom-color: #f0f0f0; border-bottom-width: 1px; border-bottom-style: solid;">
 
-                        <input id="" class="select2 arches-select2 graph-search-widget" name="" style="width:100%; " placeholder="Find a resource..." value=""></input>
+                        <input id="graph-filter" class="select2 arches-select2 graph-search-widget" name="" style="width:100%; " placeholder="Find a resource..." value=""></input>
 
                     </div>
 
-                    <div class="row" style="padding-top: 0px; height: 285px; background: #fff; overflow:scroll;">
+                    <div style="padding-top: 0px; height: 330px; background: #fff; overflow-y:scroll;">
                         
                         <!-- Search Results Container -->
                         <!-- ko foreach: $data -->
-                        <div class="" style="width: 100%;"  data-bind="if: !isRoot">
+                        <div class="" style="width: 100%;" data-bind="if: !isRoot()">
                             <!-- Spacer -->
                             <hr class="margin-10">
 
-                            <div class="inner-results padding-left-5" style="width:400px;">
+                            <div class="inner-results padding-left-5" data-bind="attr:{'data-entityid': entityid}">
 
                                 <!-- Item Header -->
                                 <h4>
@@ -86,70 +64,28 @@
 
                                 <!-- Sub-header -->
                                 <ul class="list-inline up-ul">
-                                    {% if user_can_edit == True %}
-                                    <li>
-                                        <i class="arches-search-link fa fa-pencil"></i>&nbsp;
-                                        <a href="" data-bind="attr: {'href': 'resources/' +  entitytypeid + '/default/' + entityid}"><span class="arches-search-link">{% trans "Edit" %}</span></a>
-                                    </li>
-                                    {% endif %}
 
-                                    <li>
-                                        <i class="arches-search-link fa fa fa-sitemap"></i>
-                                        <span class="arches-search-link map-toggle" data-bind="with: relationCount"><!--ko text: loaded--><!--/ko--> of <!--ko text: total--><!--/ko--> resources loaded</span>
+                                    <li data-bind="with: relationCount">
+                                        <div data-bind="if: total">
+                                            <i class="arches-search-link fa fa fa-sitemap"></i>
+                                            <span class="arches-search-link map-toggle" data-bind="if: total"><span data-bind="text:loaded"></span> {% trans 'of' %} <span data-bind="text:total"></span> {% trans 'relations loaded' %}</span>
+                                        </div>
+                                        <div data-bind="if: !total()">
+                                            <i class="arches-search-link fa fa fa-sitemap"></i>
+                                            <span class="arches-search-link map-toggle">{% trans '0 relations loaded' %}</span>
+                                        </div>
                                     </li>
 
-                                    <li>
+                                    <li data-bind="if: relationCount.total() !== relationCount.loaded()">
                                         <i class="arches-search-link fa fa-cloud-download"></i>
-                                        <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
-                                        <a href="javascript:void(0);" class="info-link load-more-relations-link" data-bind="attr:{'data-name': name, 'data-entityid': entityid, 'data-entitytypeid': entitytypeid, }">{% trans 'load more' %}</a>
+                                        <a href="javascript:void(0);" class="load-more-relations-link" data-bind="attr:{'data-name': name, 'data-entityid': entityid, 'data-entitytypeid': entitytypeid, }"><span class="arches-search-link">{% trans 'Load more' %}</span></a>
                                     </li>
 
                                 </ul>
                                 <!-- End Item Sub-Header -->
 
-
-                                <!-- Item Creator/Editor -->
-                                <!-- This list is hidden for guests, but shown if user is logged in with editor privileges -->
-                                <!-- End Item Creator/Editor -->
-
                             </div>
                             
-                            <!-- Begin Search Item -->
-                            <div  class="arches-search-item hidden">
-                                
-                                <!-- Spacer -->
-                                <hr class="margin-10">
-
-                                <div class="inner-results arches-graph-list-item" style="">
-
-                                    <!-- Item Header -->
-                                    <h4>
-                                        <a class="arches-graph-search-title" style="" href="#" data-bind="text:name">Castle Anthrax</a> 
-                                        &nbsp;
-                                        <span class="">
-                                            <small class="arches-graph-search-subtitle"><i class="fa fa-trophy"></i>Heritage Resource</small>
-                                        </span>
-                                    </h4>
-
-                                    <!-- Sub-header -->
-                                    <ul class="list-inline up-ul arches-tool-subheader">
-
-                                        <li>
-                                            <i class="arches-search-link fa fa fa-sitemap"></i>
-                                            <span class="arches-search-link map-toggle"> 15 of 42 resources loaded</span>
-                                        </li>
-
-                                        <li>
-                                            <i class="arches-search-link fa fa-cloud-download"></i>
-                                            <a href="#" class="info-link related-resources-graph" id="rr-3"><span class="arches-search-link"> Load more</span></a>
-                                        </li>
-
-                                    </ul>
-                                    <!-- End Item Sub-Header -->
-
-                                </div>
-                            </div>
-                            <!-- End Search Item -->
                         </div>
                         <!-- /ko -->
                     </div>

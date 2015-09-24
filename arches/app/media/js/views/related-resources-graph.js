@@ -1,11 +1,13 @@
-define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'plugins/d3-tip', 'knockout'], function($, Backbone, _, arches, resourceTypes, d3, d3Tip, ko) {
+define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'plugins/d3-tip', 'knockout', 'knockout-mapping'], function($, Backbone, _, arches, resourceTypes, d3, d3Tip, ko, koMapping) {
     return Backbone.View.extend({
         resourceId: null,
         resourceName: '',
         resourceTypeId: '',
         newNodeId: 0,
         events: {
-            'click .load-more-relations-link': 'loadMoreRelations'
+            'click .load-more-relations-link': 'loadMoreRelations',
+            'keyup #graph-filter': 'filterGraph',
+            'mouseover .inner-results': 'highlightNode'
         },
 
         initialize: function(options) {
@@ -16,7 +18,7 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
             _.extend(this, _.pick(options, 'resourceId', 'resourceName', 'resourceTypeId'));
             
             this.nodeMap = {};
-            this.nodeList = ko.observableArray();
+            this.nodeList = koMapping.fromJS([]);
             ko.applyBindings(this.nodeList, $('#graph-detail-panel')[0]);
             this.linkMap = {};
             this.data = {
@@ -193,7 +195,6 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                         .attr('class', function(l) {
                             return (l.source === d || l.target === d) ? 'linkMouseover' : 'link';
                         });
-                    self.updateNodeInfo(d);
                     self.nodeTip.show(d, this);
                 })
                 .on('mouseout', function (d) {
@@ -250,32 +251,38 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
             self.force.start();
         },
 
-        updateNodeInfo: function (d) {
+        highlightNode: function(e){
             var self = this;
-            var iconEl = self.$el.find('.resource-type-icon');
-            self.$el.find('.selected-resource-name').html(d.name);
-            self.$el.find('.selected-resource-name').attr('href', arches.urls.reports + d.entityid);
-            self.$el.find('.resource-type-name').html(resourceTypes[d.entitytypeid].name);
-            if (d.relationCount) {
-                self.$el.find('.relation-unloaded').hide();
-                self.$el.find('.relation-count').show();
-                self.$el.find('.relation-load-count').html(d.relationCount.loaded);
-                self.$el.find('.relation-total-count').html(d.relationCount.total);
-                if (d.relationCount.loaded === d.relationCount.total) {
-                    self.$el.find('.load-more-relations-link').hide();
-                } else { 
-                    self.$el.find('.load-more-relations-link').show();
-                }
-            } else {
-                self.$el.find('.load-more-relations-link').show();
-                self.$el.find('.relation-count').hide();
-                self.$el.find('.relation-unloaded').show();
+            if(e.currentTarget){
+                var d = $(e.currentTarget).data();
+                self.vis.selectAll("circle")
+                    .attr("class", function(d1){
+                        var className = 'node-ancestor';// + (d.isRoot ? 'current' : 'ancestor');
+                        if (d1.entityid === d.entityid) {
+                            className += '-over';
+                        }
+                        return className;
+                    });
             }
-            iconEl.removeClass();
-            iconEl.addClass('resource-type-icon');
-            iconEl.addClass(resourceTypes[d.entitytypeid].icon);
-            self.$el.find('.node_info').show();
-            self.selectedNode = d;
+        },
+
+        filterGraph: function(e){
+            var text = $(e.currentTarget).val().toLowerCase();
+
+            var data = _.filter(_.toArray(this.nodeMap), function(item){ 
+                if(item.name.toLowerCase().indexOf(text) > -1 || item.isRoot){
+                    return item;
+                }
+                if(item.typeName.toLowerCase().indexOf(text) > -1){
+                    return item;
+                }
+            });
+            koMapping.fromJS(data, this.nodeList);
+        },
+
+        updateNodeInfo: function (d) {
+            koMapping.fromJS(_.toArray(this.nodeMap), this.nodeList);
+            this.$el.find('.node_info').show();
         },
 
         loadMoreRelations: function () {
@@ -301,7 +308,7 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
             var rootNode = this.nodeMap[resourceId];
 
             if (rootNode) {
-                if (rootNode.relationCount) {
+                if (rootNode.relationCount.total) {
                     load = (rootNode.relationCount.total > rootNode.relationCount.loaded && !rootNode.loading);
                     start = rootNode.relationCount.loaded;
                 }
@@ -337,9 +344,8 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                             };
                             nodes.push(rootNode);
                             self.nodeMap[resourceId] = rootNode;
-                            self.nodeList.push(rootNode);
                             self.newNodeId += 1;
-                        } else if (rootNode.relationCount) {
+                        } else if (rootNode.relationCount.total) {
                             rootNode.relationCount.loaded = rootNode.relationCount.loaded + response.resource_relationships.length;
                         } else {
                             rootNode.relationCount = {
@@ -347,8 +353,8 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                                 loaded: response.resource_relationships.length
                             };
                         }
+
                         rootNode.loading = false;
-                        self.updateNodeInfo(rootNode);
                         _.each(response.related_resources, function (related_resource) {
                             if (!self.nodeMap[related_resource.entityid]) {
                                 var node = {
@@ -360,14 +366,18 @@ define(['jquery', 'backbone', 'underscore', 'arches', 'resource-types', 'd3', 'p
                                     name: related_resource.primaryname,
                                     isRoot: false,
                                     relationType: 'Ancestor',
-                                    relationCount: null
+                                    relationCount: {
+                                        total: undefined,
+                                        loaded: 0
+                                    }
                                 };
                                 nodes.push(node);
                                 self.nodeMap[related_resource.entityid] = node;
-                                self.nodeList.push(node);
                                 self.newNodeId += 1;
                             }
                         });
+
+                        self.updateNodeInfo(rootNode);
 
                         _.each(response.resource_relationships, function (resource_relationships) {
                             var sourceId = self.nodeMap[resource_relationships.entityid1];

@@ -250,7 +250,7 @@ ul.jqtree-tree li.jqtree-ghost span.jqtree-circle {
 
 .node-ancestor-over {
     stroke: #000000;
-    stroke-width: 3px;
+    stroke-width: 4px;
     fill: #dcecfa;
     opacity: 1.;
     cursor: pointer;
@@ -307,9 +307,8 @@ ul.jqtree-tree li.jqtree-ghost span.jqtree-circle {
     height: auto;
     position: absolute;
     top:10px; 
-    left:-9px;
+    right: 10px;
     display:none;
-    width: 100%;
 /*    padding: 15px;
     background-color: white;
     -webkit-border-radius: 12px;
