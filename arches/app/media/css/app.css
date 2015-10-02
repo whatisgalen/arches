@@ -22,8 +22,7 @@ body {
 }
 
 p, 
-li,
-li a { 
+li{ 
    color: #555;
 }
 
