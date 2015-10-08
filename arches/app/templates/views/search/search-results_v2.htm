@@ -14,7 +14,7 @@
     <!-- Begin Search Results -->
     <div class="col-xs-12 search-results-list-container" style="">
         
-        <div id="search-results-list" data-bind="foreach: results, visible: true" style="display: none; height:490px;">
+        <div id="search-results-list" class="container" data-bind="foreach: results, visible: true" style="display: none; height:490px;">
 
             <!-- Begin Search Item  -->
             <div  class="arches-search-item-v2" data-bind="attr: { 'data-resourceid': resourceid }">
@@ -75,14 +75,24 @@
             <!-- End Search Item -->
         </div>
 
-
-
-        <!-- Pagination -->
-        <div id="paginator" data-bind="html: paginator"></div>
-        <!-- End Pagination -->  
-
     </div> 
     <!-- End Search Results -->
+
+    
+
+    
                                
 </div>
+
+<!-- Pagination -->
+<div class="">
+    <div class="row">
+        <div class="col-xs-12 search-results-list-container" style="">
+            <div id="paginator" data-bind="html: paginator"></div>
+        </div>
+    </div>
+</div>
+<!-- End Pagination -->  
+
+
 <!-- End Content --> 

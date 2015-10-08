@@ -768,7 +768,7 @@ input.arches-select2:-ms-input-placeholder {
     /*color: #3A67A6;*/
     font-size: 15px;
     font-weight: 400;
-    border: 1px solid rgba(206,217,233,.95);
+    /*border: 1px solid rgba(206,217,233,.95);*/
 }
 
 .arches-map-tools:active {
