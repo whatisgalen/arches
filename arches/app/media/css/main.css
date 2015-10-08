@@ -2704,6 +2704,20 @@ ul.labels-demo li {
     font-size: 14px;
 }
 
+.arches-search-item-v2{
+    margin-top: -10px; 
+    margin-bottom: -10px; 
+    padding-left: 15px;
+}
+
+.arches-search-item-v2:hover {
+    background: #f9f9f9;
+}
+
+.arches-search-item-selected-v2 {
+    background: #f9f9f9;
+}
+
 .arches-search-item {
     margin-top: -10px; 
     margin-bottom: -10px; 
@@ -2823,9 +2837,9 @@ ul.labels-demo li {
 }
 
 .arches-map-footer {
-    margin-top: -74px;
+    margin-top: -75px;
     height: 75px; 
-    opacity: .80;
+    opacity: .33;
     background: steelblue;
 }
 
@@ -3163,7 +3177,7 @@ a.disabled {
 
 .section-headline {
     margin-top: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 3px;
     font-size: 17px;
     font-weight: 400;
 }
@@ -3226,7 +3240,7 @@ a.disabled {
     font-size: 15px;
     font-weight: 400;
     margin-top: 10px;
-    color: #000000;
+    color: #777;
 }
 
 

@@ -32,7 +32,7 @@
         </div>
             
         <!-- Map -->
-        <div class="col-xs-12" style="margin-top: -50px;">
+        <div class="col-xs-12" style="margin-top: -55px;">
             
             <div id="map" class="map arches-map-filter arches-search-map">
                 <div class="tooltip left" role="tooltip" style="display:none;" id="feature_tooltip">
@@ -50,7 +50,7 @@
                 <div class="row">
                     <div class="col-xs-12 col-sm-6" style="">
 
-                        <div id="basemaps-panel" class="tools-panel hidden" style="overflow-y: scroll; border-top-left-radius: 5px; border-top-right-radius: 5px; margin-top: -408px; height: 332px; width: 290px; margin-left: 15px;">
+                        <div id="basemaps-panel" class="tools-panel hidden" style="overflow-y: scroll; border-top-left-radius: 5px; border-top-right-radius: 5px; margin-top: -415px; height: 337px; width: 290px; margin-left: 35px;">
                             <div class="modal-header arches-modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                                     ×
@@ -90,6 +90,7 @@
                     </div>
                 </div>
                 <!-- End Map Tools Panel -->
+                
                 <!-- Info Panel -->
                 <div id="resource-info" class="row" style="display:none;">
 
@@ -98,7 +99,7 @@
 
                         <!-- Using Bootstrap Model CSS classes to get the overall look of the info panel,
                         but the actual info panel is NOT implemented as a model form -->
-                        <div class="modal-content no-corners arches-map-inventory-panel" style="margin-top: -408px;margin-right: 20px; z-index: 9999;">
+                        <div class="modal-content no-corners arches-map-inventory-panel" style="margin-top: -612px;margin-right: 20px; z-index: 9999;">
                             <div class="modal-header">
                                 <button type="button" class="close resource-info-closer" aria-hidden="true">
                                     ×
@@ -186,85 +187,73 @@
                 </div>
             </div>
 
-            <!-- Map Tools -->
-<!--             <div class="row">
-                <div class="col-xs-12 col-sm-7 col-md-5 col-lg-4" style="margin-top: -77px; margin-left: 30px;">
-                    <div class="btn-group">
-                        <button id="inventory-basemaps" type="button" class="btn btn-primary arches-map-tools" style="width:290px;"><i class="fa fa-globe"></i> {% trans "Basemaps" %}
-                        </button>
-                    </div>
-                </div>
-            </div> -->
-            <!-- End Map Tools -->
+ 
+            <!-- Map Footer -->
+            <div class="fgi-map-footer arches-map-footer"></div>
+                <div class="container map-border">
 
-
-                <!-- Map Footer -->
-                <div class="fgi-map-footer arches-map-footer">
-                    <div class="container map-border">
-
-                        <!-- Tool Buttons -->
-                        <div>
-                            <!-- Map tools button -->
-                            <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
-                                <button class="btn-u btn-u-green arches-button" style="width: 32px; height: 32px;" type="button" title="Map Tools"><i class="fa fa-2x fa-info-circle" style="  font-size: 21px; margin-top: -1px; margin-left: -7px;"></i></button>
-                            </div>
-
-                            <!-- Time Control button -->
-                            <div class="" style="width: 32px; height: 32px; margin-top: 3px;">
-                                <button class="btn-u btn-u-default" style="width: 32px; height: 32px;" type="button" title="Time Controls"><i class="fa fa-2x fa-clock-o" style="  font-size: 21px; margin-top: -1px; margin-left: -6px;"></i></button>
-                            </div>
+                    <!-- Tool Buttons -->
+                    <div>
+                        <!-- Map tools button -->
+                        <div class="hidden" style="width: 32px; height: 32px; margin-top: 3px;">
+                            <button class="btn-u btn-u-green arches-button" style="width: 32px; height: 32px;" type="button" title="Map Tools"><i class="fa fa-2x fa-info-circle" style="  font-size: 21px; margin-top: -1px; margin-left: -7px;"></i></button>
                         </div>
 
-                        <div class="row" style="margin-left: 25px;">
+                        <!-- Time Control button -->
+                        <div class="hidden" style="width: 32px; height: 32px; margin-top: 3px;">
+                            <button class="btn-u btn-u-default" style="width: 32px; height: 32px;" type="button" title="Time Controls"><i class="fa fa-2x fa-clock-o" style="  font-size: 21px; margin-top: -1px; margin-left: -6px;"></i></button>
+                        </div>
+                    </div>
 
-                            <div class="col-xs-12">
+                    <div class="row" style="margin-left: 25px;">
 
-                                <div class="" style="margin-top: 25px; margin-left: -5px; margin-top: -67px;">
-                                    <!-- Basemap -->
-                                    <div class="" style="">
+                        <div class="col-xs-12" style="margin-bottom: -14px;">
 
-                                        <button id="inventory-basemaps" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Select Basemap"><i class="fa fa-globe fa-2x" style="margin-top: 0px; margin-left: -5px;"></i></button>
+                            <div class="" style="margin-top: 25px; margin-left: -5px; margin-top: -70px;">
+                                <!-- Basemap -->
+                                <div class="" style="">
 
-                                    </div>
-                                    <!-- End Basemap -->
-
-                                    <!-- Overlay -->
-                                    <div class="" style="margin-left: 70px; margin-top: -67px;">
-
-                                        <button id="show-overlays" class="btn-u btn-u-green arches-button" style="width: 67px; height: 67px;" type="button" title="Add Overlays"><i class="fa fa-align-justify fa-2x" style="margin-top: 0px; margin-left: 0px;"></i></button>
-
-                                    </div>
-                                    <!-- End Overlay -->
-
-                                    <!-- Zoom Readout -->
-                                    <div class="info-blocks" style="margin-left: 150px; margin-top: -55px;">
-                                        <div class="info-blocks-in margin-bottom-0">
-                                            <p class="margin-top-5">
-                                                <span class="arches-map-inventory-footer-text">
-                                                    Map Zoom: <span data-bind="text:mapZoom">10</span> &nbsp; &nbsp;
-                                                </span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Coordinate Readout -->
-                                    <div class="info-blocks" style="margin-left: 150px; margin-top: -38px;">
-                                        <div class="info-blocks-in margin-bottom-0">
-                                            <p class="margin-top-5">
-                                                <span class="arches-map-inventory-footer-text">
-                                                    Cursor: <span data-bind="text:mousePosition"></span> <span class="hidden-xs">(long,lat)</span>
-                                                </span>
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <button id="inventory-basemaps" class="btn btn-primary arches-button" style="width: 67px; height: 67px;" type="button" title="Select Basemap"><i class="fa fa-globe fa-2x" style="margin-top: 0px; margin-left: 0px;"></i></button>
 
                                 </div>
+                                <!-- End Basemap -->
+
+                                <!-- Overlay -->
+                                <div class="" style="margin-left: 70px; margin-top: -67px;">
+
+                                    <button id="show-overlays" class="btn btn-primary arches-button" style="width: 67px; height: 67px;" type="button" title="Add Overlays"><i class="fa fa-align-justify fa-2x" style="margin-top: 0px; margin-left: 0px;"></i></button>
+
+                                </div>
+                                <!-- End Overlay -->
+
+                                <!-- Zoom Readout -->
+                                <div class="info-blocks" style="margin-left: 150px; margin-top: -55px;">
+                                    <div class="info-blocks-in margin-bottom-0">
+                                        <p class="margin-top-5">
+                                            <span class="arches-map-inventory-footer-text">
+                                                Map Zoom: <span data-bind="text:mapZoom">10</span> &nbsp; &nbsp;
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Coordinate Readout -->
+                                <div class="info-blocks" style="margin-left: 150px; margin-top: -38px;">
+                                    <div class="info-blocks-in margin-bottom-0">
+                                        <p class="margin-top-5">
+                                            <span class="arches-map-inventory-footer-text">
+                                                Cursor: <span data-bind="text:mousePosition"></span> <span class="hidden-xs">(long,lat)</span>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
-
                     </div>
                 </div>
-                <!-- End Map Footer -->
+            </div>
+            <!-- End Map Footer -->
 
         </div>
         

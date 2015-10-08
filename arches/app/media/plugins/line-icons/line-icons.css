@@ -202,6 +202,7 @@ you can use the generic selector below, but it's slower:
 }
 .icon-globe:before {
 	content: "\e037";
+	margin-left: 2px;
 }
 .icon-frame:before {
 	content: "\e038";
