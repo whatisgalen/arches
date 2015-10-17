@@ -101,8 +101,8 @@ ul.jqtree-tree li.jqtree-ghost span.jqtree-circle {
 /* Concept search widget
 ------------------------------------*/
 
-.concept_result {
-    font-weight:bold;
+.select2-results li.select2-result-with-children > .select2-result-label {
+    font-style:italic;
 }
 
 .concept_result_schemaname {
@@ -341,10 +341,6 @@ ul.jqtree-tree li.jqtree-ghost span.jqtree-circle {
 .select2-arrow{
     display: none !important; /*removes the down arrow from dropdowns*/
 }
-
-.resource_search_widget_dropdown .select2-results li:first-child{     
-    display:none;
-} 
 
 input.resource_search_widget {
     border: 1px solid #ccc;
@@ -842,15 +838,16 @@ input.arches-select2:-ms-input-placeholder {
 
 
 .tools-panel {
-    margin-top: -518px;
+    margin-top: -481px;
     height: 400px; 
     width: 349px; 
-    margin-left: -1px;
+    margin-left: 13px;
     background: #ffffff; 
     border: 1px solid rgba(0,0,0,.15); 
     opacity: 1.0; 
     border-top-left-radius: 1px; 
     border-top-right-radius: 1px;
+    overflow: hidden;
 }
 
 .overlay-entry {
@@ -1133,6 +1130,11 @@ input.arches-select2:-ms-input-placeholder {
     border: 1px solid rgb(197, 197, 197);
     background-color: #FFF;
     color: #416CA9;
+}
+
+.knob {
+    font-size: 11px;
+    font-weight: 200;
 }
 
 

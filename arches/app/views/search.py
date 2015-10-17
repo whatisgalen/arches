@@ -151,6 +151,7 @@ def search_terms(request):
         prefLabel = get_preflabel_from_conceptid(result['_source']['context'], lang)
         result['_source']['options']['context_label'] = prefLabel['value']
 
+    results['geocode'] =  geocoder.find_candidates(request.GET.get('q', ''))
     return JSONResponse(results)
 
 def build_search_terms_dsl(request):

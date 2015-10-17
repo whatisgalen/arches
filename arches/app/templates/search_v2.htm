@@ -151,3 +151,13 @@
 <!-- End Main Content (search bars, map, map footer) -->
 
 {% endblock content %}
+
+{% block pre_require_js %}
+    {% include 'map/resource-layers.htm' %}
+    {% include 'map/layers.htm' %}
+    <script>
+        define('selected-resource-id', [], function () {
+            return '{{resource_id}}';
+        });
+    </script>
+{% endblock pre_require_js %}

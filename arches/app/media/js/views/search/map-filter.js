@@ -5,40 +5,26 @@ define(['jquery',
     'bootstrap',
     'arches', 
     'views/map',
+    'map/layers',
     'openlayers', 
     'knockout',
     'map/resource-layer-model',
     'utils',
-    'resource-types',], 
-    function($, jqui, _, Backbone, bootstrap, arches, MapView, ol, ko, ResourceLayerModel, utils, resourceTypes) {
+    'resource-types',
+    'plugins/jquery.knob.min'], 
+    function($, jqui, _, Backbone, bootstrap, arches, MapView, layers, ol, ko, ResourceLayerModel, utils, resourceTypes) {
         var geoJSON = new ol.format.GeoJSON();
         return Backbone.View.extend({
             previousEntityIdArray: [],
 
             events: {
+                'click .visibility-toggle': 'visibilityToggle',
                 'click .layer-zoom': 'layerZoom',
-                'click .cluster-item-link': 'clusterItemClick'
+                'click .cluster-item-link': 'clusterItemClick',
             },
 
             initialize: function(options) { 
                 var self = this;
-
-                //  Handle show/hide toggle ourselves
-                $('#map-tools-btn').on('click', function(evt) {
-                    self.toggleMapTools();
-                    return false;
-                });
-                $('#map-tools-dropdown').on('click', 'a', function(evt) {
-                    if($(evt.target).attr('name') === 'map-tools'){
-                        self.togglefilter(evt);
-                    }
-                    return false;
-                });
-
-                //  suppress default bahavior of the bootstrap menu to auto close
-                $('#map-tools-btn').on('hide.bs.dropdown', false);            
-                $('#map-tools-btn').on('show.bs.dropdown', false);
-
 
                 this.expanded = ko.observable(false);
                 this.expanded.subscribe(function(status){
@@ -64,8 +50,6 @@ define(['jquery',
                     }, this).extend({ rateLimit: 200 })
                 }
 
-                ko.applyBindings(this.query.filter, $('#map-tools-dropdown')[0]); 
-
                 this.query.filter.buffer.width.subscribe(function(){
                     self.applyBuffer();
                 });
@@ -76,24 +60,27 @@ define(['jquery',
                     return enabled;
                 }, this);
 
+                this.initalizeMapTools(this.query.filter);
 
-                this.vectorLayer = new ResourceLayerModel({}, function(features){
-                    self.resourceFeatures = features;
-                    if (self.highlightOnLoad) {
-                        _.defer(function () { self.highlightFeatures(self.highlightOnLoad.resultsarray, self.highlightOnLoad.entityIdArray) });
-                    }
-                    self.trigger('vectorlayerloaded', features);
-                    if (!self.cancelFitBaseLayer){
-                        setTimeout(function() {
-                              self.zoomToExtent(self.vectorLayer.getSource().getExtent());
-                        }, 500);                        
-                    }
-                }).layer();
+
+                // this.vectorLayer = new ResourceLayerModel({}, function(features){
+                //     self.resourceFeatures = features;
+                //     if (self.highlightOnLoad) {
+                //         _.defer(function () { self.highlightFeatures(self.highlightOnLoad.resultsarray, self.highlightOnLoad.entityIdArray) });
+                //     }
+                //     self.trigger('vectorlayerloaded', features);
+                //     if (!self.cancelFitBaseLayer){
+                //         setTimeout(function() {
+                //               self.zoomToExtent(self.vectorLayer.getSource().getExtent());
+                //         }, 500);                        
+                //     }
+                // }).layer();
                 this.map = new MapView({
                     el: $('#map'),
-                    overlays: [this.vectorLayer]
+                    //overlays: [this.vectorLayer]
                 });
 
+                this.initializeOverlayManager(layers, this.map);
 
                 this.bufferFeatureOverlay = new ol.FeatureOverlay({
                     style: new ol.style.Style({
@@ -124,28 +111,79 @@ define(['jquery',
                 
                 ko.applyBindings(this.map, $('#basemaps-panel')[0]);
 
-                var hideAllPanels = function(){
+                // var hideAllPanels = function(){
+                //     $("#basemaps-panel").addClass("hidden");
+
+                //     //Update state of remaining buttons
+                //     $("#inventory-basemaps")
+                //         .removeClass("arches-map-tools-pressed")
+                //         .addClass("arches-map-tools")
+                //         .css("border-bottom-left-radius", "1px");
+                // };
+                var hideAllPanels = function () {
+                    $("#overlay-panel").addClass("hidden");
                     $("#basemaps-panel").addClass("hidden");
 
                     //Update state of remaining buttons
-                    $("#inventory-basemaps")
-                        .removeClass("arches-map-tools-pressed")
-                        .addClass("arches-map-tools")
-                        .css("border-bottom-left-radius", "1px");
+                    $("#inventory-basemaps").removeClass("arches-map-tools-pressed");
+                    $("#inventory-basemaps").addClass("arches-map-tools");
+                    $("#inventory-basemaps").css("border-bottom-left-radius", "1px");
+
+                    $("#inventory-overlays").removeClass("arches-map-tools-pressed");
+                    $("#inventory-overlays").addClass("arches-map-tools");
+                    $("#inventory-overlays").css("border-bottom-right-radius", "1px");
                 };
+
+                // //Inventory-basemaps button opens basemap panel
+                // $("#inventory-basemaps").click(function (){
+                //     if ($(this).hasClass('arches-map-tools-pressed')) {
+                //         hideAllPanels();
+                //     } else {
+                //         $("#basemaps-panel").removeClass("hidden");
+
+                //         //Update state of current button and adjust position
+                //         $("#inventory-basemaps")
+                //             .addClass("arches-map-tools-pressed")
+                //             .removeClass("arches-map-tools")
+                //             .css("border-bottom-left-radius", "5px");
+                //     }
+                // });
 
                 //Inventory-basemaps button opens basemap panel
                 $("#inventory-basemaps").click(function (){
                     if ($(this).hasClass('arches-map-tools-pressed')) {
                         hideAllPanels();
                     } else {
+                        $("#overlay-panel").addClass("hidden");
                         $("#basemaps-panel").removeClass("hidden");
 
+                        //Update state of remaining buttons
+                        $("#inventory-overlays").removeClass("arches-map-tools-pressed");
+                        $("#inventory-overlays").addClass("arches-map-tools");
+                        $("#inventory-overlays").css("border-bottom-right-radius", "3px");
+
                         //Update state of current button and adjust position
-                        $("#inventory-basemaps")
-                            .addClass("arches-map-tools-pressed")
-                            .removeClass("arches-map-tools")
-                            .css("border-bottom-left-radius", "5px");
+                        $("#inventory-basemaps").addClass("arches-map-tools-pressed");
+                        $("#inventory-basemaps").removeClass("arches-map-tools");
+                        $("#inventory-basemaps").css("border-bottom-left-radius", "3px");
+                    }
+                });
+
+                //Inventory-overlayss button opens overlay panel
+                $("#inventory-overlays").click(function (){
+                    if ($(this).hasClass('arches-map-tools-pressed')) {
+                        hideAllPanels();
+                    } else {
+                        $("#overlay-panel").removeClass("hidden");
+                        $("#basemaps-panel").addClass("hidden");
+
+                        //Update state of remaining buttons
+                        $("#inventory-basemaps").removeClass("arches-map-tools-pressed");
+                        $("#inventory-basemaps").addClass("arches-map-tools");
+
+                        //Update state of current button and adjust position
+                        $("#inventory-overlays").addClass("arches-map-tools-pressed");
+                        $("#inventory-overlays").removeClass("arches-map-tools");
                     }
                 });
 
@@ -241,6 +279,10 @@ define(['jquery',
                     }
                     self.map.$el.css("cursor", cursorStyle);
                 });
+
+
+
+
 
                 var clusterFeaturesCache = {};
 
@@ -453,6 +495,228 @@ define(['jquery',
                 // });
             },
 
+            initalizeMapTools: function(filter){
+                var self = this;
+
+                //  Handle show/hide toggle ourselves
+                var mapToolsBtn = $('#map-tools-btn');
+                mapToolsBtn.on('click', function(evt) {
+                    if(mapToolsBtn.hasClass('open')){
+                        self.disableDrawingTools();
+                    }
+                    else {
+                        self.enableDrawingTools();
+                    }
+                    mapToolsBtn.toggleClass('open');
+                    return false;
+                });
+
+                $('#map-tools-dropdown').on('click', 'a', function(evt) {
+                    if($(evt.target).attr('name') === 'map-tools'){
+                        self.togglefilter(evt);
+                    }
+                    return false;
+                });
+
+                //  suppress default bahavior of the bootstrap menu to auto close
+                mapToolsBtn.on('hide.bs.dropdown', false);            
+                mapToolsBtn.on('show.bs.dropdown', false);
+
+                ko.applyBindings(filter, $('#map-tools-dropdown')[0]); 
+            },
+
+            initializeOverlayManager: function(layers, map){
+                var self = this;
+                var filterTerms = ko.observableArray();
+
+                var elevateArchesResourceLayers = function () {
+                    map.map.getLayers().forEach(function(layer, index) {
+                        if (layer.get('is_arches_layer')) {
+                            map.map.removeLayer(layer);
+                            map.map.addLayer(layer);
+                        }
+                    });
+                };
+
+                var configureKnobs = function(){
+                    $('.knob').knob({
+                        change: function (value) {
+                            var layerId = this.$.data().layerid;
+                            var layer = ko.utils.arrayFirst(layers(), function(item) {
+                                return layerId === item.id;
+                            });
+                            layer.layer.setOpacity(value/100);
+                        }
+                    });
+                    $(".knob").css("font-size", 11);
+                    $(".knob").css("font-weight", 200);
+                };
+
+                this.getLayerById = function(layerId) {
+                    return ko.utils.arrayFirst(layers(), function(item) {
+                        return layerId === item.id;
+                    });
+                };
+
+                this.visibilityToggle = function (e) {
+                    var layer = this.getLayerById($(e.target).closest('.visibility-toggle').data().layerid);
+                    if(layer.available()){
+                        layer.onMap(!layer.onMap());
+                    }else{
+                        layer.active(!layer.active());
+                    }
+                };
+
+                this.layerZoom = function (e) {
+                    var layer = this.getLayerById($(e.target).closest('.layer-zoom').data().layerid).layer;
+                    if (layer.getLayers) {
+                        layer = layer.getLayers().getArray()[0];
+                    }
+                    if (layer.getSource) {
+                        map.map.getView().fitExtent(layer.getSource().getExtent(), map.map.getSize());
+                    }
+                };
+
+                _.each(layers, function(layer, index) {
+                    if (layer.onMap) {
+                        if (typeof layer.layer == 'function') {
+                            layer.layer = layer.layer();
+                        }
+                        map.map.addLayer(layer.layer);
+                    }
+                    layer.onMap = ko.observable(layer.onMap);
+                    layer.available = ko.observable(false);
+                    layers[index].onMap.subscribe(function(add) {
+                        // allow for lazy instantiation (and thus load)
+                        if (typeof layer.layer == 'function') {
+                            layer.layer = layer.layer();
+                        }
+                        if (add) {
+                            map.map.addLayer(layer.layer);
+                            elevateArchesResourceLayers();
+                        } else {
+                            map.map.removeLayer(layer.layer);
+                        }
+                    });
+                    layer.active = ko.observable(true);
+                    layers[index].active.subscribe(function(show) {
+                        layer.layer.setVisible(show);
+                    });
+                    layer.filtered = ko.observable(false);
+                });
+
+                layers = ko.observableArray(layers),
+                ko.applyBindings(layers, $('#overlay-panel')[0]);
+                ko.applyBindings(layers, $('#layer-library')[0]);
+
+                configureKnobs();
+
+                map.on('layerDropped', function (layer, name) {
+                    var layerModel = new LayerModel({
+                          name: name,
+                          description: '',
+                          categories: [''],
+                          icon: 'fa fa-map-marker',
+                          layer: layer,
+                          onMap:  ko.observable(true),
+                          active: ko.observable(true),
+                          filtered: ko.observable(false)
+                    });
+                    layerModel.onMap.subscribe(function(add) {
+                        if (add) {
+                            map.map.addLayer(layer);
+                            elevateArchesResourceLayers();
+                        } else {
+                            map.map.removeLayer(layer);
+                        }
+                    });
+                    layerModel.active.subscribe(function(show) {
+                        layer.setVisible(show);
+                    });
+                    layers.push(layerModel);
+
+                    configureKnobs();
+
+                    $('[data-toggle="popover"]').popover();
+                });
+
+                //Show and hide Layer Library.  
+                $("#add-layer").click(function(){
+
+                    if(layers()[0].available()){
+                        $("#add-layer").text('+ Add Layers ');
+                        $('.layerfilter').hide();
+                        filterTerms.removeAll();
+                        $('.layerfilter').select2('val', '');
+                    }else{
+                        $("#add-layer").text(' Done ');
+                        $('.layerfilter').show();
+                    }
+                    // $( ".map-space" ).slideToggle(600);
+                    // $( "#layer-library" ).slideToggle(600);
+                    _.each(layers(), function(layer, index) {
+                        layer.available(!layer.available());
+                    });
+                });
+
+                filterTerms.subscribe(function () {
+                    var terms = filterTerms()
+                    _.each(layers(), function(layer) {
+                        var filtered = true;
+                        if (terms.length == 0) {
+                            filtered = false;
+                        } else {
+                            _.each(terms, function(term) {
+                                if (term.text === layer.name) {
+                                    filtered = false;
+                                } else if (_.contains(layer.categories, term.text)) {
+                                    filtered = false;
+                                }
+                            });
+                        }
+                        layer.filtered(filtered)
+                    });
+                });
+
+                //Select2 Simple Search initialize
+                $('.layerfilter').select2({
+                    data: function() {
+                        var terms = [];
+                        _.each(layers(), function (layer) {
+                            terms = _.union(terms, layer.categories, [layer.name]);
+                        });
+
+                        return {
+                            results: _.map(terms, function(term) {
+                                return {
+                                    id: _.uniqueId('term'),
+                                    text: term
+                                };
+                            })
+                        };
+                    },
+                    placeholder: "Filter Layer List",
+                    multiple: true,
+                    maximumSelectionSize: 5
+                });
+
+                //filter layer library
+                $(".layerfilter").on("select2-selecting", function(e) {
+                    filterTerms.push(e.object);
+                });
+
+                $(".layerfilter").on("select2-removed", function(e) {
+                    var term = ko.utils.arrayFirst(filterTerms(), function(term) {
+                        return term.id === e.val;
+                    });
+
+                    filterTerms.remove(term);
+                });
+
+                ko.applyBindings(filterTerms, $('.layerfilter')[0]);
+            },
+
+
             zoomToResource: function(resourceid){
                 this.cancelFitBaseLayer = true;
                 var feature = this.resultLayer.getSource().getFeatureById(resourceid);
@@ -480,75 +744,75 @@ define(['jquery',
                 );
             },
 
-            highlightFeatures: function(resultsarray, entityIdArray){
-                var resultFeatures = [];
-                var currentPageFeatures = [];
-                var nonResultFeatures = [];
-                var self = this;
-                var sameResultSet = (entityIdArray[0] === '_none');
+            // highlightFeatures: function(resultsarray, entityIdArray){
+            //     var resultFeatures = [];
+            //     var currentPageFeatures = [];
+            //     var nonResultFeatures = [];
+            //     var self = this;
+            //     var sameResultSet = (entityIdArray[0] === '_none');
 
-                if (this.resourceFeatures) {
-                    if (sameResultSet) {
-                        currentPageFeatures = this.currentPageLayer.getSource().getFeatures();
-                        self.currentPageLayer.getSource().clear();
-                        self.resultLayer.vectorSource.addFeatures(currentPageFeatures);
-                        currentPageFeatures = [];
-                        _.each(resultsarray.results.hits.hits, function(pageResult) {
-                            var feature = self.resultLayer.vectorSource.getFeatureById(pageResult['_id']);
-                            if (feature) {
-                                self.resultLayer.vectorSource.removeFeature(feature);
-                                if (!feature.get('arches_marker')) {
-                                    feature.set('arches_marker', true);
-                                }
-                                currentPageFeatures.push(feature);
-                            }
-                        });
-                        self.currentPageLayer.getSource().addFeatures(currentPageFeatures);
-                    } else {
-                        self.vectorLayer.vectorSource.clear();
-                        this.resultLayer.vectorSource.clear();
-                        this.currentPageLayer.getSource().clear();
+            //     if (this.resourceFeatures) {
+            //         if (sameResultSet) {
+            //             currentPageFeatures = this.currentPageLayer.getSource().getFeatures();
+            //             self.currentPageLayer.getSource().clear();
+            //             self.resultLayer.vectorSource.addFeatures(currentPageFeatures);
+            //             currentPageFeatures = [];
+            //             _.each(resultsarray.results.hits.hits, function(pageResult) {
+            //                 var feature = self.resultLayer.vectorSource.getFeatureById(pageResult['_id']);
+            //                 if (feature) {
+            //                     self.resultLayer.vectorSource.removeFeature(feature);
+            //                     if (!feature.get('arches_marker')) {
+            //                         feature.set('arches_marker', true);
+            //                     }
+            //                     currentPageFeatures.push(feature);
+            //                 }
+            //             });
+            //             self.currentPageLayer.getSource().addFeatures(currentPageFeatures);
+            //         } else {
+            //             //self.vectorLayer.vectorSource.clear();
+            //             this.resultLayer.vectorSource.clear();
+            //             this.currentPageLayer.getSource().clear();
 
-                        if (entityIdArray[0] === '_all') {
-                             _.each(this.resourceFeatures, function (feature) {
-                                if (_.find(resultsarray.results.hits.hits, function(hit){ return hit['_id'] === feature.getId() })) {
-                                    if (!feature.get('arches_marker')) {
-                                        feature.set('arches_marker', true);
-                                    }
-                                    currentPageFeatures.push(feature);
-                                } else {
-                                    resultFeatures.push(feature);
-                                }
-                            });
-                        } else {
-                            _.each(this.resourceFeatures, function (feature) {
-                                if (_.find(resultsarray.results.hits.hits, function(hit){ return hit['_id'] === feature.getId() })) {
-                                    if (!feature.get('arches_marker')) {
-                                        feature.set('arches_marker', true);
-                                    }
-                                    currentPageFeatures.push(feature);
-                                } else if (entityIdArray.indexOf(feature.getId()) > 0) {
-                                    resultFeatures.push(feature);
-                                } else {
-                                    nonResultFeatures.push(feature);
-                                }
-                            });
-                        }
-                        self.currentPageLayer.getSource().addFeatures(currentPageFeatures);
-                        self.resultLayer.vectorSource.addFeatures(resultFeatures);
-                        self.vectorLayer.vectorSource.addFeatures(nonResultFeatures);
-                        if (self.drawingFeatureOverlay.getFeatures().getLength() === 0 && this.query.filter.geometry.type() !== 'bbox') {
-                            self.zoomToResults();
-                        }
-                    }
-                    self.previousEntityIdArray = entityIdArray;
-                } else {
-                    this.highlightOnLoad = {
-                        resultsarray: resultsarray,
-                        entityIdArray: entityIdArray
-                    };
-                }
-            },
+            //             if (entityIdArray[0] === '_all') {
+            //                  _.each(this.resourceFeatures, function (feature) {
+            //                     if (_.find(resultsarray.results.hits.hits, function(hit){ return hit['_id'] === feature.getId() })) {
+            //                         if (!feature.get('arches_marker')) {
+            //                             feature.set('arches_marker', true);
+            //                         }
+            //                         currentPageFeatures.push(feature);
+            //                     } else {
+            //                         resultFeatures.push(feature);
+            //                     }
+            //                 });
+            //             } else {
+            //                 _.each(this.resourceFeatures, function (feature) {
+            //                     if (_.find(resultsarray.results.hits.hits, function(hit){ return hit['_id'] === feature.getId() })) {
+            //                         if (!feature.get('arches_marker')) {
+            //                             feature.set('arches_marker', true);
+            //                         }
+            //                         currentPageFeatures.push(feature);
+            //                     } else if (entityIdArray.indexOf(feature.getId()) > 0) {
+            //                         resultFeatures.push(feature);
+            //                     } else {
+            //                         nonResultFeatures.push(feature);
+            //                     }
+            //                 });
+            //             }
+            //             self.currentPageLayer.getSource().addFeatures(currentPageFeatures);
+            //             self.resultLayer.vectorSource.addFeatures(resultFeatures);
+            //             //self.vectorLayer.vectorSource.addFeatures(nonResultFeatures);
+            //             if (self.drawingFeatureOverlay.getFeatures().getLength() === 0 && this.query.filter.geometry.type() !== 'bbox') {
+            //                 self.zoomToResults();
+            //             }
+            //         }
+            //         self.previousEntityIdArray = entityIdArray;
+            //     } else {
+            //         this.highlightOnLoad = {
+            //             resultsarray: resultsarray,
+            //             entityIdArray: entityIdArray
+            //         };
+            //     }
+            // },
 
             zoomToResults: function () {
                 var extent = ol.extent.extend(this.currentPageLayer.getSource().getExtent(), this.resultLayer.vectorSource.getExtent());
@@ -705,16 +969,6 @@ define(['jquery',
                 }else{
                     this.bufferFeatureOverlay.getFeatures().clear();  
                 }
-            },
-
-            toggleMapTools: function() {
-                if($('#map-tools-btn').hasClass('open')){
-                    this.disableDrawingTools();
-                }
-                else {
-                    this.enableDrawingTools();
-                }
-                $('#map-tools-btn').toggleClass('open');
             },
 
             toggleFilterSection: function(ele, expand){

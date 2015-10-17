@@ -46,44 +46,18 @@ define(['jquery', 'backbone', 'arches', 'select2', 'knockout'], function ($, Bac
                         };
                     },
                     results: function (data, page) {
-                        var value = $('div.resource_search_widget').find('.select2-input').val();
-
-                        // this result is being hidden by a style in arches.css 
-                        // .select2-results li:first-child{
-                        //     display:none;
-                        // } 
-                        var results = [{
-                            inverted: false,
-                            type: 'string',
-                            context: '',
-                            context_label: '',
-                            id: value,
-                            text: value,
-                            value: value
-                        }];
-                        $.each(data.hits.hits, function(){
-                            results.push({
-                                inverted: false,
-                                type: this._source.options.conceptid ? 'concept' : 'term',
-                                context: this._source.context,
-                                context_label: this._source.options.context_label,
-                                id: this._source.term + this._source.context,
-                                text: this._source.term,
-                                value: this._source.options.conceptid ? this._source.options.conceptid : this._source.term
-                            });
-                        }, this);
-                        return {results: results};
+                        return data;
                     }
                 },
                 formatResult:function(result, container, query, escapeMarkup){
                     var markup=[];
                     window.Select2.util.markMatch(result.text, query.term, markup, escapeMarkup);
-                    var context = result.context_label != '' ? '<i class="concept_result_schemaname">(' + result.context_label + ')</i>' : '';
+                    var context = result.context_label && result.context_label != '' ? '<i class="concept_result_schemaname">(' + result.context_label + ')</i>' : '';
                     var formatedresult = '<span class="concept_result">' + markup.join("")  + '</span>' + context;
                     return formatedresult;
                 },
                 formatSelection: function(result){
-                    var context = result.context_label != '' ? '<i class="concept_result_schemaname">(' + result.context_label + ')</i>' : '';
+                    var context = result.context_label && result.context_label != '' ? '<i class="concept_result_schemaname">(' + result.context_label + ')</i>' : '';
                     var markup = '<span data-filter="external-filter"><i class="fa fa-minus" style="margin-right: 7px;display:none;"></i>' + result.text + '</span>' + context;
                     if(result.inverted){
                         markup = '<span data-filter="external-filter"><i class="fa fa-minus inverted" style="margin-right: 7px;"></i>' + result.text + '</span>' + context;
@@ -93,6 +67,7 @@ define(['jquery', 'backbone', 'arches', 'select2', 'knockout'], function ($, Bac
                 escapeMarkup: function(m) { return m; }
             }).on('select2-selecting', function(e, el) {
                 self.trigger('select2-selecting', e, el);
+
             }).on('change', function(e, el){
                 self.trigger('change', e, el);
 

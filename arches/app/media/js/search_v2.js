@@ -39,6 +39,9 @@ require(['jquery',
             initialize: function(options) { 
                 var mapFilterText, timeFilterText;
                 var self = this;
+                var overlay = new ol.Overlay({
+                    element: $('#popup')[0]
+                });
                 this.PAGE_STATES = {'saved_searches_displayed': 'SAVED_SEARCHES_DISPLAYED', 'saved_searches_hidden': 'SAVED_SEARCHES_HIDDEN'};
                 this.LIST_STATES = {'full': 'FULL', 'partial': 'PARTIAL', 'hidden': 'HIDDEN'};
                 this.RIGHT_PANEL_STATES = {'map': 'MAP', 'graph': 'GRAPH'};
@@ -132,6 +135,56 @@ require(['jquery',
                         this.timeFilter.query.filter.inverted(item.inverted);
                     }
                 }, this);
+                this.termFilter.on('select2-selecting', function(e, el){
+                    var data = e.choice;
+                    if(e.choice.geometry){
+                        self.showMap();
+                        e.preventDefault();
+                        $("#select2-drop-mask").click();
+                            var geoJSON = new ol.format.GeoJSON();
+                            var geom = geoJSON.readGeometry(e.choice.geometry);
+                            geom.transform(ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+                            self.mapFilter.zoomToExtent(geom.getExtent());
+                            overlay.setPosition(ol.extent.getCenter(geom.getExtent()));
+                            overlay.setPositioning('center-center');
+
+                            var currentStep = 0;
+                            var cycles = 3;
+
+                            var down = function(){
+                                if(currentStep < cycles){
+                                    currentStep += 1;
+                                    $('#popup').animate({
+                                        fontSize: '15px',
+                                        opacity: 0.8
+                                    }, {
+                                        easing: 'linear',
+                                        duration: 3000,
+                                        step: function( now, fx ) {
+                                            overlay.setPositioning('center-center');
+                                        },
+                                        done: up
+                                    });
+                                }
+                            }
+
+                            var up = function(){
+                                $('#popup').animate({
+                                    fontSize: '25px',
+                                    opacity: 0.4
+                                }, {
+                                    easing: 'linear',
+                                    duration: 3000,
+                                    step: function( now, fx ) {
+                                        overlay.setPositioning('center-center');
+                                    },
+                                    done: down
+                                });
+                            }
+
+                            up();
+                    }
+                }, this);
 
 
                 this.mapFilter = new MapFilter({
@@ -145,6 +198,7 @@ require(['jquery',
                         this.termFilter.removeTag(mapFilterText);
                     }
                 }, this);
+                this.mapFilter.map.map.addOverlay(overlay);
 
 
                 this.timeFilter = new TimeFilter({
@@ -272,7 +326,7 @@ require(['jquery',
                     data: queryString,
                     success: function(results){
                         var data = self.searchResults.updateResults(results);
-                        self.mapFilter.highlightFeatures(data, $('.search-result-all-ids').data('results'));
+                        //self.mapFilter.highlightFeatures(data, $('.search-result-all-ids').data('results'));
                         self.mapFilter.applyBuffer();
                         self.isNewQuery = false;
                         $('.loading-mask').hide();
@@ -378,6 +432,7 @@ require(['jquery',
                     //this.map_footer.hide();
 
                     //Show search results panel
+                    this.sliding_panel.show()
                     this.sliding_panel.addClass("col-xs-12");
                     this.sliding_panel.removeClass("col-xs-4");
                     this.sliding_panel.addClass("container");
