@@ -48,3 +48,11 @@ DATABASES = {
         'POSTGIS_TEMPLATE': 'template_postgis_20',
     }
 }
+
+ELASTICSEARCH_HTTP_PORT = 9999
+SEARCH_BACKEND = 'arches.app.search.search.SearchEngine'
+# see http://elasticsearch-py.readthedocs.org/en/master/api.html#elasticsearch.Elasticsearch
+ELASTICSEARCH_HOSTS = [
+    {'host': 'localhost', 'port': ELASTICSEARCH_HTTP_PORT}
+]
+ELASTICSEARCH_CONNECTION_OPTIONS = {'timeout': 30}

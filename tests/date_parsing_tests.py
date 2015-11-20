@@ -24,7 +24,7 @@ Replace this with more appropriate tests for your application.
 """
 
 import os
-from tests.test_settings import DAY,MONTH,FOUR_DIGIT_YEAR,YEAR,ERA,SEP
+from tests.test_settings import DAY,MONTH,FOUR_DIGIT_YEAR,NEGATIVE_YEAR,YEAR,ERA,SEP
 from django.test import SimpleTestCase, TestCase
 from arches.app.models.entity import Entity
 from arches.app.models.resource import Resource
@@ -42,7 +42,8 @@ class DayFirstDateTests(SimpleTestCase):
         [DAY,MONTH,FOUR_DIGIT_YEAR],
         [r'(\s|^)'+YEAR,ERA],
         [r'(\s|^)'+YEAR+ERA],
-        [r'(\s|\s-|^)'+YEAR+r'(\s|$)'],
+        [r'(\s|^)'+NEGATIVE_YEAR+r'(\s|$)'],
+        [r'(\s|^)'+YEAR+r'(\s|$)'],
     ]
 
     def test_slash_separated_date(self):

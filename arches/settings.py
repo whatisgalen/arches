@@ -325,6 +325,7 @@ SEP = r'(\s+|,\s+|-|/|\.)'
 DAY = r'(?P<day>0?[0-9]|1[0-9]|2[0-8]|3[0-1])'
 MONTH = r'(?P<month>0?[0-9]|1[0-2])'
 YEAR = r'(?P<year>\d+)'
+NEGATIVE_YEAR = r'(?P<year>-\d+)'
 FOUR_DIGIT_YEAR = r'(?P<year>\d{4})'
 ERA = r'(?P<era>(BC(E)?|AD|ACE))'
 

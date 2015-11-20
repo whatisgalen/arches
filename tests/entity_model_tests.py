@@ -26,6 +26,7 @@ Replace this with more appropriate tests for your application.
 import os
 from tests import test_settings
 from django.core import management
+from django.core.exceptions import ObjectDoesNotExist
 from django.test import SimpleTestCase, TestCase
 from arches.app.search.search_engine_factory import SearchEngineFactory
 from arches.app.utils.data_management.resources.importer import ResourceLoader
@@ -41,6 +42,7 @@ from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializ
 
 # these tests can be run from the command line via
 # python manage.py test tests --pattern="*.py" --settings="tests.test_settings"
+# python manage.py test tests.entity_model_tests.BasicEntityTests --pattern="entity_model_tests.py" --settings="tests.test_settings"
 
 run_install = True
 class BasicEntityTests(SimpleTestCase):
@@ -153,14 +155,16 @@ class BasicEntityTests(SimpleTestCase):
 
         entity = Resource().get(entity.entityid)
         self.assertEqual(int(entity.child_entities[0].child_entities[0].child_entities[0].value), 300)
+
+        #print JSONSerializer().serialize(entity)
         
         entity.child_entities[0].child_entities[0].entityid = ''
         entity.child_entities[0].child_entities[0].child_entities[0].entityid = ''
         entity.save()
 
-        #entity = Resource().get(entity.entityid)
+        entity = Resource().get(entity.entityid)
         #print JSONSerializer().serialize(entity)
-        #self.assertEqual(int(entity.child_entities[0].child_entities[0].child_entities[0].value), 300)
+        self.assertEqual(int(entity.child_entities[0].child_entities[0].child_entities[0].value), 300)
 
         # test for database integrity
         self.assertEqual(models.Entities.objects.count(), 4)
@@ -219,9 +223,9 @@ class ConceptModelTests(SimpleTestCase):
 
         self.assertEqual(concept_out.values[0].value, 'updated pref label')
 
-        concept_out.delete()
-        deleted_concept = Concept().get(id=concept_in.id)
-        self.assertEqual(deleted_concept, None)
+        concept_out.delete(delete_self=True)
+        with self.assertRaises(models.Concepts.DoesNotExist):
+            deleted_concept = Concept().get(id=concept_in.id)
 
 
     def test_prefLabel(self):
