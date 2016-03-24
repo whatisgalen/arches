@@ -203,6 +203,43 @@ input[type="checkbox"]{
 	margin-bottom: 25px;
 }
 
+.card-tile {
+	background: #fdfdfd;
+	opacity: .7;
+}
+
+.card-tile:nth-child(odd) {
+    background-color: #f7f7f7;
+}
+
+.card-tile:hover {
+	opacity: 1.0;
+	border: 1px solid #ddd;
+}
+
+.card-tile-header {
+	cursor: pointer; 
+	padding: 5px 0px 5px 0px; 
+	margin: 0px;
+	font-size: 13px;
+}
+
+.card-tile-header:hover {
+	cursor: pointer;
+}
+
+.effect {
+	margin-top: -10px;
+}
+
+.tile-content-instructions {
+	margin-bottom: 10px;
+	border-top: 1px solid #ddd;
+	padding-top: 8px;
+	font-size: 13px;
+	color: #8d8d8d;
+}
+
 /* Base Class Overrides 
 ---------------------------------------------- */
 .tab-base .nav-tabs>li:not(.active)>a:hover {
