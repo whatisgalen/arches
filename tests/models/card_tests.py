@@ -166,11 +166,9 @@ class CardTests(ArchesTestCase):
         cards_count_before = models.CardModel.objects.count()
         cardnodewidgets_count_before = models.CardXNodeXWidget.objects.count()
         nodes_count_before = models.Node.objects.count()
-        nodes_count_before = models.Node.objects.count()
 
         card = Card(card_obj)
 
         self.assertEqual(models.CardModel.objects.count()-cards_count_before, 0)
         self.assertEqual(models.CardXNodeXWidget.objects.count()-cardnodewidgets_count_before, 0)
         self.assertEqual(models.Node.objects.count()-nodes_count_before, 0)
-        nodes_count_before = models.Node.objects.count()
