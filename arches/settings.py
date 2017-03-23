@@ -389,11 +389,11 @@ MAPBOX_API_KEY = '' # Put your Mapbox key here!
 MAPBOX_SPRITES = "mapbox://sprites/mapbox/basic-v9"
 MAPBOX_GLYPHS = "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
 
-# Default map settings for search and map layer manager pages
-DEFAULT_MAP_X = 0
-DEFAULT_MAP_Y = 0
-DEFAULT_MAP_ZOOM = 0
-MAP_MIN_ZOOM = 0
+# London Workshop specific settings
+DEFAULT_MAP_Y = 53.24
+DEFAULT_MAP_X = -0.55735
+DEFAULT_MAP_ZOOM = 10
+MAP_MIN_ZOOM = 10
 MAP_MAX_ZOOM = 20
 
 DEFAULT_SEARCH_BASEMAP_NAME = "streets" #ie 'streets', 'stamen-terrain', 'mapzen','Emerald','Light Streets'
@@ -401,14 +401,14 @@ DEFAULT_SEARCH_GEOCODER = "MapzenGeocoder" # currently MapzenGeocoder or BingGeo
 
 # bounds for search results hex binning fabric
 # a smaller bbox will give you less distortion in hexes and better performance
-HEX_BIN_BOUNDS = (-122, -52, 128, 69)
+HEX_BIN_BOUNDS = (-0.6222,53.18,-0.4925,53.3)
 # size to use for hex binning search results on map (in km)
-HEX_BIN_SIZE = 100
+HEX_BIN_SIZE = 0.20
 # binning uses elasticsearch GeoHash grid aggregation.
 # precision for binning is set based on GeoHash precision, see this table:
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator
 # high precision binning may result in performance issues.
-HEX_BIN_PRECISION = 4
+HEX_BIN_PRECISION = 8
 
 BULK_IMPORT_BATCH_SIZE = 2000
 
