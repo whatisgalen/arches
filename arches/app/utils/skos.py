@@ -282,6 +282,10 @@ class SKOS4Writer(object):
                             else:
                                 rdf_graph.add((ARCHES[node.id], SKOS[value.type], Literal(jsonLiteralValue, lang = value.language)))
                         else:
+                            if value.type == 'minimum date':
+                                value.type = 'min_year'
+                            if value.type == 'maximum date':
+                                value.type = 'max_year'
                             rdf_graph.add((ARCHES[node.id], ARCHES[value.type.replace(' ', '_')], Literal(jsonLiteralValue, lang = value.language)))
 
                     rdf_graph.add((ARCHES[node.id], RDF.type, SKOS[node.nodetype]))
