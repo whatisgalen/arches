@@ -25,6 +25,7 @@ from rdflib.graph import Graph
 from time import time
 from arches.app.models.concept import Concept
 from arches.app.models import models
+from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializer
 
 class SKOSReader(object):
     def __init__(self):
@@ -232,6 +233,9 @@ class SKOS4Writer(object):
 
         #get empty RDF graph
         rdf_graph = Graph()
+
+        #define namespaces
+        ARCHES = Namespace('http://www.archesproject.org/')
 
         #bind the namespaces
         rdf_graph.bind('arches',ARCHES)
