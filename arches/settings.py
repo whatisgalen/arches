@@ -40,6 +40,8 @@ DATABASES = {
     }
 }
 
+COUCHDB_URL = 'http://postgres:postgis@localhost:5984' # defaults to localhost:5984
+
 # from http://django-guardian.readthedocs.io/en/stable/configuration.html#anonymous-user-name
 ANONYMOUS_USER_NAME = None
 

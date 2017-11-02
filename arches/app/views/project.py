@@ -29,6 +29,7 @@ from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializ
 from arches.app.utils.JSONResponse import JSONResponse
 from arches.app.utils.decorators import group_required
 from arches.app.models import models
+from arches.app.models.project import Project
 from arches.app.models.system_settings import settings
 from arches.app.views.base import BaseManagerView
 from django.contrib.auth.models import User, Group
@@ -95,10 +96,11 @@ class ProjectManagerView(BaseManagerView):
     def post(self, request):
         data = JSONDeserializer().deserialize(request.body)
         if data['id'] is None:
-            project = models.MobileProject()
+            #project = models.MobileProject()
+            project = Project()
             project.createdby = self.request.user
         else:
-            project = models.MobileProject.objects.get(pk=data['id'])
+            project = Project.objects.get(pk=data['id'])
             self.update_identities(data, project, project.users.all(), 'users', User, models.MobileProjectXUser)
             self.update_identities(data, project, project.groups.all(), 'groups', Group, models.MobileProjectXGroup)
 
