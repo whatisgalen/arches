@@ -21,6 +21,7 @@ from django.db import transaction
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from django.core.mail import EmailMultiAlternatives
+from django.http import HttpResponseNotFound
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext as _
@@ -53,7 +54,7 @@ class ProjectManagerView(BaseManagerView):
         for group in Group.objects.all():
             users = group.user_set.all()
             if len(users) > 0:
-                groupUsers = [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email, 'last_login': get_last_login(user.last_login), 'username': user.username, 'groups': [g.id for g in user.groups.all()] } for user in users]
+                groupUsers = [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email, 'last_login': get_last_login(user.last_login), 'username': user.username, 'groups': [g.id for g in user.groups.all()], 'group_names': ', '.join([g.name for g in user.groups.all()]) } for user in users]
             identities.append({'name': group.name, 'type': 'group', 'id': group.pk, 'users': groupUsers, 'default_permissions': group.permissions.all()})
         for user in User.objects.filter():
             groups = []
@@ -63,7 +64,7 @@ class ProjectManagerView(BaseManagerView):
                 groups.append(group.name)
                 group_ids.append(group.id)
                 default_perms = default_perms + list(group.permissions.all())
-            identities.append({'name': user.email or user.username, 'groups': ', '.join(groups), 'type': 'user', 'id': user.pk, 'default_permissions': set(default_perms), 'is_superuser':user.is_superuser, 'group_ids': group_ids, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})            
+            identities.append({'name': user.email or user.username, 'groups': ', '.join(groups), 'type': 'user', 'id': user.pk, 'default_permissions': set(default_perms), 'is_superuser':user.is_superuser, 'group_ids': group_ids, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
         context = self.get_context_data(
             projects=JSONSerializer().serialize(projects),
             identities=JSONSerializer().serialize(identities),
@@ -75,6 +76,21 @@ class ProjectManagerView(BaseManagerView):
         context['nav']['help'] = (_('Mobile Project Manager'),'help/project-manager-help.htm')
 
         return render(request, 'views/project-manager.htm', context)
+
+    def delete(self, request):
+
+        project_id = None
+        try:
+            project_id = JSONDeserializer().deserialize(request.body)['id']
+        except Exception as e:
+            print e
+
+        if project_id is not None:
+            ret = models.MobileProject.objects.get(pk=project_id)
+            ret.delete()
+            return JSONResponse(ret)
+
+        return HttpResponseNotFound()
 
     def update_identities(self, data, project, related_identities, identity_type='users', identity_model=User, xmodel=models.MobileProjectXUser):
         project_identity_ids = set([u.id for u in related_identities])
