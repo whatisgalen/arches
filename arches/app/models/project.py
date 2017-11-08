@@ -66,11 +66,11 @@ class Project(models.MobileProject):
             db = self.couch['project_' + str(self.id)]
         except couchdb.ResourceNotFound:
             db = self.couch.create('project_' + str(self.id))
-
-        db.save(self.serialize())
-        for tile in models.TileModel.objects.all()[1:10]:
+            tile = models.TileModel.objects.get(pk='4345f530-aa90-48cf-b4b3-92d1185ca439')
             tile = json.loads(JSONSerializer().serialize(tile))
             db.save(tile)
+
+        db.save(self.serialize())
 
     def serialize(self):
         """

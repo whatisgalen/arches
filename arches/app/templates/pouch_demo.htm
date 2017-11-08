@@ -1,0 +1,330 @@
+{% load i18n %}
+{% load staticfiles %}
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>VanillaJS • TodoMVC</title>
+        <link rel="stylesheet" href="media/css/arches.css">
+        <!--[if IE]>
+            <script src="style/ie.js"></script>
+        <![endif]-->
+        
+    </head>
+    <body>
+        <div class="pad-all">
+            <div class="resource-grid-title">{% trans "Recently Added Resources" %}</div>
+            <div class="recent-additions-container">
+                <table data-bind="datatable: resourceTableConfig" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Project Id" %}</th>
+                            <th>{% trans "Name" %}</th>
+                            <th>{% trans "Start Date" %}</th>
+                            <th>{% trans "Active" %}</th>
+                            <th class="min-desktop"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in projects %}
+                        <tr>
+                            <td><a href="" class="regular-link" target="_blank">{{project.pk}}</a></td>
+                            <td>{{project.name}}</td>
+                            <td>{{project.startdate}}</td>
+                            <td>{{project.active}}</td>
+                            <td>
+                                <a href="javascript: sync('{{project.pk}}')" target="_blank" class="btn btn-primary">{% trans "Sync" %}</a>
+                                <!-- <a href="javascript: listDocs('{{project.pk}}')" target="_blank" class="btn btn-primary">{% trans "List local DB contents" %}</a> -->
+                                <!-- ko if: listening() == false -->
+                                <a href="javascript: listen('{{project.pk}}')" target="_blank" class="btn btn-primary">{% trans "Listen Live" %}</a>
+                                <!-- /ko -->
+                                <!-- ko if: listening -->
+                                <a href="javascript: quitListen('{{project.pk}}')" target="_blank" class="btn btn-primary">{% trans "Quit Listening" %}</a>
+                                <!-- /ko -->
+                                <!-- ko if: remote_data_updated -->
+                                <a href="javascript: sync('{{project.pk}}')" target="_blank" class="btn btn-warning">{% trans "Pull Remote Data" %}</a>
+                                <!-- /ko -->
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <section id="todoapp">
+                <section id="main">
+                    <ul id="todo-list" data-bind="foreach: {data: tiles, as: '_tile'}">
+                        <!-- ko if: _tile.doc.tileid -->
+                        <li><span>tileid: </span><span data-bind="text: _tile.doc.tileid"></span></li>
+                        <!-- ko if: _tile.doc.data -->
+                        <table>
+                        <thead>
+                            <tr>
+                                <th>nodeid</th>
+                                <th>value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ko foreach: {data: Object.keys(_tile.doc.data), as: 'nodeid'} -->
+                            <tr id="todo-list">
+                                <td data-bind="text: nodeid"></td>    
+                                <td><input type="text" data-bind="value: _tile.doc.data[nodeid], event: { blur: updateDbValues.bind(_tile)}"/></td>
+                            </tr>
+                            <!-- /ko -->
+                        </tbody>
+                        </table>
+                        <!-- /ko -->
+                        <!-- /ko -->
+                    </ul>
+                </section>
+                <footer id="footer">
+                    <span id="todo-count"></span>
+                    <div id="sync-wrapper">
+                        <div id="sync-success">Currently syncing</div>
+                        <div id="sync-error">There was a problem syncing</div>
+                    </div>
+                </footer>
+            </section>
+            
+        </div>
+    </body>
+        {% block javascript %}
+        <script src="https://cdn.jsdelivr.net/npm/pouchdb@6.3.4/dist/pouchdb.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-debug.js"></script>
+        <script>
+
+            var ENTER_KEY = 13;
+            var newTodoDom = document.getElementById('new-todo');
+            var syncDom = document.getElementById('sync-wrapper');
+
+            // EDITING STARTS HERE (you dont need to edit anything above this line)
+
+            viewModel = {
+                "tiles": ko.observableArray(),
+                "remote_data_updated": ko.observable(false),
+                "listening": ko.observable(false)
+            }
+
+        
+            // We have to create a new todo document and enter it in the database
+            // function addTodo(text) {
+            //     var todo = {
+            //         _id: new Date().toISOString(),
+            //         title: text,
+            //         completed: false
+            //     };
+            //     localDB.put(todo, function callback(err, result) {
+            //         if (!err) {
+            //             console.log('Successfully posted a todo!');
+            //         }
+            //     });
+            // }
+
+            function setupDBs(project_id){
+                localDB = new PouchDB('project_'+project_id);
+                remoteDB = new PouchDB('http://localhost:5984/project_'+project_id)
+            }
+
+            // Show the current list of todos by reading them from the database
+            function listDocs(project_id) {
+                setupDBs(project_id);
+                localDB.allDocs({include_docs: true, descending: true}, function(err, doc) {
+                    console.log(doc)
+                    viewModel.tiles(doc.rows);
+                });
+            }
+
+
+            // function checkboxChanged(todo, event) {
+            //     todo.completed = event.target.checked;
+            //     localDB.put(todo);
+            // }
+
+            // // User pressed the delete button for a todo, delete it
+            // function deleteButtonPressed(todo) {
+            //     localDB.remove(todo);
+            // }
+
+            // // The input box when editing a todo has blurred, we should save
+            // // the new title or delete the todo if the title is empty
+            // function todoBlurred(todo, event) {
+            //     var trimmedText = event.target.value.trim();
+            //     if (!trimmedText) {
+            //         localDB.remove(todo);
+            //     } else {
+            //         todo.title = trimmedText;
+            //         localDB.put(todo);
+            //     }
+            // }
+
+            // Initialise a sync with the remote server
+            function sync(project_id) {
+                console.log(project_id)
+                setupDBs(project_id);
+
+                // localDB.changes({
+                //     since: 'now',
+                //     live: true
+                // }).on('change', showTodos);
+
+                //syncDom.setAttribute('data-sync-state', 'syncing');
+                var opts = {live: true};
+                // localDB.replicate.to(remoteDB, opts, syncError);
+                // localDB.replicate.from(remoteDB, opts, syncError);
+                localDB.sync(remoteDB).on('complete', function () {
+                    // yay, we're in sync!
+                    console.log('yay, we\'re in sync!')
+                    viewModel.remote_data_updated(false);
+                    listDocs(project_id);
+                }).on('error', function (err) {
+                    // boo, we hit an error!
+                    console.log('boo, we hit an error!')
+                    console.log(err)
+                });
+            }
+
+            function updateDbValues(nodeid, event) {
+                var self = this;
+                //if (event.keyCode === ENTER_KEY) {
+                localDB.get(this.id).then(function (doc) {
+                  // update their age
+                  doc.data = self.doc.data;
+                  // put them back
+                  return localDB.put(doc);
+                }).then(function () {
+                  // fetch mittens again
+                  return localDB.get(self.id);
+                }).then(function (doc) {
+                  console.log(doc);
+                });
+                //}
+                return true;
+            }
+
+            function listen(project_id){
+                viewModel.listening(true);
+                setupDBs(project_id);
+                changes = remoteDB.changes({
+                    since: 'now',
+                    live: true,
+                    include_docs: true
+                }).on('change', function(change) {
+                    // handle change
+                    viewModel.remote_data_updated(true);
+                    console.log(change);
+                }).on('complete', function(info) {
+                    // changes() was canceled
+                }).on('error', function (err) {
+                    console.log(err);
+                });
+
+                //changes.cancel();
+            }
+
+            function quitListen(project_id){
+                changes.cancel();
+                viewModel.listening(false);
+            }
+
+
+            // EDITING STARTS HERE (you dont need to edit anything below this line)
+
+            // There was some form or error syncing
+            // function syncError() {
+            //     syncDom.setAttribute('data-sync-state', 'error');
+            // }
+
+            // // User has double clicked a todo, display an input so they can edit the title
+            // function todoDblClicked(todo) {
+            //     var div = document.getElementById('li_' + todo._id);
+            //     var inputEditTodo = document.getElementById('input_' + todo._id);
+            //     div.className = 'editing';
+            //     inputEditTodo.focus();
+            // }
+
+            // // If they press enter while editing an entry, blur it to trigger save
+            // // (or delete)
+            // function todoKeyPressed(todo, event) {
+            //     if (event.keyCode === ENTER_KEY) {
+            //         var inputEditTodo = document.getElementById('input_' + todo._id);
+            //         inputEditTodo.blur();
+            //     }
+            // }
+
+            // // Given an object representing a todo, this will create a list item
+            // // to display it.
+            // function createTodoListItem(todo) {
+            //     var checkbox = document.createElement('input');
+            //     checkbox.className = 'toggle';
+            //     checkbox.type = 'checkbox';
+            //     checkbox.addEventListener('change', checkboxChanged.bind(this, todo));
+
+            //     var label = document.createElement('label');
+            //     label.appendChild( document.createTextNode(todo.title));
+            //     label.addEventListener('dblclick', todoDblClicked.bind(this, todo));
+
+            //     var deleteLink = document.createElement('button');
+            //     deleteLink.className = 'destroy';
+            //     deleteLink.addEventListener( 'click', deleteButtonPressed.bind(this, todo));
+
+            //     var divDisplay = document.createElement('div');
+            //     divDisplay.className = 'view';
+            //     divDisplay.appendChild(checkbox);
+            //     divDisplay.appendChild(label);
+            //     divDisplay.appendChild(deleteLink);
+
+            //     var inputEditTodo = document.createElement('input');
+            //     inputEditTodo.id = 'input_' + todo._id;
+            //     inputEditTodo.className = 'edit';
+            //     inputEditTodo.value = todo.title;
+            //     inputEditTodo.addEventListener('keypress', todoKeyPressed.bind(this, todo));
+            //     inputEditTodo.addEventListener('blur', todoBlurred.bind(this, todo));
+
+            //     var li = document.createElement('li');
+            //     li.id = 'li_' + todo._id;
+            //     li.appendChild(divDisplay);
+            //     li.appendChild(inputEditTodo);
+
+            //     if (todo.completed) {
+            //         li.className += 'complete';
+            //         checkbox.checked = true;
+            //     }
+
+            //     return li;
+            // }
+
+            // function redrawTodosUI(todos) {
+            //     var ul = document.getElementById('todo-list');
+            //     ul.innerHTML = '';
+            //     todos.forEach(function(todo) {
+            //         ul.appendChild(createTodoListItem(todo.doc));
+            //     });
+            // }
+
+            // function newTodoKeyPressHandler( event ) {
+            //     if (event.keyCode === ENTER_KEY) {
+            //         addTodo(newTodoDom.value);
+            //         newTodoDom.value = '';
+            //     }
+            // }
+
+            // function addEventListeners() {
+            //     newTodoDom.addEventListener('keypress', newTodoKeyPressHandler, false);
+            // }
+
+            // addEventListeners();
+            // showTodos();
+
+            // if (remoteDB) {
+            //   console.log('syncing');
+            //   //sync();
+            // }
+
+            ko.applyBindings(viewModel);
+
+
+        </script>
+        {% endblock javascript %}
+</html>
