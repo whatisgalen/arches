@@ -5,13 +5,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>VanillaJS • TodoMVC</title>
         <link rel="stylesheet" href="media/css/arches.css">
-        <!--[if IE]>
-            <script src="style/ie.js"></script>
-        <![endif]-->
-        
     </head>
     <body>
         <div class="pad-all">
@@ -41,7 +35,7 @@
                                 <a href="javascript: listen('{{project.pk}}')" target="_blank" class="btn btn-primary">{% trans "Listen Live" %}</a>
                                 <!-- /ko -->
                                 <!-- ko if: listening -->
-                                <a href="javascript: quitListen('{{project.pk}}')" target="_blank" class="btn btn-primary">{% trans "Quit Listening" %}</a>
+                                <a href="javascript: quitListen('{{project.pk}}')" target="_blank" class="btn btn-success">{% trans "Quit Listening" %}</a>
                                 <!-- /ko -->
                                 <!-- ko if: remote_data_updated -->
                                 <a href="javascript: sync('{{project.pk}}')" target="_blank" class="btn btn-warning">{% trans "Pull Remote Data" %}</a>
@@ -55,7 +49,7 @@
             </div>
             <section id="todoapp">
                 <section id="main">
-                    <ul id="todo-list" data-bind="foreach: {data: tiles, as: '_tile'}">
+                    <ul data-bind="foreach: {data: tiles, as: '_tile'}">
                         <!-- ko if: _tile.doc.tileid -->
                         <li><span>tileid: </span><span data-bind="text: _tile.doc.tileid"></span></li>
                         <!-- ko if: _tile.doc.data -->
@@ -68,7 +62,7 @@
                         </thead>
                         <tbody>
                             <!-- ko foreach: {data: Object.keys(_tile.doc.data), as: 'nodeid'} -->
-                            <tr id="todo-list">
+                            <tr>
                                 <td data-bind="text: nodeid"></td>    
                                 <td><input type="text" data-bind="value: _tile.doc.data[nodeid], event: { blur: updateDbValues.bind(_tile)}"/></td>
                             </tr>
@@ -93,6 +87,11 @@
         {% block javascript %}
         <script src="https://cdn.jsdelivr.net/npm/pouchdb@6.3.4/dist/pouchdb.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-debug.js"></script>
+        <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous">
+        </script>
         <script>
 
             var ENTER_KEY = 13;
@@ -178,6 +177,9 @@
                     console.log('yay, we\'re in sync!')
                     viewModel.remote_data_updated(false);
                     listDocs(project_id);
+                    $.get( "push_edits_to_db?project_id=" + project_id, function(data) {
+                        console.log( "Load was performed." );
+                    });
                 }).on('error', function (err) {
                     // boo, we hit an error!
                     console.log('boo, we hit an error!')

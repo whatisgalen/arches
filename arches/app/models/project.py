@@ -22,6 +22,7 @@ import couchdb
 from copy import copy, deepcopy
 from django.db import transaction
 from arches.app.models import models
+from arches.app.models.tile import Tile
 from arches.app.models.system_settings import settings
 from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializer
 from django.utils.translation import ugettext as _
@@ -68,9 +69,26 @@ class Project(models.MobileProject):
             db = self.couch.create('project_' + str(self.id))
             tile = models.TileModel.objects.get(pk='4345f530-aa90-48cf-b4b3-92d1185ca439')
             tile = json.loads(JSONSerializer().serialize(tile))
+            print 'herre'
+            tile['_id'] = tile['tileid']
             db.save(tile)
 
         db.save(self.serialize())
+
+    def push_edits_to_db(self):
+        # read all docs that have changes
+        # save back to postgres db
+        db = self.couch['project_' + str(self.id)]
+        ret = []
+        for row in db.view('_all_docs', include_docs=True):
+            ret.append(row)
+            if 'tileid' in row.doc:
+                tile = Tile(row.doc)
+                #if tile.filter_by_perm(request.user, 'write_nodegroup'):
+                with transaction.atomic():
+                    tile.save()
+                #tile = models.TileModel.objects.get(pk=row.doc.tileid).update(**row.doc)
+        return ret
 
     def serialize(self):
         """
