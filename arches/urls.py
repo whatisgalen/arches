@@ -120,6 +120,7 @@ urlpatterns = [
     url(r'^project_manager/*', ProjectManagerView.as_view(), name="project_manager"),
     url(r'^pouch_demo/*', pouch_demo.index, name="pouch_demo"),
     url(r'^push_edits_to_db/*', pouch_demo.push_edits_to_db, name="push_edits_to_db"),
+    url(r'^couchdb/(?P<path>.*)$', pouch_demo.CouchdbProxy.as_view()),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

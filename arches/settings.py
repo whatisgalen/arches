@@ -282,7 +282,8 @@ INSTALLED_APPS = (
     'arches.app.models',
     'arches.management',
     'guardian',
-    'captcha'
+    'captcha',
+    'revproxy'
 )
 
 MIDDLEWARE_CLASSES = (

@@ -1,8 +1,14 @@
 from django.shortcuts import render
 from arches.app.models import models
 from arches.app.models.project import Project
+from arches.app.models.system_settings import settings
 from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializer
 from arches.app.utils.JSONResponse import JSONResponse
+from revproxy.views import ProxyView
+
+class CouchdbProxy(ProxyView):
+    #check user credentials here
+    upstream = settings.COUCHDB_URL
 
 def index(request):
     # import ipdb

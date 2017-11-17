@@ -96,7 +96,7 @@
 
             function setupDBs(project_id){
                 localDB = new PouchDB('project_'+project_id);
-                remoteDB = new PouchDB('http://localhost:5984/project_'+project_id)
+                remoteDB = new PouchDB('http://localhost:8000/couchdb/project_'+project_id)
             }
 
             // Show the current list of todos by reading them from the database
