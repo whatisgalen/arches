@@ -17,7 +17,7 @@
     </li>
     <li>
         <a href="#branch-library" class="nav-library-tab-link" data-toggle="tab" data-bind="visible: node() && !node().dirty()">
-            <i class="ion-ios-plus add-tooltip library-tools-icon" data-placement="bottom" data-toggle="tooltip" data-original-title="{% trans "Add Child Nodes" %}"></i>
+            <i class="ion-ios-plus add-tooltip library-tools-icon" data-placement="bottom" data-toggle="tooltip" data-original-title="{% if graph.isresource %}{% trans "Add Branch" %}{% else %}{% trans "Add Child Node" %}{% endif %}"></i>
         </a>
     </li>
     <li data-bind="visible: node() && !node().istopnode">
@@ -97,10 +97,10 @@
                     <span class="switch switch-small arches-switch" data-bind="css: {'on': node().issearchable()}, click: function () { node().issearchable(!node().issearchable()); }"><small></small></span>
 
                     <p class="control-label" style="margin-left: 40px; margin-top: -17px; margin-bottom: 0px;">
-                        {% trans "Searchable" %}
+                        {% trans "Expose to Advanced Search" %}
                     </p>
                     <span style="margin-left: 40px; display: inline-block; color: #8ba2b9; font-size: 10px;">
-                        {% trans "Activate to allow searches on values stored for this node." %}
+                        {% trans "Activate to use this node in Advanced Search." %}
                     </span>
                 </div>
                 <!-- /ko -->
@@ -139,7 +139,7 @@
                 <span class="switch switch-small arches-switch" data-bind="css: {'on': node().isCollector()}, click: toggleIsCollector"><small></small></span>
 
                 <p class="control-label" style="margin-left: 40px; margin-top: -17px; margin-bottom: 0px;">
-                    <span data-bind="text: (node().nodeGroupId() && !node().isCollector() || graphModel.isNodeInChildGroup(node())) ? '{% trans "Make sub-card" %}' : '{% trans "Make card" %}'"></span>
+                    <span data-bind="text: (node().nodeGroupId() && !node().isCollector() || graphModel.isNodeInChildGroup(node())) ? '{% trans "Place node(s) in a separate card" %}' : '{% trans "Make card" %}'"></span>
                 </p>
                 <span style="margin-left: 40px; display: inline-block; color: #8ba2b9; font-size: 10px;">
                     <!-- ko if: node().istopnode -->

@@ -27,8 +27,6 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 
-
-
 # can't use "arches.app.models.system_settings.SystemSettings" because of circular refernce issue
 # so make sure the only settings we use in this file are ones that are static (fixed at run time)
 from django.conf import settings
@@ -50,7 +48,6 @@ class CardModel(models.Model):
     visible = models.BooleanField(default=True)
     sortorder = models.IntegerField(blank=True, null=True, default=None)
 
-    @property
     def is_editable(self):
         result = True
         tiles = TileModel.objects.filter(nodegroup=self.nodegroup).count()
@@ -162,6 +159,7 @@ class Edge(models.Model):
 
 class EditLog(models.Model):
     editlogid = models.UUIDField(primary_key=True, default=uuid.uuid1)
+    resourcedisplayname = models.TextField(blank=True, null=True)
     resourceclassid = models.TextField(blank=True, null=True)
     resourceinstanceid = models.TextField(blank=True, null=True)
     nodegroupid = models.TextField(blank=True, null=True)
@@ -169,11 +167,14 @@ class EditLog(models.Model):
     edittype = models.TextField(blank=True, null=True)
     newvalue = JSONField(blank=True, null=True, db_column='newvalue')
     oldvalue = JSONField(blank=True, null=True, db_column='oldvalue')
+    newprovisionalvalue = JSONField(blank=True, null=True, db_column='newprovisionalvalue')
+    oldprovisionalvalue = JSONField(blank=True, null=True, db_column='oldprovisionalvalue')
     timestamp = models.DateTimeField(blank=True, null=True)
     userid = models.TextField(blank=True, null=True)
     user_firstname = models.TextField(blank=True, null=True)
     user_lastname = models.TextField(blank=True, null=True)
     user_email = models.TextField(blank=True, null=True)
+    user_username = models.TextField(blank=True, null=True)
     note = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -340,7 +341,6 @@ class GraphModel(models.Model):
             return False
         return _('To make this resource editable: ') + ', '.join(msg)
 
-    @property
     def is_editable(self):
         result = True
         if self.isresource:
@@ -621,6 +621,47 @@ class TileModel(models.Model): #Tile
             "20000000-0000-0000-0000-000000000004": "Primary"
         }
 
+    the provisionaledits JSONField has this schema:
+
+    values are dictionaries with n number of keys that represent nodeid's and values the value of that node instance
+
+    .. code-block:: python
+
+        {
+            userid: {
+                value: node value,
+                status: "review", "approved", or "rejected"
+                action: "create", "update", or "delete"
+                reviewer: reviewer's user id,
+                timestamp: time of last provisional change,
+                reviewtimestamp: time of review
+                }
+            ...
+        }
+
+        {
+            1: {
+                "value": {
+                        "20000000-0000-0000-0000-000000000002": "Jack",
+                        "20000000-0000-0000-0000-000000000003": "Smith",
+                        "20000000-0000-0000-0000-000000000004": "Primary"
+                      },
+                "status": "rejected",
+                "action": "update",
+                "reviewer": 8,
+                "timestamp": "20180101T1500",
+                "reviewtimestamp": "20180102T0800",
+                },
+            15: {
+                "value": {
+                        "20000000-0000-0000-0000-000000000002": "John",
+                        "20000000-0000-0000-0000-000000000003": "Smith",
+                        "20000000-0000-0000-0000-000000000004": "Secondary"
+                      },
+                "status": "review",
+                "action": "update",
+        }
+
     """
 
     tileid = models.UUIDField(primary_key=True, default=uuid.uuid1)  # This field type is a guess.
@@ -629,13 +670,14 @@ class TileModel(models.Model): #Tile
     data = JSONField(blank=True, null=True, db_column='tiledata')  # This field type is a guess.
     nodegroup = models.ForeignKey(NodeGroup, db_column='nodegroupid')
     sortorder = models.IntegerField(blank=True, null=True, default=0)
+    provisionaledits = JSONField(blank=True, null=True, db_column='provisionaledits')  # This field type is a guess.
 
     class Meta:
         managed = True
         db_table = 'tiles'
 
     def save(self, *args, **kwargs):
-        if(self.sortorder is None):
+        if(self.sortorder is None or (self.provisionaledits is not None and self.data == {})):
             sortorder_max = TileModel.objects.filter(nodegroup_id=self.nodegroup_id, resourceinstance_id=self.resourceinstance_id).aggregate(Max('sortorder'))['sortorder__max']
             self.sortorder = sortorder_max + 1 if sortorder_max is not None else 0
         super(TileModel, self).save(*args, **kwargs) # Call the "real" save() method.
@@ -832,43 +874,58 @@ class UserProfile(models.Model):
         db_table = 'user_profile'
 
 
-class MobileProject(models.Model):
+class MobileSurveyModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid1)
     name = models.TextField(null=True)
     active = models.BooleanField(default=False)
     createdby = models.ForeignKey(User, related_name='createdby')
     lasteditedby = models.ForeignKey(User, related_name='lasteditedby')
-    users = models.ManyToManyField(to=User, through='MobileProjectXUser')
-    groups = models.ManyToManyField(to=Group, through='MobileProjectXGroup')
+    users = models.ManyToManyField(to=User, through='MobileSurveyXUser')
+    groups = models.ManyToManyField(to=Group, through='MobileSurveyXGroup')
+    cards = models.ManyToManyField(to=CardModel, through='MobileSurveyXCard')
     startdate = models.DateField(blank=True, null=True)
     enddate = models.DateField(blank=True, null=True)
     description = models.TextField(null=True)
+    bounds = models.MultiPolygonField(null=True)
+    tilecache = models.TextField(null=True)
+    datadownloadconfig = JSONField(blank=True, null=True, default='{"download":false, "count":1000, "resources":[], "custom":null}')
 
     def __unicode__(self):
         return self.name
 
     class Meta:
         managed = True
-        db_table = 'mobile_projects'
+        db_table = 'mobile_surveys'
 
 
-class MobileProjectXUser(models.Model):
-    mobile_project_x_user_id = models.UUIDField(primary_key=True, serialize=False, default=uuid.uuid1)
+class MobileSurveyXUser(models.Model):
+    mobile_survey_x_user_id = models.UUIDField(primary_key=True, serialize=False, default=uuid.uuid1)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    mobile_project = models.ForeignKey(MobileProject, on_delete=models.CASCADE)
+    mobile_survey = models.ForeignKey(MobileSurveyModel, on_delete=models.CASCADE, null=True)
 
     class Meta:
         managed = True
-        db_table = 'mobile_projects_x_users'
-        unique_together = ('mobile_project', 'user',)
+        db_table = 'mobile_surveys_x_users'
+        unique_together = ('mobile_survey', 'user',)
 
 
-class MobileProjectXGroup(models.Model):
-    mobile_project_x_group_id = models.UUIDField(primary_key=True, serialize=False, default=uuid.uuid1)
+class MobileSurveyXGroup(models.Model):
+    mobile_survey_x_group_id = models.UUIDField(primary_key=True, serialize=False, default=uuid.uuid1)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    mobile_project = models.ForeignKey(MobileProject, on_delete=models.CASCADE)
+    mobile_survey = models.ForeignKey(MobileSurveyModel, on_delete=models.CASCADE, null=True)
 
     class Meta:
         managed = True
-        db_table = 'mobile_projects_x_groups'
-        unique_together = ('mobile_project', 'group',)
+        db_table = 'mobile_surveys_x_groups'
+        unique_together = ('mobile_survey', 'group',)
+
+class MobileSurveyXCard(models.Model):
+    mobile_survey_x_card_id = models.UUIDField(primary_key=True, serialize=False, default=uuid.uuid1)
+    card = models.ForeignKey(CardModel, on_delete=models.CASCADE)
+    mobile_survey = models.ForeignKey(MobileSurveyModel, on_delete=models.CASCADE, null=True)
+    sortorder = models.IntegerField(default=0)
+
+    class Meta:
+        managed = True
+        db_table = 'mobile_surveys_x_cards'
+        unique_together = ('mobile_survey', 'card',)

@@ -205,7 +205,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                                         </div>
                                         <div class="col-sm-5">
                                             <p class="account-tips">
-                                                {% trans 'Arches uses your e-maill to alert you to projects and tasks assigned to you.' %}
+                                                {% trans 'Arches uses your e-maill to alert you to surveys and tasks assigned to you.' %}
                                             </p>
                                         </div>
                                     </div>
@@ -284,62 +284,64 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                 </div>
 
 
-                <!-- My Projects -->
+                <!-- My Surveys -->
                 <div class="profile-list profile-projects">
                     <div class="profile-header">
-                        My Projects
+                        {% trans 'My Surveys' %}
                     </div>
 
-                    <!--ko ifnot: projectManager.projects().length -->
+                    <!--ko ifnot: mobileSurveyManager.mobilesurveys().length -->
                     <div id="default-mobile-projects" class="profile-default-message-panel">
-                        Sorry, but you haven't been invited to a project yet...
+                        {% trans "Sorry, but you haven't been invited to a survey yet..." %}
                     </div>
                     <!--/ko-->
 
-                    <!--ko if: projectManager.projects().length -->
-                    <!-- Project Invitations List -->
+                    <!--ko if: mobileSurveyManager.mobilesurveys().length -->
+                    <!-- Survey Invitations List -->
                     <div id="mobile-projects-list" class="profile-default-message-panel">
                         <div class="row">
 
-                            <!-- Find a project -->
+                            <!-- Find a survey -->
                             <div class="col-sm-9 col-sm-offset-3 relative">
                                 <div class="project-search-widget">
-                                    <input type="text" class="form-control" style="width: 250px;" placeholder="Find a project..." data-bind="value: projectManager.projectFilter, valueUpdate: 'keyup'">
-                                    <span class="clear-node-search" data-bind="visible: projectManager.projectFilter().length > 0, click: function() { projectManager.projectFilter(''); }"><i class="fa fa-times-circle"></i></span>
+                                    <input type="text" class="form-control" placeholder="{% trans 'Find a survey...' %}" data-bind="value: mobileSurveyManager.mobileSurveyFilter, valueUpdate: 'keyup'">
+                                    <span class="clear-node-search" data-bind="visible: mobileSurveyManager.mobileSurveyFilter().length > 0, click: function() { mobileSurveyManager.mobileSurveyFilter(''); }"><i class="fa fa-times-circle"></i></span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Projects List -->
+                        <!-- Survey List -->
                         <div id="" class="row">
                             <div class="col-sm-9 col-sm-offset-3 mar-top">
                                 <div class="">
-                                    <!--ko foreach: {data: projectManager.filteredProjects(), as: 'project'} -->
+                                    <!--ko foreach: {data: mobileSurveyManager.filteredMobileSurveys(), as: 'mobilesurvey'} -->
                                     <div class="project-panel">
 
                                         <div class="project-panel-header">
-                                            <div class="">
-                                                <div class="project-status" data-bind="text:project.active() ? '{% trans "Active" %}' : '{% trans "Inactive" %}', css: {active: project.active()}"></div>
-                                            </div>
-                                            <h3 class="project-panel-title" data-bind="text: project.name"></h3>
-
-                                            <div class="">
+                                            <div class="user-survey">
+                                                <div class="project-status" data-bind="text:mobilesurvey.active() ? '{% trans "Active" %}' : '{% trans "Inactive" %}', css: {active: mobilesurvey.active()}"></div>
                                                 <ul class="project-metadata">
                                                     <li class="project-metadata-item">
-                                                        September 19, 2017 to September 30, 2017
+                                                        <span data-bind="text: mobilesurvey.startdate() || '?'"></span>
+                                                        {% trans 'to' %}
+                                                        <span data-bind="text: mobilesurvey.enddate() || '?'"></span>
                                                     </li>
                                                 </ul>
+                                            </div>
+                                            <h3 class="project-panel-title" data-bind="text: mobilesurvey.name() === '' ? '{% trans "Unnamed Survey" %}' : mobilesurvey.name()"></h3>
+
+                                            <div class="">
                                                 <div class="project-details">
-                                                    <a id="view-project-details-btn" class="text-primary text-semibold" data-bind="click: function(val){val.toggleShowDetails()}">{% trans 'View Details' %}</a>
+                                                    <a id="view-project-details-btn" class="text-primary text-semibold" data-bind="click: function(val){val.toggleShowDetails(); $parent.mobileSurveyManager.getMobileSurveyResources(val)}">{% trans 'View Details' %}</a>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class='profile-mpm-panel' data-bind="css: {'show-details': project.showDetails}">
+                                        <div class='profile-mpm-panel' data-bind="css: {'show-details': mobilesurvey.showDetails}">
                                         <!-- <div class='profile-mpm-panel' data-bind="slideToggle: $data.showDetails, duration: 400, easing: 'swing'"> -->
                                             <div class="">
                                                 <p class="mpm-item-listing-header" style="margin-bottom: 0px;">
-                                                    Project Summary
+                                                    {% trans 'Survey Summary' %}
                                                 </p>
                                                 <ul class="mpm-node-detail-metadata">
                                                     <li class="">
@@ -361,16 +363,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                                                 <ul class="mpm-node-detail-metadata">
                                                     <li class="">
 
-                                                        {% trans 'Groups' %} (<span data-bind="text: project.groups().length"></span>)
-                                                        <ul class="mpm-node-detail-metadata" data-bind="foreach: _.filter(project.identities, function(id){return (id.type === 'group' && _.contains(project.groups(), id.id))})">
+                                                        {% trans 'Groups' %} (<span data-bind="text: mobilesurvey.groups().length"></span>)
+                                                        <ul class="mpm-node-detail-metadata" data-bind="foreach: _.filter(mobilesurvey.identities, function(id){return (id.type === 'group' && _.contains(mobilesurvey.groups(), id.id))})">
                                                             <li class="" data-bind="text: $data.name"></li>
                                                         </ul>
                                                     </li>
                                                 </ul>
                                                 <ul class="mpm-node-detail-metadata">
                                                     <li class="">
-                                                        {% trans 'Users' %} (<span data-bind="text: project.users().length"></span>)
-                                                        <ul class="mpm-node-detail-metadata" data-bind="foreach: _.filter(project.identities, function(id){return (id.type === 'user' && _.contains(project.users(), id.id))})">
+                                                        {% trans 'Users' %} (<span data-bind="text: mobilesurvey.users().length"></span>)
+                                                        <ul class="mpm-node-detail-metadata" data-bind="foreach: _.filter(mobilesurvey.identities, function(id){return (id.type === 'user' && _.contains(mobilesurvey.users(), id.id))})">
                                                             <li class="" data-bind="text: $data.name"></li>
                                                         </ul>
                                                     </li>
@@ -379,28 +381,21 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
                                             <div class="">
                                                 <p class="mpm-item-listing-header" style="margin-bottom: 0px;">
-                                                    Models and Data Entry Cards
+                                                    {% trans 'Models and Data Entry Cards' %}
                                                 </p>
-                                                <ul class="mpm-node-detail-metadata">
-                                                    <li class="">
-                                                        Assets (3 data entry cards)
-                                                        <ul class="mpm-node-detail-metadata">
-                                                            <li class="">
-                                                                Name, Modification Event, Condition Assessment
-                                                            </li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                                <ul class="mpm-node-detail-metadata">
-                                                    <li class="">
-                                                        Investigation Activities (3 data entry cards)
-                                                        <ul class="mpm-node-detail-metadata">
-                                                            <li class="">
-                                                                Name, Event Location, Activity Type
-                                                            </li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
+
+                                                    <ul class="mpm-node-detail-metadata">
+                                                        <!--ko foreach: {data: mobilesurvey.resources(), as: 'resource'} -->
+                                                        <li class="">
+                                                            <div data-bind="text: resource.name + ' (' + resource.cards.length + ' data entry cards)'"></div>
+                                                            <!--ko foreach: {data: resource.cards, as: 'card'} -->
+                                                            <ul class="mpm-node-detail-metadata">
+                                                                <li data-bind="text: card.name"></li>
+                                                            </ul>
+                                                            <!--/ko-->
+                                                        </li>
+                                                        <!--/ko-->
+                                                    </ul>
                                             </div>
 
                                         </div>
@@ -421,160 +416,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     </div>
     <!--END  Main Editor -->
 
-
-
-    <!--MAIN NAVIGATION-->
-    <nav id="mainnav-container" class="arches-background">
-        <div id="mainnav">
-
-            <!--Shortcut buttons-->
-            <div id="mainnav-shortcut" class="hidden">
-                <ul class="list-unstyled">
-                    <li class="col-xs-4" data-content="Home">
-                        <a class="shortcut-grid" href="#">
-                            <i class="fa fa-home"></i>
-                        </a>
-                    </li>
-                    <li class="col-xs-4" data-content="Dashboard">
-                        <a class="shortcut-grid" href="#">
-                            <i class="fa fa-tachometer"></i>
-                        </a>
-                    </li>
-                    <li class="col-xs-4" data-content="Add New Resource">
-                        <a class="shortcut-grid" href="#">
-                            <i class="fa fa-building-o"></i>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <!--End shortcut buttons-->
-
-
-            <!--Menu-->
-            <div id="mainnav-menu-wrap">
-                <div class="nano arches-header-shim">
-                    <div class="nano-content">
-                        <ul id="mainnav-menu" class="list-group">
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-tachometer"></i>
-                                    <span class="menu-title">
-                                        <strong>Dashboard</strong>
-                                    </span>
-                                </a>
-                            </li>
-
-                            <!--Menu list item-->
-                            <li class="active-link">
-                                <a href="#">
-                                    <i class="fa fa-building-o"></i>
-                                    <span class="menu-title">
-                                        <strong>Resource Manager</strong>
-                                    </span>
-                                </a>
-                                <!-- Submenu -->
-                                <ul class="collapse in" aria-expanded="true">
-                                    <li class="link-submenu-item"><a class="link-submenu" href="forms-general.html"><i class="fa fa-university arches-menu-icon"></i> New Archaeological Resource</a></li>
-                                    <li class="link-submenu-item"><a class="link-submenu" href="forms-components.html"><i class="fa fa-building-o arches-menu-icon"></i> New Architectural Resource</a></li>
-                                    <li class="link-submenu-item"><a class="link-submenu" href="forms-validation.html"><i class="fa fa-tasks arches-menu-icon"></i> New Activity</a></li>
-                                    <li class="link-submenu-item"><a class="link-submenu" href="forms-wizard.html"><i class="fa fa-calendar arches-menu-icon"></i> New Historic Event</a></li>
-                                    <li class="link-submenu-item"><a class="link-submenu" href="forms-wizard.html"><i class="fa fa-group arches-menu-icon"></i> New Agent</a></li>
-                                    <li class="link-submenu-item"><a class="link-submenu" href="forms-wizard.html"><i class="fa fa-file-o arches-menu-icon"></i> New Information Resource</a></li>
-                                </ul>
-                            </li>
-
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="ti-alarm-clock"></i>
-                                    <span class="menu-title">
-                                        <strong>System Settings</strong>
-                                    </span>
-                                </a>
-                            </li>
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-bookmark"></i>
-                                    <span class="menu-title">
-                                        <strong>Resource Designer</strong>
-                                    </span>
-                                </a>
-
-                            </li>
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-server"></i>
-                                    <span class="menu-title">
-                                        <strong>Map Server Manager</strong>
-                                    </span>
-                                </a>
-                            </li>
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-globe"></i>
-                                    <span class="menu-title">
-                                        <strong>Field Project Manager</strong>
-                                    </span>
-                                </a>
-                            </li>
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-cloud-upload"></i>
-                                    <span class="menu-title">
-                                        <strong>Import/Export Manager</strong>
-                                    </span>
-                                </a>
-                            </li>
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-user-md"></i>
-                                    <span class="menu-title">
-                                        <strong>Profile Manager</strong>
-                                    </span>
-                                </a>
-                            </li>
-
-                            <li class="list-divider-dark"></li>
-
-                            <!-- Tools -->
-                            <li class="list-header">Modules</li>
-
-                            <!--Menu list item-->
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-align-left"></i>
-                                    <span class="menu-title">
-                                        RDM
-
-                                    </span>
-                                </a>
-                            </li>
-
-                        </ul>
-
-                    </div>
-                </div>
-            </div>
-            <!--End menu-->
-
-        </div>
-    </nav>
-    <!--END MAIN NAVIGATION-->
-
-    <!--ASIDE-->
 </div>
 
 <!-- SCROLL TOP BUTTON -->
@@ -586,8 +427,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     define('profile-manager-data', [], function() {
         return {
             'error_count': {{form.errors|length}},
-            'projects': {{user_projects}},
-            'identities': {{identities}}
+            'mobilesurveys': {{user_surveys}},
+            'identities': {{identities}},
+            'resources': {{resources}}
         }
     });
 {% endautoescape %}</script>

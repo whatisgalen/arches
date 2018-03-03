@@ -234,6 +234,9 @@ STATICFILES_FINDERS = (
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'c7ky-mc6vdnv+avp0r@(a)8y^51ex=25nogq@+q5$fnc*mxwdi'
+JWT_KEY = SECRET_KEY
+JWT_TOKEN_EXPIRATION = 50 #days before the token becomes stale
+JWT_ALGORITHM = 'HS256'
 
 TEMPLATES = [
     {
@@ -286,17 +289,19 @@ INSTALLED_APPS = (
     'revproxy'
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'arches.app.utils.middleware.TokenMiddleware',
     #'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'arches.app.utils.middleware.JWTAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'arches.app.utils.set_anonymous_user.SetAnonymousUser',
-)
+    'arches.app.utils.middleware.SetAnonymousUser',
+]
 
 ROOT_URLCONF = 'arches.urls'
 
@@ -363,6 +368,9 @@ ENABLE_CAPTCHA = True
 NOCAPTCHA = True
 # RECAPTCHA_PROXY = 'http://127.0.0.1:8000'
 
+# group to assign users who self sign up via the web ui
+USER_SIGNUP_GROUP = 'Crowdsource Editor'
+
 #######################################
 ###       END STATIC SETTINGS       ###
 #######################################
@@ -386,8 +394,6 @@ ETL_USERNAME = 'ETL' # override this setting in your packages settings.py file
 GOOGLE_ANALYTICS_TRACKING_ID = None
 
 DEFAULT_GEOCODER = "10000000-0000-0000-0000-010000000000"
-
-MAPZEN_API_KEY = ""
 
 SPARQL_ENDPOINT_PROVIDERS = (
     {'SPARQL_ENDPOINT_PROVIDER':'arches.app.utils.data_management.sparql_providers.aat_provider.AAT_Provider'},

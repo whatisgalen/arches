@@ -55,8 +55,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('-o', '--operation', action='store', dest='operation', default='setup',
-            choices=['setup', 'install', 'setup_db', 'setup_indexes', 'start_elasticsearch', 'setup_elasticsearch', 'build_permissions', 'remove_resources', 'load_concept_scheme', 'export_business_data', 'export_graphs', 'add_tileserver_layer', 'delete_tileserver_layer',
-            'create_mapping_file', 'import_reference_data', 'import_graphs', 'import_business_data','import_business_data_relations', 'import_mapping_file', 'save_system_settings', 'add_mapbox_layer', 'seed_resource_tile_cache', 'update_project_templates','load_package','create_package'],
+            choices=['setup', 'install', 'setup_db', 'setup_indexes', 'start_elasticsearch', 'setup_elasticsearch', 'build_permissions', 'load_concept_scheme', 'export_business_data', 'export_graphs', 'add_tileserver_layer', 'delete_tileserver_layer',
+            'create_mapping_file', 'import_reference_data', 'import_graphs', 'import_business_data','import_business_data_relations', 'import_mapping_file', 'save_system_settings', 'add_mapbox_layer', 'seed_resource_tile_cache', 'update_project_templates','load_package','create_package', 'export_package_configs'],
             help='Operation Type; ' +
             '\'setup\'=Sets up Elasticsearch and core database schema and code' +
             '\'setup_db\'=Truncate the entire arches based db and re-installs the base schema' +
@@ -116,6 +116,9 @@ class Command(BaseCommand):
         parser.add_argument('-bulk', '--bulk_load', action='store_true', dest='bulk_load',
             help='Bulk load values into the database.  By setting this flag the system will bypass any PreSave functions attached to the resource.')
 
+        parser.add_argument('-create_concepts', '--create_concepts', action='store', dest='create_concepts',
+            help='Create concepts from your business data on import. When setting this flag the system will pull the unique values from columns indicated as concepts and load them into candidates and collections.')
+
         parser.add_argument('-single_file', '--single_file', action='store_true', dest='single_file',
             help='Export grouped business data attrbiutes one or multiple csv files. By setting this flag the system will export all grouped business data to one csv file.')
 
@@ -125,7 +128,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print 'operation: '+ options['operation']
         package_name = settings.PACKAGE_NAME
-        print 'package: '+ package_name
 
         if options['operation'] == 'setup':
             self.setup(package_name, es_install_location=options['dest_dir'])
@@ -151,9 +153,6 @@ class Command(BaseCommand):
         if options['operation'] == 'build_permissions':
             self.build_permissions()
 
-        if options['operation'] == 'remove_resources':
-            self.remove_resources(load_id=options['load_id'],force=options['yes'])
-
         if options['operation'] == 'load_concept_scheme':
             self.load_concept_scheme(package_name, options['source'])
 
@@ -170,7 +169,7 @@ class Command(BaseCommand):
             self.export_graphs(options['dest_dir'], options['graphs'])
 
         if options['operation'] == 'import_business_data':
-            self.import_business_data(options['source'], options['config_file'], options['overwrite'], options['bulk_load'])
+            self.import_business_data(options['source'], options['config_file'], options['overwrite'], options['bulk_load'], options['create_concepts'])
 
         if options['operation'] == 'import_business_data_relations':
             self.import_business_data_relations(options['source'])
@@ -200,10 +199,23 @@ class Command(BaseCommand):
             self.update_project_templates()
 
         if options['operation'] == 'load_package':
-            self.load_package(options['source'], options['setup_db'], options['overwrite'], options['stage'])
+            self.load_package(options['source'], options['setup_db'], options['overwrite'], options['stage'], options['yes'])
 
         if options['operation'] == 'create_package':
             self.create_package(options['dest_dir'])
+
+        if options['operation'] == 'export_package_configs':
+            self.export_package_configs(options['dest_dir'])
+
+    def export_package_configs(self, dest_dir):
+        with open(os.path.join(dest_dir, 'package_config.json'), 'w') as config_file:
+            try:
+                constraints = models.Resource2ResourceConstraint.objects.all()
+                configs = {"permitted_resource_relationships":constraints}
+                config_file.write(JSONSerializer().serialize(configs))
+            except Exception as e:
+                print e
+                print 'Could not read resource to resource constraints'
 
     def create_package(self, dest_dir):
 
@@ -215,6 +227,7 @@ class Command(BaseCommand):
                 'business_data',
                 'business_data/files',
                 'business_data/relations',
+                'business_data/resource_views',
                 'extensions/datatypes',
                 'extensions/functions',
                 'extensions/widgets',
@@ -224,6 +237,7 @@ class Command(BaseCommand):
                 'map_layers/mapbox_spec_json/basemaps',
                 'map_layers/tile_server/basemaps',
                 'map_layers/tile_server/overlays',
+                'preliminary_sql',
                 'reference_data/concepts',
                 'reference_data/collections',
                 'system_settings',
@@ -236,14 +250,7 @@ class Command(BaseCommand):
                     with open(os.path.join(dest_dir, directory, '.gitkeep'), 'w'):
                         print 'added', os.path.join(dest_dir, directory, '.gitkeep')
 
-            with open(os.path.join(dest_dir, 'package_config.json'), 'w') as config_file:
-                try:
-                    constraints = models.Resource2ResourceConstraint.objects.all()
-                    configs = {"permitted_resource_relationships":constraints}
-                    config_file.write(JSONSerializer().serialize(configs))
-                except Exception as e:
-                    print e
-                    print 'Could not read resource to resource constraints'
+            self.export_package_configs(dest_dir)
 
             try:
                 self.save_system_settings(data_dest=os.path.join(dest_dir, 'system_settings'))
@@ -251,17 +258,18 @@ class Command(BaseCommand):
                 print e
                 print "Could not save system settings"
 
-    def load_package(self, source, setup_db=True, overwrite_concepts='ignore', stage_concepts='keep'):
+    def load_package(self, source, setup_db=True, overwrite_concepts='ignore', stage_concepts='keep', yes=False):
 
         def load_system_settings(package_dir):
             update_system_settings = True
             if os.path.exists(settings.SYSTEM_SETTINGS_LOCAL_PATH):
-                response = raw_input('Overwrite current system settings with package settings? (Y/N): ')
-                if response.lower() in ('t', 'true', 'y', 'yes'):
-                    update_system_settings = True
-                    print 'Using package system settings'
-                else:
-                    update_system_settings = False
+                if yes == False:
+                    response = raw_input('Overwrite current system settings with package settings? (Y/N): ')
+                    if response.lower() in ('t', 'true', 'y', 'yes'):
+                        update_system_settings = True
+                        print 'Using package system settings'
+                    else:
+                        update_system_settings = False
 
             if update_system_settings == True:
                 if len(glob.glob(os.path.join(package_dir, 'system_settings', 'System_Settings.json'))) > 0:
@@ -281,6 +289,20 @@ class Command(BaseCommand):
                         resource2resourceid=uuid.UUID(relationship['resource2resourceid'])
                     )
 
+        @transaction.atomic
+        def load_preliminary_sql(package_dir):
+            resource_views = glob.glob(os.path.join(package_dir, 'preliminary_sql', '*.sql'))
+            try:
+                with connection.cursor() as cursor:
+                    for view in resource_views:
+                        with open(view, 'r') as f:
+                            sql = f.read()
+                            cursor.execute(sql)
+            except Exception as e:
+                print e
+                print 'Could not connect to db'
+
+
         def load_resource_views(package_dir):
             resource_views = glob.glob(os.path.join(package_dir, 'business_data','resource_views', '*.sql'))
             try:
@@ -297,8 +319,9 @@ class Command(BaseCommand):
             branches = glob.glob(os.path.join(package_dir, 'graphs', 'branches'))[0]
             resource_models = glob.glob(os.path.join(package_dir, 'graphs', 'resource_models'))[0]
             # self.import_graphs(os.path.join(settings.ROOT_DIR, 'db', 'graphs','branches'), overwrite_graphs=False)
-            self.import_graphs(branches, overwrite_graphs=False)
-            self.import_graphs(resource_models, overwrite_graphs=False)
+            overwrite_graphs = True if yes == True else False
+            self.import_graphs(branches, overwrite_graphs=overwrite_graphs)
+            self.import_graphs(resource_models, overwrite_graphs=overwrite_graphs)
 
         def load_concepts(package_dir, overwrite, stage):
             concept_data = glob.glob(os.path.join(package_dir, 'reference_data', 'concepts', '*.xml'))
@@ -322,16 +345,25 @@ class Command(BaseCommand):
 
                 self.add_mapbox_layer(meta["name"], path, meta["icon"], basemap)
 
-        def load_tile_server_layers(xml_paths, basemap):
-            for path in xml_paths:
-                meta = {
-                    "icon": "fa fa-globe",
-                    "name": os.path.basename(path)
-                }
-                if os.path.exists(os.path.join(os.path.dirname(path), 'meta.json')):
-                    meta = json.load(open(os.path.join(os.path.dirname(path), 'meta.json')))
+        def load_tile_server_layers(paths, basemap):
+            for path in paths:
+                if os.path.basename(path) != 'meta.json':
+                    meta = {
+                        "icon": "fa fa-globe",
+                        "name": os.path.basename(path)
+                    }
+                    if os.path.exists(os.path.join(os.path.dirname(path), 'meta.json')):
+                        meta = json.load(open(os.path.join(os.path.dirname(path), 'meta.json')))
 
-                self.add_tileserver_layer(meta['name'], path, meta['icon'], basemap)
+                    tile_config_path = False
+                    mapnik_xml_path = False
+                    if path.endswith('.json'):
+                        tile_config_path = path
+                    if path.endswith('.xml'):
+                        mapnik_xml_path = path
+
+                    self.add_tileserver_layer(meta['name'], mapnik_xml_path, meta['icon'], basemap, tile_config_path)
+
 
         def load_map_layers(package_dir):
             basemap_styles = glob.glob(os.path.join(package_dir, 'map_layers', 'mapbox_spec_json', 'basemaps', '*', '*.json'))
@@ -340,7 +372,9 @@ class Command(BaseCommand):
             load_mapbox_styles(overlay_styles, False)
 
             tile_server_basemaps = glob.glob(os.path.join(package_dir, 'map_layers', 'tile_server', 'basemaps', '*', '*.xml'))
+            tile_server_basemaps += glob.glob(os.path.join(package_dir, 'map_layers', 'tile_server', 'basemaps', '*', '*.json'))
             tile_server_overlays = glob.glob(os.path.join(package_dir, 'map_layers', 'tile_server', 'overlays', '*', '*.xml'))
+            tile_server_overlays += glob.glob(os.path.join(package_dir, 'map_layers', 'tile_server', 'overlays', '*', '*.json'))
             load_tile_server_layers(tile_server_basemaps, True)
             load_tile_server_layers(tile_server_overlays, False)
 
@@ -404,7 +438,6 @@ class Command(BaseCommand):
             load_extensions(package_dir, 'datatypes', 'datatype')
 
         def handle_source(source):
-
             if os.path.isdir(source):
                 return source
 
@@ -440,6 +473,9 @@ class Command(BaseCommand):
             if setup_db.lower() in ('t', 'true', 'y', 'yes'):
                 self.setup_db(settings.PACKAGE_NAME)
 
+
+        print 'loading preliminary sql'
+        load_preliminary_sql(package_location)
         print 'loading system settings'
         load_system_settings(package_location)
         print 'loading widgets'
@@ -470,7 +506,7 @@ class Command(BaseCommand):
         """
         files = [
             {'src': 'arches/app/templates/index.htm', 'dst':'arches/install/arches-templates/project_name/templates/index.htm'},
-            {'src':'bower.json', 'dst':'arches/install/arches-templates/project_name/bower.json'}
+            {'src':'package.json', 'dst':'arches/install/arches-templates/project_name/package.json'}
             ]
         for f in files:
             shutil.copyfile(f['src'], f['dst'])
@@ -689,18 +725,6 @@ class Command(BaseCommand):
                 Permission.objects.create(codename='read_%s' % entitytype, name='%s - read' % entitytype , content_type=content_type[0])
                 Permission.objects.create(codename='delete_%s' % entitytype, name='%s - delete' % entitytype , content_type=content_type[0])
 
-    def remove_resources(self, load_id='', force=False):
-        """
-        Runs the resource_remover command found in data_management.resources
-        """
-        # resource_remover.delete_resources(load_id)
-        if not force:
-            if not utils.get_yn_input("all resources will be removed. continue?"):
-                return
-
-        resource_remover.clear_resources()
-        return
-
     def export_business_data(self, data_dest=None, file_format=None, config_file=None, graph=None, single_file=False):
         try:
             resource_exporter = ResourceExporter(file_format, configs=config_file, single_file=single_file)
@@ -741,7 +765,7 @@ class Command(BaseCommand):
         rdf = skos.read_file(data_source)
         ret = skos.save_concepts_from_skos(rdf, overwrite, stage)
 
-    def import_business_data(self, data_source, config_file=None, overwrite=None, bulk_load=False):
+    def import_business_data(self, data_source, config_file=None, overwrite=None, bulk_load=False, create_concepts=False):
         """
         Imports business data from all formats
         """
@@ -757,11 +781,21 @@ class Command(BaseCommand):
         if isinstance(data_source, basestring):
             data_source = [data_source]
 
+        create_collections = False
+        if create_concepts:
+            create_concepts = str(create_concepts).lower()
+            if create_concepts == 'create':
+                create_collections = True
+                print 'Creating new collections . . .'
+            elif create_concepts == 'append':
+                print 'Appending to existing collections . . .'
+            create_concepts = True
+
         if data_source != ():
             for path in data_source:
                 if os.path.isabs(path):
                     if os.path.isfile(os.path.join(path)):
-                        BusinessDataImporter(path, config_file).import_business_data(overwrite=overwrite, bulk=bulk_load)
+                        BusinessDataImporter(path, config_file).import_business_data(overwrite=overwrite, bulk=bulk_load, create_concepts=create_concepts, create_collections=create_collections)
                     else:
                         print '*'*80
                         print 'No file found at indicated location: {0}'.format(path)

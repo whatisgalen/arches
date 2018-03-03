@@ -32,7 +32,7 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from arches.app.utils.decorators import group_required
 from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializer
-from arches.app.utils.JSONResponse import JSONResponse
+from arches.app.utils.response import JSONResponse
 from arches.app.models import models
 from arches.app.models.graph import Graph, GraphValidationError
 from arches.app.models.card import Card
@@ -58,7 +58,7 @@ def get_ontology_namespaces():
         g.parse(ontology.path.path)
     for namespace in g.namespaces():
         if str(namespace[1]) not in ontology_namespaces:
-            ontology_namespaces[str(namespace[1])] = namespace[0]
+            ontology_namespaces[str(namespace[1])] = str(namespace[0])
     return ontology_namespaces
 
 
@@ -109,7 +109,8 @@ class GraphSettingsView(GraphBaseView):
 
         context['nav']['title'] = self.graph.name
         context['nav']['menu'] = True
-        context['nav']['help'] = (_('Defining Settings'),'help/settings-help.htm')
+        context['nav']['help'] = (_('Defining Settings'),'help/base-help.htm')
+        context['help'] = 'settings-help'
 
         return render(request, 'views/graph/graph-settings.htm', context)
 
@@ -149,23 +150,24 @@ class GraphManagerView(GraphBaseView):
 
             context['nav']['title'] = 'Arches Designer'
             context['nav']['icon'] = 'fa-bookmark'
-            context['nav']['help'] = (_('About the Arches Designer'),'help/arches-designer-help.htm')
+            context['nav']['help'] = (_('About the Arches Designer'),'help/base-help.htm')
+            context['help'] = 'arches-designer-help'
 
             return render(request, 'views/graph.htm', context)
 
         self.graph = Graph.objects.get(graphid=graphid)
         datatypes = models.DDataType.objects.all()
-        branch_graphs = Graph.objects.exclude(pk=graphid).exclude(isresource=True).exclude(isactive=False)
+        branch_graphs = Graph.objects.exclude(pk=graphid).exclude(isresource=True)
         if self.graph.ontology is not None:
             branch_graphs = branch_graphs.filter(ontology=self.graph.ontology)
         lang = request.GET.get('lang', settings.LANGUAGE_CODE)
         concept_collections = Concept().concept_tree(mode='collections', lang=lang)
-
+        datatypes_json = JSONSerializer().serialize(datatypes, exclude=['iconclass','modulename','isgeometric'])
         context = self.get_context_data(
             main_script='views/graph/graph-manager',
-            branches=JSONSerializer().serialize(branch_graphs),
-            datatypes_json=JSONSerializer().serialize(datatypes),
-            datatypes=datatypes,
+            branches=JSONSerializer().serialize(branch_graphs, exclude=['cards','domain_connections', 'functions', 'cards', 'deploymentfile', 'deploymentdate']),
+            datatypes_json=datatypes_json,
+            datatypes=json.loads(datatypes_json),
             concept_collections=concept_collections,
             node_list={
                 'title': _('Node List'),
@@ -181,10 +183,10 @@ class GraphManagerView(GraphBaseView):
             },
             ontology_namespaces = get_ontology_namespaces()
         )
-
         context['nav']['title'] = self.graph.name
-        context['nav']['help'] = (_('Using the Graph Manager'),'help/graph-designer-help.htm')
+        context['nav']['help'] = (_('Using the Graph Manager'),'help/base-help.htm')
         context['nav']['menu'] = True
+        context['help'] = 'graph-designer-help'
 
         return render(request, 'views/graph/graph-manager.htm', context)
 
@@ -232,10 +234,20 @@ class GraphDataView(View):
             response.write(zip_stream)
             return response
 
+        elif self.action == 'get_domain_connections':
+            res = []
+            graph = Graph.objects.get(graphid=graphid)
+            ontology_class = request.GET.get('ontology_class', None)
+            ret = graph.get_valid_domain_ontology_classes()
+            for r in ret:
+                res.append({'ontology_property': r['ontology_property'], 'ontology_classes':[c for c in r['ontology_classes'] if c == ontology_class]})
+            return JSONResponse(res)
+
         else:
             graph = Graph.objects.get(graphid=graphid)
             if self.action == 'get_related_nodes':
-                ret = graph.get_valid_ontology_classes(nodeid=nodeid)
+                parent_nodeid = request.GET.get('parent_nodeid', None)
+                ret = graph.get_valid_ontology_classes(nodeid=nodeid, parent_nodeid=parent_nodeid)
 
             elif self.action == 'get_valid_domain_nodes':
                 ret = graph.get_valid_domain_ontology_classes(nodeid=nodeid)
@@ -317,19 +329,18 @@ class CardManagerView(GraphBaseView):
             cardid = card.cardid
             return redirect('card', cardid=cardid)
 
-        branch_graphs = Graph.objects.exclude(pk=graphid).exclude(isresource=True).exclude(isactive=False)
+        branch_graphs = Graph.objects.exclude(pk=graphid).exclude(isresource=True)
         if self.graph.ontology is not None:
             branch_graphs = branch_graphs.filter(ontology=self.graph.ontology)
 
         context = self.get_context_data(
             main_script='views/graph/card-manager',
-            branches=JSONSerializer().serialize(branch_graphs),
+            branches=JSONSerializer().serialize(branch_graphs, exclude=['functions', 'relatable_resource_model_ids', 'edges']),
         )
-
         context['nav']['title'] = self.graph.name
         context['nav']['menu'] = True
-        context['nav']['help'] = (_('Managing Cards'),'help/card-manager-help.htm')
-
+        context['nav']['help'] = (_('Managing Cards'),'help/base-help.htm')
+        context['help'] = 'card-manager-help'
         return render(request, 'views/graph/card-manager.htm', context)
 
 
@@ -345,6 +356,10 @@ class CardView(GraphBaseView):
             self.graph = Graph.objects.get(graphid=card.graph_id)
             if self.graph.isresource == True:
                 return redirect('card_manager', graphid=cardid)
+
+        card.confirm_enabled_state(request.user, card.nodegroup)
+        for c in card.cards:
+            c.confirm_enabled_state(request.user, c.nodegroup)
 
         datatypes = models.DDataType.objects.all()
         widgets = models.Widget.objects.all()
@@ -379,7 +394,8 @@ class CardView(GraphBaseView):
 
         context['nav']['title'] = self.graph.name
         context['nav']['menu'] = True
-        context['nav']['help'] = (_('Configuring Cards and Widgets'),'help/card-designer-help.htm')
+        context['nav']['help'] = (_('Configuring Cards and Widgets'),'help/base-help.htm')
+        context['help'] = 'card-designer-help'
 
         return render(request, 'views/graph/card-configuration-manager.htm', context)
 
@@ -410,7 +426,9 @@ class FormManagerView(GraphBaseView):
 
             context['nav']['title'] = self.graph.name
             context['nav']['menu'] = True
-            context['nav']['help'] = (_('Using the Menu Manager'),'help/menu-manager-help.htm')
+            context['nav']['help'] = (_('Using the Menu Manager'),'help/base-help.htm')
+            context['help'] = 'menu-manager-help'
+
             return render(request, 'views/graph/form-manager.htm', context)
         else:
             return redirect('graph_settings', graphid=graphid)
@@ -456,7 +474,8 @@ class FormView(GraphBaseView):
 
             context['nav']['title'] = self.graph.name
             context['nav']['menu'] = True
-            context['nav']['help'] = (_('Configuring Menus'),'help/menu-designer-help.htm')
+            context['nav']['help'] = (_('Configuring Menus'),'help/base-help.htm')
+            context['help'] = 'menu-designer-help'
 
             return render(request, 'views/graph/form-configuration.htm', context)
 
@@ -523,7 +542,8 @@ class ReportManagerView(GraphBaseView):
 
             context['nav']['title'] = self.graph.name
             context['nav']['menu'] = True
-            context['nav']['help'] = (_('Managing Reports'),'help/report-manager-help.htm')
+            context['nav']['help'] = (_('Managing Reports'),'help/base-help.htm')
+            context['help'] = 'report-manager-help'
 
             return render(request, 'views/graph/report-manager.htm', context)
 
@@ -577,7 +597,8 @@ class ReportEditorView(GraphBaseView):
 
             context['nav']['title'] = self.graph.name
             context['nav']['menu'] = True
-            context['nav']['help'] = (_('Designing Reports'),'help/report-designer-help.htm')
+            context['nav']['help'] = (_('Designing Reports'),'help/base-help.htm')
+            context['help'] = 'report-designer-help'
 
             return render(request, 'views/graph/report-editor.htm', context)
 
@@ -627,7 +648,8 @@ class FunctionManagerView(GraphBaseView):
 
             context['nav']['title'] = self.graph.name
             context['nav']['menu'] = True
-            context['nav']['help'] = (_('Managing Functions'),'help/function-help.htm')
+            context['nav']['help'] = (_('Managing Functions'),'help/base-help.htm')
+            context['help'] = 'function-help'
 
             return render(request, 'views/graph/function-manager.htm', context)
         else:
@@ -724,7 +746,8 @@ class PermissionManagerView(GraphBaseView):
 
             context['nav']['title'] = self.graph.name
             context['nav']['menu'] = True
-            context['nav']['help'] = (_('Managing Permissions'),'help/permissions-manager-help.htm')
+            context['nav']['help'] = (_('Managing Permissions'),'help/base-help.htm')
+            context['help'] = 'permissions-manager-help'
 
             return render(request, 'views/graph/permission-manager.htm', context)
         else:

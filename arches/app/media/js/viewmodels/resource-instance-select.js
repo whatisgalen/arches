@@ -78,6 +78,7 @@ define([
             multiple: this.multiple,
             placeholder: this.placeholder,
             allowClear: true,
+            disabled: this.disabled,
             ajax: {
                 url: arches.urls.search_results,
                 dataType: 'json',
@@ -88,12 +89,16 @@ define([
                         no_filters: true,
                         page: page
                     };
-                    if (graphid) {
+                    if (graphid && graphid.length > 0) {
                         data.no_filters = false;
-                        data.typeFilter = JSON.stringify([{
-                            "graphid": graphid,
-                            "inverted": false
-                        }]);
+                        data.typeFilter = JSON.stringify(
+                            graphid.map(function(id) {
+                                return {
+                                    "graphid": id,
+                                    "inverted": false
+                                }
+                            })
+                        );
                     }
                     if (term) {
                         data.no_filters = false;

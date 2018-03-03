@@ -18,7 +18,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import uuid, importlib
 import datetime
+import json
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.translation import ugettext as _
 from arches.app.models import models
 from arches.app.models.resource import Resource
@@ -93,7 +96,7 @@ class Tile(models.TileModel):
                             tile.parenttile = self
                             self.tiles[key].append(tile)
 
-    def save_edit(self, user={}, note='', edit_type='', old_value=None, new_value=None):
+    def save_edit(self, user={}, note='', edit_type='', old_value=None, new_value=None, newprovisionalvalue=None, oldprovisionalvalue=None):
         timestamp = datetime.datetime.now()
         edit = EditLog()
         edit.resourceclassid = self.resourceinstance.graph_id
@@ -104,40 +107,139 @@ class Tile(models.TileModel):
         edit.user_email = getattr(user, 'email', '')
         edit.user_firstname = getattr(user, 'first_name', '')
         edit.user_lastname = getattr(user, 'last_name', '')
-        edit.note = note
+        edit.user_username = getattr(user, 'username', '')
+        edit.resourcedisplayname = Resource.objects.get(resourceinstanceid=self.resourceinstance.resourceinstanceid).displayname
         edit.oldvalue = old_value
         edit.newvalue = new_value
         edit.timestamp = timestamp
         edit.edittype = edit_type
+        edit.newprovisionalvalue = newprovisionalvalue
+        edit.oldprovisionalvalue = oldprovisionalvalue
         edit.save()
+
+    def apply_provisional_edit(self, user, data, action='create', status='review'):
+        """
+        Creates or updates the json stored in a tile's provisionaledits db_column
+
+        """
+
+        provisionaledit =  {
+            "value": data,
+            "status": status,
+            "action": action,
+            "reviewer": None,
+            "timestamp": timezone.now(),
+            "reviewtimestamp": None
+        }
+
+        if self.provisionaledits is not None:
+            provisionaledits = JSONDeserializer().deserialize(self.provisionaledits)
+            provisionaledits[str(user.id)] = provisionaledit
+        else:
+            provisionaledits = {
+                user.id: provisionaledit
+                }
+        self.provisionaledits = JSONSerializer().serialize(provisionaledits)
+
+    def is_provisional(self):
+        """
+        Returns True if a tile has been created as provisional and has not yet
+        been approved by a user in the resource reviewer group
+
+        """
+
+        result = False
+        if self.provisionaledits is not None and len(self.data) == 0:
+            result = True
+
+        return result
+
+    def user_owns_provisional(self, user):
+        """
+        Returns True if a user was the creator of a provisional tile that has not
+        yet been approved. This is used to confirm whether a provisional user
+        is allowed to edit and delete their provisional data.
+
+        """
+        result = False
+        if self.provisionaledits is not None:
+            provisionaledits = JSONDeserializer().deserialize(self.provisionaledits)
+            if str(user.id) in provisionaledits:
+                edit = provisionaledits[str(user.id)]
+                result = True
+        return result
+
+    def get_provisional_edit(self, tile, user):
+        edit = None
+        if tile.provisionaledits is not None:
+            edits = json.loads(tile.provisionaledits)
+            if str(user.id) in edits:
+                edit = edits[str(user.id)]
+        return edit
+
+    def check_for_missing_nodes(self, request):
+        for nodeid, value in self.data.iteritems():
+            datatype_factory = DataTypeFactory()
+            node = models.Node.objects.get(nodeid=nodeid)
+            datatype = datatype_factory.get_instance(node.datatype)
+            datatype.clean(self, nodeid)
+            if request is not None:
+                datatype.handle_request(self, request, node)
+                if self.data[nodeid] == None and node.isrequired == True:
+                    missing_nodes.append(node.name)
+                    if missing_nodes != []:
+                        message = _('This card requires values for the following:')
+                        raise ValidationError(message, (', ').join(missing_nodes))
 
     def save(self, *args, **kwargs):
         request = kwargs.pop('request', None)
         index = kwargs.pop('index', True)
+        log = kwargs.pop('log', True)
         self.__preSave(request)
         missing_nodes = []
-        if self.data != {}:
-            old_model = models.TileModel.objects.filter(pk=self.tileid)
-            old_data = old_model[0].data if len(old_model) > 0 else None
-            edit_type = 'tile create' if (old_data == None) else 'tile edit'
-            try:
-                user = request.user
-            except:
-                user = {}
-            self.save_edit(user=user, edit_type=edit_type, old_value=old_data, new_value=self.data)
-            for nodeid, value in self.data.iteritems():
-                datatype_factory = DataTypeFactory()
-                node = models.Node.objects.get(nodeid=nodeid)
-                datatype = datatype_factory.get_instance(node.datatype)
-                datatype.convert_value(self, nodeid)
-                if self.data[nodeid] == None and node.isrequired == True:
-                    missing_nodes.append(node.name)
+        creating_new_tile = True
+        user_is_reviewer = False
+        newprovisionalvalue = None
+        oldprovisionalvalue = None
+        self.check_for_missing_nodes(request)
 
-        if missing_nodes != []:
-            message = _('This card requires values for the following:')
-            raise ValidationError(message, (', ').join(missing_nodes))
+        try:
+            user = request.user
+            user_is_reviewer = request.user.groups.filter(name='Resource Reviewer').exists()
+        except AttributeError: #no user - probably importing data
+            user = None
+
+        creating_new_tile = models.TileModel.objects.filter(pk=self.tileid).exists() == False
+        edit_type = 'tile create' if (creating_new_tile == True) else 'tile edit'
+
+        if creating_new_tile == False:
+            existing_model = models.TileModel.objects.get(pk=self.tileid)
+
+        if user is not None:
+            if user_is_reviewer == False and creating_new_tile == False:
+                self.apply_provisional_edit(user, self.data, action='update')
+                newprovisionalvalue = self.data
+                oldprovisional = self.get_provisional_edit(existing_model, user)
+                if oldprovisional is not None:
+                    oldprovisionalvalue = oldprovisional['value']
+
+                self.data = existing_model.data
+            if creating_new_tile == True:
+                if self.is_provisional() == False and user_is_reviewer == False:
+                    self.apply_provisional_edit(user, data=self.data, action='create')
+                    newprovisionalvalue = self.data
+                    self.data = {}
 
         super(Tile, self).save(*args, **kwargs)
+        #We have to save the edit log record after calling save so that the
+        #resource's displayname changes are avaliable
+        if log == True:
+            user = {} if user == None else user
+            if creating_new_tile == True:
+                self.save_edit(user=user, edit_type=edit_type, old_value={}, new_value=self.data, newprovisionalvalue=newprovisionalvalue)
+            else:
+                self.save_edit(user=user, edit_type=edit_type, old_value=existing_model.data, new_value=self.data, newprovisionalvalue=newprovisionalvalue, oldprovisionalvalue=oldprovisionalvalue)
+
         if index and unicode(self.resourceinstance.graph_id) != unicode(settings.SYSTEM_SETTINGS_RESOURCE_MODEL_ID):
             self.index()
         for tiles in self.tiles.itervalues():
@@ -153,20 +255,31 @@ class Tile(models.TileModel):
         for tiles in self.tiles.itervalues():
             for tile in tiles:
                 tile.delete(*args, request=request, **kwargs)
+        try:
+            user = request.user
+            user_is_reviewer = request.user.groups.filter(name='Resource Reviewer').exists()
+        except AttributeError: #no user
+            user = None
 
-        query = Query(se)
-        bool_query = Bool()
-        bool_query.filter(Terms(field='tileid', terms=[self.tileid]))
-        query.add_query(bool_query)
-        results = query.search(index='strings', doc_type='term')['hits']['hits']
-        for result in results:
-            se.delete(index='strings', doc_type='term', id=result['_id'])
+        if user_is_reviewer is True or self.user_owns_provisional(user):
+            query = Query(se)
+            bool_query = Bool()
+            bool_query.filter(Terms(field='tileid', terms=[self.tileid]))
+            query.add_query(bool_query)
+            results = query.search(index='strings', doc_type='term')['hits']['hits']
 
-        self.__preDelete(request)
-        self.save_edit(user=request.user, edit_type='tile delete', old_value=self.data)
-        super(Tile, self).delete(*args, **kwargs)
-        resource = Resource.objects.get(resourceinstanceid=self.resourceinstance.resourceinstanceid)
-        resource.index()
+            for result in results:
+                se.delete(index='strings', doc_type='term', id=result['_id'])
+
+            self.__preDelete(request)
+            self.save_edit(user=request.user, edit_type='tile delete', old_value=self.data)
+            super(Tile, self).delete(*args, **kwargs)
+            resource = Resource.objects.get(resourceinstanceid=self.resourceinstance.resourceinstanceid)
+            resource.index()
+
+        else:
+            self.apply_provisional_edit(user, data={}, action='delete')
+            super(Tile, self).save(*args, **kwargs)
 
 
     def index(self):
@@ -269,7 +382,7 @@ class Tile(models.TileModel):
                 return None
         return self
 
-    def serialize(self):
+    def serialize(self, fields=None, exclude=None):
         """
         serialize to a different form then used by the internal class structure
 

@@ -86,15 +86,19 @@ class Resource(models.ResourceInstance):
         Saves and indexes a single resource
 
         """
+
         request = kwargs.pop('request', '')
+        user = kwargs.pop('user', '')
         super(Resource, self).save(*args, **kwargs)
         for tile in self.tiles:
             tile.resourceinstance_id = self.resourceinstanceid
             saved_tile = tile.save(index=False)
         if request == '':
-            user = {}
+            if user == '':
+                user = {}
         else:
             user = request.user
+
         self.save_edit(user=user, edit_type='create')
         self.index()
 
@@ -184,7 +188,8 @@ class Resource(models.ResourceInstance):
         """
 
         document = JSONSerializer().serializeToPython(self)
-        document['tiles'] = list(models.TileModel.objects.filter(resourceinstance=self)) if fetchTiles else self.tiles
+        tiles = list(models.TileModel.objects.filter(resourceinstance=self)) if fetchTiles else self.tiles
+        document['tiles'] = tiles
         document['strings'] = []
         document['dates'] = []
         document['domains'] = []
@@ -192,6 +197,7 @@ class Resource(models.ResourceInstance):
         document['points'] = []
         document['numbers'] = []
         document['date_ranges'] = []
+        document['provisional'] = True if sum([len(t.data) for t in tiles]) == 0 else False
 
         terms = []
 
@@ -203,7 +209,24 @@ class Resource(models.ResourceInstance):
                     datatype_instance.append_to_document(document, nodevalue, nodeid, tile)
                     node_terms = datatype_instance.get_search_terms(nodevalue, nodeid)
                     for index, term in enumerate(node_terms):
-                        terms.append({'_id':unicode(nodeid)+unicode(tile.tileid)+unicode(index), '_source': {'value': term, 'nodeid': nodeid, 'nodegroupid': tile.nodegroup_id, 'tileid': tile.tileid, 'resourceinstanceid':tile.resourceinstance_id}})
+                        terms.append({'_id':unicode(nodeid)+unicode(tile.tileid)+unicode(index), '_source': {'value': term, 'nodeid': nodeid, 'nodegroupid': tile.nodegroup_id, 'tileid': tile.tileid, 'resourceinstanceid':tile.resourceinstance_id, 'provisional': False}})
+
+            if tile.provisionaledits is not None:
+                provisionaledits = JSONDeserializer().deserialize(tile.provisionaledits)
+                if len(provisionaledits) > 0:
+                    if document['provisional'] == False:
+                        document['provisional'] = 'partial'
+                    for user, edit in provisionaledits.iteritems():
+                        if edit['status'] == 'review':
+                            for nodeid, nodevalue in edit['value'].iteritems():
+                                datatype = node_datatypes[nodeid]
+                                if nodevalue != '' and nodevalue != [] and nodevalue != {} and nodevalue is not None:
+                                    datatype_instance = datatype_factory.get_instance(datatype)
+                                    datatype_instance.append_to_document(document, nodevalue, nodeid, tile, True)
+                                    node_terms = datatype_instance.get_search_terms(nodevalue, nodeid)
+                                    for index, term in enumerate(node_terms):
+                                        terms.append({'_id':unicode(nodeid)+unicode(tile.tileid)+unicode(index), '_source': {'value': term, 'nodeid': nodeid, 'nodegroupid': tile.nodegroup_id, 'tileid': tile.tileid, 'resourceinstanceid':tile.resourceinstance_id, 'provisional': True}})
+
 
         return document, terms
 
@@ -225,7 +248,8 @@ class Resource(models.ResourceInstance):
         for result in results:
             se.delete(index='strings', doc_type='term', id=result['_id'])
         se.delete(index='resource', doc_type=str(self.graph_id), id=self.resourceinstanceid)
-        self.save_edit(edit_type='delete')
+
+        self.save_edit(edit_type='delete', user=user, note=self.displayname)
         super(Resource, self).delete()
 
     def get_related_resources(self, lang='en-US', limit=settings.RELATED_RESOURCES_EXPORT_LIMIT, start=0, page=0):
@@ -235,19 +259,19 @@ class Resource(models.ResourceInstance):
         """
         root_nodes = models.Node.objects.filter(istopnode=True)
         node_config_lookup = {}
-
+        graphs = models.GraphModel.objects.all().exclude(pk=settings.SYSTEM_SETTINGS_RESOURCE_MODEL_ID).exclude(isresource=False)
+        graph_lookup = {str(graph.graphid): {'name':graph.name, 'iconclass': graph.iconclass} for graph in graphs}
         for node in root_nodes:
             graph_id = unicode(node.graph_id)
-            if node.config != None:
+            if node.config != None and graph_id in graph_lookup:
                 node_config_lookup[graph_id] = node.config
-                node_config_lookup[graph_id]['iconclass'] = node.graph.iconclass
-                node_config_lookup[graph_id]['name'] = node.graph.name
+                node_config_lookup[graph_id]['iconclass'] = graph_lookup[graph_id]['iconclass']
+                node_config_lookup[graph_id]['name'] = graph_lookup[graph_id]['name']
 
         ret = {
             'resource_instance': self,
             'resource_relationships': [],
             'related_resources': [],
-            'root_node_config': models.Node.objects.filter(graph_id=self.graph.graphid).filter(istopnode=True)[0].config,
             'node_config_lookup': node_config_lookup
         }
         se = SearchEngineFactory().create()
@@ -325,7 +349,7 @@ class Resource(models.ResourceInstance):
 
         return new_resource
 
-    def serialize(self):
+    def serialize(self, fields=None, exclude=None):
         """
         Serialize to a different form then used by the internal class structure
 

@@ -4,11 +4,11 @@ define([
     'knockout',
     'knockout-mapping',
     'arches',
-    'viewmodels/project-manager',
+    'viewmodels/mobile-survey-manager',
     'views/base-manager',
     'profile-manager-data',
     'bindings/slide-toggle'
-], function($, _, ko, koMapping, arches, ProjectManagerViewModel, BaseManagerView, data) {
+], function($, _, ko, koMapping, arches, MobileSurveyManagerViewModel, BaseManagerView, data) {
 
     var UserProfileManager = BaseManagerView.extend({
         initialize: function(options) {
@@ -33,8 +33,36 @@ define([
             self.viewModel.toggleEditUserForm = function(val) {
                 this.showEditUserForm(!this.showEditUserForm())
             };
+            console.log(data)
+            self.viewModel.mobileSurveyManager = new MobileSurveyManagerViewModel(data);
 
-            self.viewModel.projectManager = new ProjectManagerViewModel(data);
+            _.each(self.viewModel.mobileSurveyManager.mobilesurveys(), function(mobilesurvey) {
+                mobilesurvey.resources = ko.computed(function() {
+                    var resources = [];
+                    var resource_lookup = {};
+                    _.each(self.viewModel.mobileSurveyManager.resourceList.items(), function(resource) {
+                        _.each(resource.cards(), function(card) {
+                                if (_.contains(mobilesurvey.cards(), card.cardid)) {
+                                    if (resource_lookup[resource.id]) {
+                                        resource_lookup[resource.id].cards.push(card)
+                                    } else {
+                                        resource_lookup[resource.id] = {
+                                            name: resource.name,
+                                            cards: [card]
+                                        };
+                                    }
+                                }
+                        })
+                    });
+                    _.each(resource_lookup, function(resource) {
+                        resources.push(resource)
+                    })
+                        resources.sort(function(a, b) {
+                        return a.name - b.name;
+                    });
+                    return resources;
+                })
+            }, self)
 
             self.viewModel.credentials = koMapping.fromJS({
                 old_password: '',
@@ -56,7 +84,6 @@ define([
                         self.viewModel.changePasswordSuccess(data.success);
                         self.viewModel.toggleChangePasswordForm();
                     }
-
                 }).fail(function(err) {
                     console.log(err);
                 });

@@ -31,7 +31,7 @@ from arches.app.search.search_engine_factory import SearchEngineFactory
 from arches.app.search.elasticsearch_dsl_builder import Bool, Match, Query, Nested, Terms, GeoShape, Range, SimpleQueryString
 from arches.app.utils.decorators import group_required
 from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializer
-from arches.app.utils.JSONResponse import JSONResponse
+from arches.app.utils.response import JSONResponse
 from arches.app.utils.skos import SKOSWriter, SKOSReader
 from arches.app.views.base import BaseManagerView
 
@@ -39,7 +39,8 @@ from arches.app.views.base import BaseManagerView
 class RDMView(BaseManagerView):
     def get(self, request, conceptid):
         lang = request.GET.get('lang', settings.LANGUAGE_CODE)
-        languages = models.DLanguage.objects.all()
+
+        languages = sort_languages(models.DLanguage.objects.all(), lang)
 
         concept_schemes = []
         for concept in models.Concept.objects.filter(nodetype='ConceptScheme'):
@@ -61,7 +62,8 @@ class RDMView(BaseManagerView):
 
         context['nav']['icon'] = 'fa fa-align-left'
         context['nav']['title'] = _('Reference Data Manager')
-        context['nav']['help'] = (_('Using the RDM'),'help/rdm-help.htm')
+        context['nav']['help'] = (_('Using the RDM'),'help/base-help.htm')
+        context['help'] = 'rdm-help'
 
         return render(request, 'rdm.htm', context)
 
@@ -76,6 +78,22 @@ def get_sparql_providers(endpoint=None):
         return sparql_providers[endpoint]
     else:
         return sparql_providers
+
+def sort_languages(languages, lang):
+    """
+    Sorts languages from the d_languages model by name. If there is more than
+    one default language or no default language, the default language is defined
+    by lang (the settings.LANGUAGE_CODE)
+    """
+
+    if len([l for l in languages if l.isdefault == True]) != 1:
+        for l in languages:
+            if l.languageid == lang:
+                l.isdefault = True
+            else:
+                l.isdefault = False
+
+    return sorted(languages, key=lambda x: x.languagename)
 
 
 @group_required('RDM Administrator')
@@ -106,13 +124,13 @@ def concept(request, conceptid):
 
 
             labels = []
-            #concept_graph = Concept().get(id=conceptid)
 
             concept_graph = Concept().get(id=conceptid, include_subconcepts=include_subconcepts,
                 include_parentconcepts=include_parentconcepts, include_relatedconcepts=include_relatedconcepts,
                 depth_limit=depth_limit, up_depth_limit=None, lang=lang, semantic=(mode == 'semantic' or mode == ''))
 
-            languages = models.DLanguage.objects.all()
+            languages = sort_languages(models.DLanguage.objects.all(), lang)
+
             valuetypes = models.DValueType.objects.all()
             relationtypes = models.DRelationType.objects.all()
             prefLabel = concept_graph.get_preflabel(lang=lang)
@@ -138,7 +156,7 @@ def concept(request, conceptid):
                     'sparql_providers': get_sparql_providers(),
                     'valuetype_labels': valuetypes.filter(category='label'),
                     'valuetype_notes': valuetypes.filter(category='note'),
-                    'valuetype_related_values': valuetypes.filter(category='undefined'),
+                    'valuetype_related_values': valuetypes.filter(category__in=['undefined','identifiers']),
                     'parent_relations': parent_relations,
                     'related_relations': relationtypes.filter(Q(category='Mapping Properties') | Q(relationtype = 'related')),
                     'concept_paths': concept_graph.get_paths(lang=lang),
@@ -154,7 +172,7 @@ def concept(request, conceptid):
                     'languages': languages,
                     'valuetype_labels': valuetypes.filter(category='label'),
                     'valuetype_notes': valuetypes.filter(category='note'),
-                    'valuetype_related_values': valuetypes.filter(category='undefined'),
+                    'valuetype_related_values': valuetypes.filter(category__in=['undefined','identifiers']),
                     'related_relations': relationtypes.filter(relationtype = 'member'),
                     'concept_paths': concept_graph.get_paths(lang=lang)
                 })

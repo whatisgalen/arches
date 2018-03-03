@@ -12,6 +12,7 @@ define([
     'geojson-extent',
     'views/list',
     'views/components/widgets/map/map-styles',
+    'views/components/widgets/map/bin-feature-collection',
     'viewmodels/map-controls',
     'viewmodels/xy-input',
     'mathjs',
@@ -22,7 +23,7 @@ define([
     'bindings/chosen',
     'bindings/color-picker',
     'geocoder-templates'
-], function($, ko, _, WidgetViewModel, arches, mapboxgl, Draw, turf, geohash, koMapping, geojsonExtent, ListView, mapStyles, MapControlsViewModel, XYInputViewModel, mathjs) {
+], function($, ko, _, WidgetViewModel, arches, mapboxgl, Draw, turf, geohash, koMapping, geojsonExtent, ListView, mapStyles, binFeatureCollection, MapControlsViewModel, XYInputViewModel, mathjs) {
     /**
      * knockout components namespace used in arches
      * @external "ko.components"
@@ -75,7 +76,9 @@ define([
                 'featureEditingDisabled',
                 'overlayConfigs',
                 'overlayOpacity',
-                'mapControlsHidden'
+                'mapControlsHidden',
+                'defaultValueType',
+                'defaultValue'
             ];
 
             WidgetViewModel.apply(this, [params]);
@@ -125,6 +128,12 @@ define([
                 this.maxZoom(arches.mapDefaultMaxZoom);
                 this.minZoom(arches.mapDefaultMinZoom);
             }
+
+            this.zoomConfigOpen = ko.observable(false);
+            this.positionConfigOpen = ko.observable(false);
+            this.geocoderConfigOpen = ko.observable(false);
+            this.resourcePropertiesConfigOpen = ko.observable(false);
+            this.defaultValueConfigOpen = ko.observable(false);
 
             if (this.context === 'search-filter') {
                 this.query = params.query;
@@ -192,8 +201,8 @@ define([
                     if (val) {
                         self.draw.add(val);
                     }
+                    self.drawFeaturesOnMap(self.draw.getAll().features.length > 0)
                 }
-                self.drawFeaturesOnMap(self.draw.getAll().features.length > 0)
             };
 
             this.zoomToDrawLayer = function(){
@@ -206,9 +215,11 @@ define([
             this.clearGeometries = function(val, key) {
                 if (self.draw !== undefined && val === null) {
                     self.draw.deleteAll()
-                } else if (val.features.length === 0 && self.context === 'search-filter') {
-                    self.searchBuffer(null);
-                    self.updateSearchQueryLayer([]);
+                } else if (val !== null && val.features) {
+                    if (val.features.length === 0 && self.context === 'search-filter') {
+                        self.searchBuffer(null);
+                        self.updateSearchQueryLayer([]);
+                    }
                 }
             };
 
@@ -472,6 +483,10 @@ define([
                     this.layers.unshift(this.searchQueryLayer);
                 }
 
+                if (this.context === 'survey-bounds') {
+                    setTimeout(self.loadGeometriesIntoDrawLayer, 1500);
+                }
+
                 this.layers.forEach(function(mapLayer) {
                     if (mapLayer.name === this.basemap()) {
                         _.each(mapLayer.layer_definitions, function(layer) {
@@ -684,12 +699,7 @@ define([
 
                         if (self.context === 'search-filter') {
                             self.searchAggregations = params.searchAggregations;
-                            var cellWidth = arches.hexBinSize;
-                            var units = 'kilometers';
-                            var hexGrid = turf.hexGrid(arches.hexBinBounds, cellWidth, units);
-                            _.each(hexGrid.features, function(feature, i) {
-                                feature.properties.id = i;
-                            });
+                            var bins = binFeatureCollection(self.searchAggregations);
                             self.searchBuffer.subscribe(function(val){
                                 self.updateSearchQueryLayer([{geometry: JSON.parse(self.searchBuffer())}, self.queryFeature])
                             })
@@ -722,14 +732,17 @@ define([
                                 });
                                 var pointsFC = turf.featureCollection(features);
 
-                                var aggregated = turf.collect(hexGrid, pointsFC, 'doc_count', 'doc_count');
+                                var aggregated = turf.collect(ko.unwrap(bins), pointsFC, 'doc_count', 'doc_count');
                                 _.each(aggregated.features, function(feature) {
                                     feature.properties.doc_count = _.reduce(feature.properties.doc_count, function(i, ii) {
                                         return i + ii;
                                     }, 0);
                                 });
 
-                                return aggregated;
+                                return {
+                                    points: pointsFC,
+                                    agg: aggregated
+                                };
                             }
                             var updateSearchPointsGeoJSON = function() {
                                 var pointSource = self.map.getSource('search-results-points')
@@ -762,12 +775,17 @@ define([
                             }
                             self.overlays.unshift(self.createOverlay(self.searchQueryLayer))
                             self.updateSearchResultsLayer = function() {
-                                var aggSource = self.map.getSource('search-results-hex')
+                                var aggSource = self.map.getSource('search-results-hex');
+                                var hashSource = self.map.getSource('search-results-hashes');
                                 var aggData = getSearchAggregationGeoJSON();
-                                aggSource.setData(aggData)
+                                aggSource.setData(aggData.agg);
+                                hashSource.setData(aggData.points);
                                 updateSearchPointsGeoJSON();
                             }
                             self.searchAggregations.subscribe(self.updateSearchResultsLayer);
+                            if (ko.isObservable(bins)) {
+                                bins.subscribe(self.updateSearchResultsLayer);
+                            }
                             if (self.searchAggregations) {
                                 self.updateSearchResultsLayer()
                             }
@@ -985,7 +1003,8 @@ define([
                     'icon',
                     'raster',
                     'circle',
-                    'fill-extrusion'
+                    'fill-extrusion',
+                    'heatmap'
                 ];
                 var multiplyStopValues = function(stops, multiplier) {
                     _.each(stops, function(stop) {
@@ -1556,6 +1575,13 @@ define([
                     self.map.on('moveend', self.updateConfigs);
                 }
 
+                if (self.defaultValueType() && self.defaultValueType() != '' || self.defaultValueType() > 0) {
+                    if (self.defaultValueType() == 1){
+                        self.value(self.defaultValue())
+                    }
+                    this.loadDefaultValue(self.defaultValueType(), true);
+                };
+
             }; //end setup map
 
             // preprocess relative paths for app tileserver
@@ -1579,6 +1605,13 @@ define([
                 }
             };
             this.sources["search-results-hex"] = {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            };
+            this.sources["search-results-hashes"] = {
                 "type": "geojson",
                 "data": {
                     "type": "FeatureCollection",
@@ -1609,7 +1642,75 @@ define([
             this.selectBasemap = function(val) {
                 self.basemap(val.name)
                 self.setBasemap(val);
-            }
+            };
+
+            this.defaultValueOptions = [
+                {
+                    "name": "",
+                    "defaultOptionid": 0,
+                    "value": ""
+                },
+                {
+                    "name": "Drawn Location",
+                    "defaultOptionid": 1,
+                    "value": "Drawn Location"
+                },
+                {
+                    "name": "Current Device Location",
+                    "defaultOptionid": 2,
+                    "value": "Current Device Location"
+                }
+            ];
+
+            if (this.configForm || this.state === 'form') {
+
+                this.loadDefaultValue = function(val, load) {
+                    if (val === 0 || val === null) {
+                        self.clearGeometries(null);
+                        self.defaultValue("");
+                    }
+                    else if (val === 1 && self.draw) {
+                        if (!load) {
+                            self.defaultValue(self.draw.getAll());
+                        }
+                        if (self.defaultValue()) {
+                            setTimeout(self.loadGeometriesIntoDrawLayer, 1500);
+                        };
+                    }
+                    else if (val === 2 && self.draw) {
+                        self.clearGeometries(null);
+                        navigator.geolocation.getCurrentPosition(function(location) {
+                            self.defaultValue(
+                                {
+                                    type: "FeatureCollection",
+                                    features: [
+                                        {
+                                            geometry: {
+                                                type: 'Point',
+                                                coordinates: [location.coords.longitude, location.coords.latitude]
+                                            },
+                                            type: 'Feature',
+                                            properties: {
+                                                timestamp: location.timestamp,
+                                                accuracy: location.coords.accuracy,
+                                                altitude: location.coords.altitude,
+                                                altitudeAccuracy: location.coords.altitudeAccuracy,
+                                                heading: location.coords.heading,
+                                                speed: location.coords.speed
+                                            }
+                                        }
+                                    ]
+                                }
+                            );
+                            if (self.defaultValue()) {
+                                self.loadGeometriesIntoDrawLayer();
+                                self.zoomToDrawLayer();
+                            };
+                        });
+                    }
+                };
+                this.defaultValueType.subscribe(this.loadDefaultValue);
+            };
 
             this.mapStyle.layers = this.addInitialLayers();
 

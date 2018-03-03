@@ -21,12 +21,13 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from arches.app.views import concept, main, map, search, graph, tileserver, pouch_demo
 from arches.app.views.admin import ReIndexResources
 from arches.app.views.graph import GraphManagerView, GraphSettingsView, GraphDataView, DatatypeTemplateView, CardManagerView, CardView, FormManagerView, FormView, ReportManagerView, ReportEditorView, FunctionManagerView, PermissionManagerView, PermissionDataView
-from arches.app.views.resource import ResourceEditorView, ResourceListView, ResourceData, ResourceReportView, RelatedResourcesView, ResourceDescriptors, ResourceEditLogView
+from arches.app.views.resource import ResourceEditorView, ResourceListView, ResourceData, ResourceCards, ResourceReportView, RelatedResourcesView, ResourceDescriptors, ResourceEditLogView, ResourceTiles
 from arches.app.views.concept import RDMView
 from arches.app.views.user import UserManagerView
 from arches.app.views.tile import TileData
 from arches.app.views.map import MapLayerManagerView
-from arches.app.views.project import ProjectManagerView
+from arches.app.views.mobile_survey import MobileSurveyManagerView, MobileSurveyResources
+from arches.app.views.auth import LoginView, SignupView, ConfirmSignupView, ChangePasswordView, GetTokenView
 from arches.app.models.system_settings import settings
 
 # Uncomment the next two lines to enable the admin:
@@ -38,10 +39,11 @@ uuid_regex = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
 urlpatterns = [
     url(r'^$', main.index, name='root'),
     url(r'^index.htm', main.index, name='home'),
-    url(r'^auth/password$', main.change_password, name='change_password'),
-    url(r'^auth/signup$', main.signup, name='signup'),
-    url(r'^auth/confirm_signup$', main.confirm_signup, name='confirm_signup'),
-    url(r'^auth/', main.auth, name='auth'),
+    url(r'^auth/password$', ChangePasswordView.as_view(), name='change_password'),
+    url(r'^auth/signup$', SignupView.as_view(), name='signup'),
+    url(r'^auth/confirm_signup$', ConfirmSignupView.as_view(), name='confirm_signup'),
+    url(r'^auth/get_token$', GetTokenView.as_view(), name='get_token'),
+    url(r'^auth/', LoginView.as_view(), name='auth'),
     url(r'^rdm/(?P<conceptid>%s|())$' % uuid_regex , RDMView.as_view(), name='rdm'),
     url(r'^admin/reindex/resources$', ReIndexResources.as_view(), name="reindex"),
     url(r'^concepts/(?P<conceptid>%s)/manage_parents/$' % uuid_regex, concept.manage_parents, name="concept_manage_parents"),
@@ -80,25 +82,28 @@ urlpatterns = [
     url(r'^graph/new$', GraphDataView.as_view(action='new_graph'), name='new_graph'),
     url(r'^graph/(?P<graphid>%s)/get_related_nodes/(?P<nodeid>%s)$' % (uuid_regex, uuid_regex), GraphDataView.as_view(action='get_related_nodes'), name='get_related_nodes'),
     url(r'^graph/(?P<graphid>%s)/get_valid_domain_nodes/(?P<nodeid>%s)$' % (uuid_regex, uuid_regex), GraphDataView.as_view(action='get_valid_domain_nodes'), name='get_valid_domain_nodes'),
+    url(r'^graph/(?P<graphid>%s)/get_domain_connections$' % uuid_regex, GraphDataView.as_view(action='get_domain_connections'), name='get_domain_connections'),
     url(r'^graph/(?P<graphid>%s)/form_manager$' % uuid_regex, FormManagerView.as_view(), name='form_manager'),
     url(r'^graph/(?P<graphid>%s)/add_form$' % uuid_regex, FormManagerView.as_view(action='add_form'), name='add_form'),
     url(r'^graph/(?P<graphid>%s)/reorder_forms$' % uuid_regex, FormManagerView.as_view(action='reorder_forms'), name='reorder_forms'),
     url(r'^graph/(?P<graphid>%s)/report_manager$' % uuid_regex, ReportManagerView.as_view(), name='report_manager'),
     url(r'^graph/(?P<graphid>%s)/add_report$' % uuid_regex, ReportManagerView.as_view(), name='add_report'),
-    url(r'^graph/(?P<graphid>%s)/add_resource$' % uuid_regex, ResourceEditorView.as_view(), name='add_resource'),
     url(r'^graph/(?P<graphid>%s)/function_manager$' % uuid_regex, FunctionManagerView.as_view(), name='function_manager'),
     url(r'^graph/(?P<graphid>%s)/apply_functions$' % uuid_regex, FunctionManagerView.as_view(), name='apply_functions'),
     url(r'^graph/(?P<graphid>%s)/remove_functions$' % uuid_regex, FunctionManagerView.as_view(), name='remove_functions'),
     url(r'^graph/(?P<graphid>%s)/permissions$' % uuid_regex, PermissionManagerView.as_view(), name='permission_manager'),
     url(r'^graph/permissions$', PermissionDataView.as_view(), name='permission_data'),
     url(r'^resource$', ResourceListView.as_view(), name='resource'),
+    url(r'^resource/(?P<resourceid>%s)/(?P<graphid>%s)/add_resource$' % (uuid_regex, uuid_regex), ResourceEditorView.as_view(), name='add_resource'),
     url(r'^resource/(?P<resourceid>%s)$' % uuid_regex, ResourceEditorView.as_view(), name='resource_editor'),
     url(r'^resource/(?P<resourceid>%s)/copy$' % uuid_regex, ResourceEditorView.as_view(action='copy'), name='resource_copy'),
     url(r'^resource/(?P<resourceid>%s)/history$' % uuid_regex, ResourceEditLogView.as_view(), name='resource_edit_log'),
     url(r'^resource/(?P<resourceid>%s)/data/(?P<formid>%s)$' % (uuid_regex, uuid_regex), ResourceData.as_view(), name='resource_data'),
+    url(r'^resource/(?P<resourceid>%s)/cards$' % uuid_regex, ResourceCards.as_view(), name='resource_cards'),
     url(r'^resource/history$', ResourceEditLogView.as_view(), name="edit_history"),
     url(r'^resource/related/(?P<resourceid>%s|())$' % uuid_regex, RelatedResourcesView.as_view(), name="related_resources"),
     url(r'^resource/descriptors/(?P<resourceid>%s|())$' % uuid_regex, ResourceDescriptors.as_view(), name="resource_descriptors"),
+    url(r'^resource/(?P<resourceid>%s)/tiles$' % uuid_regex, ResourceTiles.as_view(), name='resource_tiles'),
     url(r'^report/(?P<resourceid>%s)$' % uuid_regex, ResourceReportView.as_view(), name='resource_report'),
     url(r'^card/(?P<cardid>%s|())$' % uuid_regex, CardView.as_view(), name='card'),
     url(r'^form/(?P<formid>%s|())$' % uuid_regex, FormView.as_view(), name='form'),
@@ -110,14 +115,18 @@ urlpatterns = [
     url(r'^widgets/(?P<template>[a-zA-Z_-]*)', main.widget, name="widgets"),
     url(r'^report-templates/(?P<template>[a-zA-Z_-]*)', main.report_templates, name="report-templates"),
     url(r'^function-templates/(?P<template>[a-zA-Z_-]*)', main.function_templates, name="function-templates"),
+    url(r'^help-templates$', main.help_templates, name="help_templates"),
     url(r'^tile$', TileData.as_view(action='update_tile'), name="tile"),
     url(r'^tiles/reorder_tiles$', TileData.as_view(action='reorder_tiles'), name='reorder_tiles'),
+    url(r'^tiles/delete_provisional_tile$', TileData.as_view(action='delete_provisional_tile'), name='delete_provisional_tile'),
     url(r'^templates/(?P<template>[a-zA-Z_\-./]*)', main.templates, name="templates"),
     url(r'^tileserver/*', tileserver.handle_request, name="tileserver"),
     url(r'^map_layer_manager/(?P<maplayerid>%s)$' % uuid_regex, MapLayerManagerView.as_view(), name='map_layer_update'),
     url(r'^map_layer_manager/*', MapLayerManagerView.as_view(), name="map_layer_manager"),
     url(r'^user$', UserManagerView.as_view(), name="user_profile_manager"),
-    url(r'^project_manager/*', ProjectManagerView.as_view(), name="project_manager"),
+    url(r'^user/get_user_names$', UserManagerView.as_view(action='get_user_names'), name="get_user_names"),
+    url(r'^mobile_survey_resources/(?P<surveyid>%s)/resources$' % uuid_regex, MobileSurveyResources.as_view(), name='mobile_survey_resources'),
+    url(r'^mobile_survey_manager/*', MobileSurveyManagerView.as_view(), name="mobile_survey_manager"),
     url(r'^pouch_demo/*', pouch_demo.index, name="pouch_demo"),
     url(r'^push_edits_to_db/*', pouch_demo.push_edits_to_db, name="push_edits_to_db"),
     url(r'^couchdb/(?P<path>.*)$', pouch_demo.CouchdbProxy.as_view()),
@@ -128,12 +137,3 @@ urlpatterns = [
     # Uncomment the next line to enable the admin:
     url(r'^admin/', admin.site.urls),
 ]
-
-handler404 = 'arches.app.views.main.custom_404'
-handler500 = 'arches.app.views.main.custom_500'
-
-urlpatterns += staticfiles_urlpatterns()
-
-if settings.DEBUG:
-    from django.conf.urls.static import static
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
