@@ -82,7 +82,7 @@ class TileData(View):
                                 import couchdb
                                 import json as json_json
                                 couch = couchdb.Server(settings.COUCHDB_URL)
-                                for project in models.MobileProject.objects.all():
+                                for project in models.MobileSurveyModel.objects.all():
                                     db = couch['project_' + str(project.id)]
                                     #tile = models.TileModel.objects.get(pk='4345f530-aa90-48cf-b4b3-92d1185ca439')
                                     tile_json = json_json.loads(JSONSerializer().serialize(tile))

@@ -28,7 +28,7 @@ from arches.app.utils.betterJSONSerializer import JSONSerializer, JSONDeserializ
 from django.utils.translation import ugettext as _
 
 
-class Project(models.MobileProject):
+class Project(models.MobileSurveyModel):
     """
     Used for mapping complete project objects to and from the database
 
@@ -39,18 +39,18 @@ class Project(models.MobileProject):
 
     def __init__(self, *args, **kwargs):
         super(Project, self).__init__(*args, **kwargs)
-        # from models.MobileProject
+        # from models.MobileSurveyModel
         # self.id = models.UUIDField(primary_key=True, default=uuid.uuid1)
         # self.name = models.TextField(null=True)
         # self.active = models.BooleanField(default=False)
         # self.createdby = models.ForeignKey(User, related_name='createdby')
         # self.lasteditedby = models.ForeignKey(User, related_name='lasteditedby')
-        # self.users = models.ManyToManyField(to=User, through='MobileProjectXUser')
-        # self.groups = models.ManyToManyField(to=Group, through='MobileProjectXGroup')
+        # self.users = models.ManyToManyField(to=User, through='MobileSurveyModelXUser')
+        # self.groups = models.ManyToManyField(to=Group, through='MobileSurveyModelXGroup')
         # self.startdate = models.DateField(blank=True, null=True)
         # self.enddate = models.DateField(blank=True, null=True)
         # self.description = models.TextField(null=True)
-        # end from models.MobileProject
+        # end from models.MobileSurveyModel
         # import ipdb 
         # ipdb.set_trace()
         self.couch = couchdb.Server(settings.COUCHDB_URL)
