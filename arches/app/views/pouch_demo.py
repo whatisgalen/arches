@@ -13,12 +13,18 @@ class CouchdbProxy(ProxyView):
 def index(request):
     # import ipdb
     # ipdb.set_trace()
-    projects = models.MobileProject.objects.all().order_by('name')
+    projects = models.MobileSurveyModel.objects.all().order_by('name')
     context = {
         "projects": projects
     }
 
     return render(request, 'pouch_demo.htm', context)
+
+def myProjects(request):
+    projects = models.MobileSurveyModel.objects.all()
+    response = JSONResponse(projects, indent=4)
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
 
 def push_edits_to_db(request):
     project_id = request.GET.get('project_id', None)
