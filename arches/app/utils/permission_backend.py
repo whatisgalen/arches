@@ -143,25 +143,41 @@ def get_resource_types_by_perm(user, perms):
     return list(graphs)
 
 
-def user_can_read_resources(user):
+def user_can_read_resources(user, graph_id=None):
     """
-    Requires that a user be able to read a single nodegroup of a resource
+    Requires that a user be able to read a single nodegroup of any resource or a specific resource
+
+    Arguments:
+    user -- the user to check
+    graph_id -- if supplied, will check if the user can read at least a single nodegroup from the given graph
 
     """
 
     if user.is_authenticated():
-        return user.is_superuser or len(get_resource_types_by_perm(user, ['models.read_nodegroup'])) > 0
+        graph_models = get_resource_types_by_perm(user, ['models.read_nodegroup'])
+        if graph_id:
+            return str(graph_id) in [str(graph.pk) for graph in graph_models]
+        else:
+            return user.is_superuser or len(graph_models) > 0
     return False
 
 
-def user_can_edit_resources(user):
+def user_can_edit_resources(user, graph_id=None):
     """
-    Requires that a user be able to edit or delete a single nodegroup of a resource
+    Requires that a user be able to edit or delete a single nodegroup of any resource or a specific resource
+
+    Arguments:
+    user -- the user to check
+    graph_id -- if supplied, will check if the user can edit or delete at least a single nodegroup from the given graph
 
     """
 
     if user.is_authenticated():
-        return user.is_superuser or len(get_editable_resource_types(user)) > 0
+        graph_models = get_editable_resource_types(user)
+        if graph_id:
+            return str(graph_id) in [str(graph.pk) for graph in graph_models]
+        else:
+            return user.is_superuser or len(graph_models) > 0
     return False
 
 def user_can_read_concepts(user):

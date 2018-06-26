@@ -90,7 +90,6 @@ class Resources(APIBase):
     #     "@context": "https://linked.art/ns/v1/linked-art.json"
     # }]
 
-    @method_decorator(can_read_resource_instance())
     def get(self, request, resourceid=None):
         format = request.GET.get('format', 'json-ld')
         try:
@@ -100,11 +99,16 @@ class Resources(APIBase):
 
         if resourceid:
             try:
+                resource = models.ResourceInstance.objects.get(pk=resourceid)
+                if not user_can_read_resources(user=request.user, graph_id=resource.graph_id):
+                    return JSONResponse(status=403)
+            except models.ResourceInstance.DoesNotExist:
+                return JSONResponse(status=404)
+
+            try:
                 exporter = ResourceExporter(format=format)
                 output = exporter.writer.write_resources(resourceinstanceids=[resourceid], indent=indent, user=request.user)
                 out = output[0]['outputfile'].getvalue()
-            except models.ResourceInstance.DoesNotExist:
-                return JSONResponse(status=404)
             except:
                 return JSONResponse(status=500)
         else:
@@ -161,12 +165,19 @@ class Resources(APIBase):
         return JSONResponse(out, indent=indent)
 
     def put(self, request, resourceid):
-        if user_can_edit_resources(user=request.user):
+        try:
+            resource = models.ResourceInstance.objects.get(pk=resourceid)
+            if not user_can_edit_resources(user=request.user, graph_id=resource.graph_id):
+                return JSONResponse(status=403)
+        except models.ResourceInstance.DoesNotExist:
+            return JSONResponse(status=404)
+
+        try:   
             data = JSONDeserializer().deserialize(request.body)
             #print data
             reader = JsonLdReader()
             reader.read_resource(data)
-        else:
+        except:
             return JSONResponse(status=500)
 
         return JSONResponse(self.get(request, resourceid))
