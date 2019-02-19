@@ -169,6 +169,10 @@ define([
 
             var xt = this.currentOffset[0] + this.center[0];
             var yt = this.currentOffset[1] + this.center[1];
+            if (!xt || !yt) {
+                xt = 0;
+                yt = 0;
+            }
 
             this.svg.attr("transform",
                 "translate(" + xt + "," + yt + ")" +
